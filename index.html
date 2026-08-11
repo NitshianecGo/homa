@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Приватный Чат & Соцсеть</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Private Space</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e1e2e">
+    <link rel="stylesheet" href="style.css">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
     <div id="auth-screen" class="screen active">
         <div class="auth-card">
-            <h2>🔒 Вход в систему</h2>
-            <p>Закрытый доступ только для 3 участников</p>
+            <h2>Private Space</h2>
+            <p class="subtitle">Закрытая социальная сеть</p>
             <form id="login-form">
                 <input type="email" id="email" placeholder="Email" required autocomplete="username">
                 <input type="password" id="password" placeholder="Пароль" required autocomplete="current-password">
@@ -23,111 +25,120 @@
         </div>
     </div>
 
+    <!-- ОСНОВНОЙ ЭКРАН ПРИЛОЖЕНИЯ -->
     <div id="app-screen" class="screen">
-        <header class="app-header">
-            <div class="logo">💬 PrivateSpace</div>
-            <div class="header-controls">
-                <button id="theme-toggle" class="btn-icon" title="Переключить тему">🌙</button>
-                <div class="font-scaler">
-                    <button id="font-dec" class="btn-sm">A-</button>
-                    <span id="font-size-val">100%</span>
-                    <button id="font-inc" class="btn-sm">A+</button>
-                </div>
-            </div>
-        </header>
+        
+        <!-- ЛЕВАЯ ПАНЕЛЬ: КОНТАКТЫ -->
+        <aside id="panel-contacts" class="panel active">
+            <header class="panel-header">
+                <h3>💬 Чаты</h3>
+            </header>
+            <div id="contacts-list" class="scroll-content"></div>
+        </aside>
 
-        <main class="layout-container">
-            <!-- КОНТАКТЫ -->
-            <section id="panel-contacts" class="panel active">
-                <div class="panel-header">
-                    <h3>👥 Участники</h3>
-                </div>
-                <div id="contacts-list" class="list-container"></div>
-            </section>
-
-            <!-- ЧАТ -->
-            <section id="panel-chat" class="panel">
-                <div class="panel-header">
-                    <h3 id="chat-title">💬 Общий чат</h3>
+        <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ: ЧАТ -->
+        <main id="panel-chat" class="panel">
+            <header class="panel-header chat-header">
+                <div>
+                    <h3 id="chat-title">Общий чат</h3>
                     <span id="typing-indicator" class="typing-text"></span>
                 </div>
-                
-                <div id="chat-messages" class="messages-container"></div>
-                
-                <!-- Панель цитирования (появляется при ответе) -->
-                <div id="reply-preview" class="reply-preview-bar" style="display: none;">
-                    <div class="reply-preview-content">
-                        <span id="reply-user-name" class="reply-user">Имя</span>
-                        <span id="reply-text-preview" class="reply-text">Текст сообщения</span>
-                    </div>
-                    <button id="cancel-reply-btn" class="btn-icon">❌</button>
+            </header>
+
+            <div id="chat-messages" class="scroll-content messages-container"></div>
+
+            <!-- Предпросмотр цитаты -->
+            <div id="reply-preview" class="reply-preview-bar" style="display: none;">
+                <div class="reply-info">
+                    <span class="reply-user" id="reply-user-name">Имя</span>
+                    <span class="reply-text" id="reply-text-preview">Текст сообщения</span>
                 </div>
+                <button id="cancel-reply-btn" class="icon-btn">✖</button>
+            </div>
 
-                <div class="chat-input-area">
-                    <button id="chat-file-btn" class="btn-icon" title="Прикрепить фото или видео">📎</button>
-                    <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
-                    
-                    <input type="text" id="chat-text-input" placeholder="Введите сообщение..." autocomplete="off">
-                    
-                    <button id="record-audio-btn" class="btn-icon" title="Голосовое сообщение">🎙️</button>
-                    <button id="send-msg-btn" class="btn btn-primary">➔</button>
-                </div>
-            </section>
+            <!-- Панель ввода сообщения -->
+            <div class="chat-input-area">
+                <button id="chat-file-btn" class="icon-btn">📎</button>
+                <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
 
-            <!-- ПРОФИЛЬ И СТЕНА -->
-            <section id="panel-profile" class="panel">
-                <div class="panel-header">
-                    <h3>👤 Профиль и Стена</h3>
-                </div>
-                <div class="profile-scroll-area">
-                    <div class="profile-card">
-                        <div class="avatar-container">
-                            <img id="user-avatar" src="https://via.placeholder.com/80" alt="Аватар" class="avatar-lg">
-                            <button id="avatar-edit-btn" class="avatar-edit-badge" title="Сменить аватар">📷</button>
-                            <input type="file" id="avatar-file-input" accept="image/*" hidden>
-                        </div>
-                        <h4 id="user-display-name">Загрузка...</h4>
-                        <p id="user-email-text" class="text-muted"></p>
-                    </div>
+                <input type="text" id="chat-text-input" placeholder="Сообщение..." autocomplete="off">
 
-                    <div class="create-post-card">
-                        <textarea id="post-text-input" placeholder="Что у вас нового на сегодня?" rows="3"></textarea>
-                        <div class="post-actions">
-                            <button id="post-file-btn" class="btn-sm btn-outline">📷 / 🎥 Медиа</button>
-                            <input type="file" id="post-file-input" accept="image/*,video/*" hidden>
-                            <span id="post-file-name" class="file-name-tag"></span>
-                            <button id="submit-post-btn" class="btn btn-primary btn-sm">Опубликовать</button>
-                        </div>
-                    </div>
-
-                    <div class="wall-header">📜 Стена заметок</div>
-                    <div id="wall-posts" class="posts-container"></div>
-
-                    <div class="settings-card">
-                        <h4>⚙️ Настройки и Разрешения</h4>
-                        <div class="permissions-group">
-                            <button id="req-mic-btn" class="btn btn-outline btn-sm">🎙️ Доступ к микрофону</button>
-                            <button id="req-cam-btn" class="btn btn-outline btn-sm">📷 Доступ к камере</button>
-                            <button id="req-notif-btn" class="btn btn-outline btn-sm">🔔 Разрешить Push</button>
-                        </div>
-                        <br>
-                        <button id="logout-btn" class="btn btn-danger full-width">🚪 Выйти из аккаунта</button>
-                    </div>
-                </div>
-            </section>
+                <button id="record-audio-btn" class="icon-btn">🎙️</button>
+                <button id="send-msg-btn" class="btn btn-primary btn-icon">➤</button>
+            </div>
         </main>
 
+        <!-- ПРАВАЯ ПАНЕЛЬ: СТЕНА (ЛЕНТА) -->
+        <section id="panel-wall" class="panel">
+            <header class="panel-header">
+                <h3>📰 Стена публикаций</h3>
+            </header>
+            <div class="wall-create-box">
+                <textarea id="post-text-input" placeholder="Что нового?"></textarea>
+                <div class="wall-actions">
+                    <button id="post-file-btn" class="btn btn-outline btn-sm">📷 Медиа</button>
+                    <input type="file" id="post-file-input" accept="image/*,video/*" hidden>
+                    <span id="post-file-name" class="file-name-indicator"></span>
+                    <button id="submit-post-btn" class="btn btn-primary btn-sm">Опубликовать</button>
+                </div>
+            </div>
+            <div id="wall-posts" class="scroll-content"></div>
+        </section>
+
+        <!-- ПАНЕЛЬ: НАСТРОЙКИ И ПРОФИЛЬ -->
+        <section id="panel-settings" class="panel">
+            <header class="panel-header">
+                <h3>⚙️ Профиль и Настройки</h3>
+            </header>
+            <div class="scroll-content settings-content">
+                <div class="profile-card">
+                    <div class="avatar-wrapper">
+                        <img id="user-avatar" src="https://via.placeholder.com/100" class="avatar-lg">
+                        <button id="avatar-edit-btn" class="btn-avatar-edit">✏️</button>
+                        <input type="file" id="avatar-file-input" accept="image/*" hidden>
+                    </div>
+                    <h3 id="user-display-name">Пользователь</h3>
+                    <p id="user-email-text" class="text-muted"></p>
+                </div>
+
+                <div class="settings-group">
+                    <h4>Оформление</h4>
+                    <div class="setting-item">
+                        <span>Тёмная тема</span>
+                        <button id="theme-toggle" class="btn btn-outline btn-sm">Сменить тему</button>
+                    </div>
+                    <div class="setting-item">
+                        <span>Размер шрифта</span>
+                        <div class="font-controls">
+                            <button id="font-dec" class="btn btn-outline btn-sm">-</button>
+                            <span id="font-size-val">100%</span>
+                            <button id="font-inc" class="btn btn-outline btn-sm">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <button id="logout-btn" class="btn btn-danger btn-full">Выйти из аккаунта</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- НИЖНЯЯ НАВИГАЦИЯ (ДЛЯ МОБИЛЬНЫХ) -->
         <nav class="bottom-nav">
             <button class="nav-btn active" data-target="panel-contacts">
-                <span class="nav-icon">👥</span>
-                <span class="nav-label">Контакты</span>
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Чаты</span>
             </button>
             <button class="nav-btn" data-target="panel-chat">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Чат</span>
+                <span class="nav-icon">✉️</span>
+                <span class="nav-label">Диалог</span>
             </button>
-            <button class="nav-btn" data-target="panel-profile">
-                <span class="nav-icon">👤</span>
+            <button class="nav-btn" data-target="panel-wall">
+                <span class="nav-icon">📰</span>
+                <span class="nav-label">Стена</span>
+            </button>
+            <button class="nav-btn" data-target="panel-settings">
+                <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Профиль</span>
             </button>
         </nav>
