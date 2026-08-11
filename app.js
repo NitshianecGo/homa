@@ -16,8 +16,12 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 let currentUser = null;
-let currentChatTarget = 'global';
+let currentChatTarget = 'global'; // 'global' или 'private_UID1_UID2'
 let selectedPostImage = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let typingTimeout = null;
 
 // АВТОРИЗАЦИЯ
 onAuthStateChanged(auth, (user) => {
@@ -59,12 +63,13 @@ function setupPresence(uid) {
 
 function initAppData() {
     loadContacts();
-    loadMessages('global');
+    switchChat('global', 'Общий чат');
     loadPosts();
     
     document.getElementById('user-email-text').innerText = currentUser.email;
     document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
 
+    // Загрузка собственной аватарки
     onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
         const userData = snapshot.val();
         if (userData && userData.avatar) {
@@ -73,56 +78,103 @@ function initAppData() {
     });
 }
 
-// КОНТАКТЫ
+// 1. СПИСОК КОНТАКТОВ (ВСЕ ПОЛЬЗОВАТЕЛИ ИЗ БД, ВЖИВУЮ И ОФФЛАЙН)
 function loadContacts() {
     onValue(ref(db, 'users'), (snapshot) => {
         const container = document.getElementById('contacts-list');
         container.innerHTML = '';
         const users = snapshot.val() || {};
         
+        // Кнопка переключения на Общий Чат
         const globalChatDiv = document.createElement('div');
         globalChatDiv.className = 'contact-item';
         globalChatDiv.innerHTML = `<strong>📢 Общий Чат</strong>`;
-        globalChatDiv.onclick = () => switchChat('global', 'Общий чат');
+        globalChatDiv.onclick = () => {
+            switchChat('global', 'Общий чат');
+            openMobileTab('panel-chat');
+        };
         container.appendChild(globalChatDiv);
 
+        // Отображение ВСЕХ пользователей
         Object.keys(users).forEach(uid => {
-            if(uid === currentUser.uid) return;
+            if (uid === currentUser.uid) return;
             const u = users[uid];
             const div = document.createElement('div');
             div.className = 'contact-item';
+            
+            // Генерация уникального ID личной комнаты (чтобы у обоих пользователей был один чат)
+            const privateChatId = currentUser.uid < uid ? `private_${currentUser.uid}_${uid}` : `private_${uid}_${currentUser.uid}`;
+
             div.innerHTML = `
                 <img src="${u.avatar || 'https://via.placeholder.com/35'}" class="avatar-sm">
                 <div>
-                    <div><strong>${u.name || u.email}</strong></div>
+                    <div><strong>${u.name || u.email.split('@')[0]}</strong></div>
                     <span id="status-${uid}" class="text-muted" style="font-size:0.75rem;">⚪ Оффлайн</span>
                 </div>
             `;
-            div.onclick = () => switchChat(uid, u.name || u.email);
+            
+            // Клик по пользователю открывает личный чат с ним
+            div.onclick = () => {
+                switchChat(privateChatId, `💬 Чат с ${u.name || u.email.split('@')[0]}`);
+                openMobileTab('panel-chat');
+            };
             container.appendChild(div);
 
+            // Отслеживание онлайн статуса
             onValue(ref(db, `/status/${uid}`), (sSnap) => {
                 const st = sSnap.val();
                 const el = document.getElementById(`status-${uid}`);
-                if(el && st) {
-                    el.innerText = st.state === 'online' ? '🟢 В сети' : '⚪ Был(а) недавно';
+                if (el && st) {
+                    el.innerText = st.state === 'online' ? '🟢 В сети' : '⚪ Оффлайн';
                 }
             });
         });
     });
 }
 
-// ЧАТ И СООБЩЕНИЯ
+// 2. ЧАТ, СООБЩЕНИЯ И СТАТУСЫ
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
     document.getElementById('chat-title').innerText = title;
     loadMessages(targetId);
+    listenTyping(targetId);
 }
 
 document.getElementById('send-msg-btn').addEventListener('click', sendTextMessage);
 document.getElementById('chat-text-input').addEventListener('keypress', (e) => {
     if(e.key === 'Enter') sendTextMessage();
 });
+
+// Отслеживание набора текста (Карандашик ✏️)
+document.getElementById('chat-text-input').addEventListener('input', () => {
+    if (!currentUser) return;
+    set(ref(db, `typing/${currentChatTarget}/${currentUser.uid}`), true);
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        set(ref(db, `typing/${currentChatTarget}/${currentUser.uid}`), false);
+    }, 2000);
+});
+
+function listenTyping(chatId) {
+    onValue(ref(db, `typing/${chatId}`), (snapshot) => {
+        const typingData = snapshot.val() || {};
+        let isTyping = false;
+        
+        Object.keys(typingData).forEach(uid => {
+            if (uid !== currentUser.uid && typingData[uid] === true) {
+                isTyping = true;
+            }
+        });
+
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) {
+            indicator.innerText = isTyping ? '✏️ печатает...' : '';
+            indicator.style.color = 'var(--accent)';
+            indicator.style.fontSize = '0.8rem';
+        }
+    });
+}
 
 function sendTextMessage() {
     const input = document.getElementById('chat-text-input');
@@ -133,8 +185,11 @@ function sendTextMessage() {
         sender: currentUser.uid,
         type: 'text',
         content: text,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        read: false
     });
+    
+    set(ref(db, `typing/${currentChatTarget}/${currentUser.uid}`), false);
     input.value = '';
 }
 
@@ -144,38 +199,87 @@ function loadMessages(targetId) {
         container.innerHTML = '';
         const data = snapshot.val() || {};
         
-        Object.values(data).forEach(msg => {
+        Object.keys(data).forEach(msgKey => {
+            const msg = data[msgKey];
             const isOutgoing = msg.sender === currentUser.uid;
+
+            // Если сообщение чужое — помечаем его прочитанным
+            if (!isOutgoing && msg.read === false) {
+                set(ref(db, `messages/${targetId}/${msgKey}/read`), true);
+            }
+
             const bubble = document.createElement('div');
             bubble.className = `msg-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
             
             let body = msg.content;
-            if(msg.type === 'image') {
+            if (msg.type === 'image') {
                 body = `<img src="${msg.content}" class="chat-media-img">`;
+            } else if (msg.type === 'audio') {
+                body = `<div class="audio-player"><audio src="${msg.content}" controls style="max-width:200px; height:36px;"></audio></div>`;
+            }
+
+            // Настройка галочек: 1 синяя = отправлено, 2 синие = прочитано
+            let checkMark = '';
+            if (isOutgoing) {
+                checkMark = msg.read ? '<span style="color:#89b4fa; font-weight:bold;">✓✓</span>' : '<span style="color:#89b4fa; font-weight:bold;">✓</span>';
             }
 
             const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
-            bubble.innerHTML = `${body} <div class="msg-meta">${timeStr} ✓</div>`;
+            bubble.innerHTML = `${body} <div class="msg-meta">${timeStr} ${checkMark}</div>`;
             container.appendChild(bubble);
         });
         container.scrollTop = container.scrollHeight;
     });
 }
 
-// ПРИВЯЗКА НАЖАТИЙ КНОПОК
-document.getElementById('chat-file-btn').addEventListener('click', () => {
-    document.getElementById('chat-file-input').click();
+// 3. ОТПРАВКА АУДИОСООБЩЕНИЙ (БЕЗ STORAGE, МГНОВЕННО)
+const recordBtn = document.getElementById('record-audio-btn');
+recordBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const base64Audio = reader.result;
+                    push(ref(db, `messages/${currentChatTarget}`), {
+                        sender: currentUser.uid,
+                        type: 'audio',
+                        content: base64Audio,
+                        timestamp: serverTimestamp(),
+                        read: false
+                    });
+                };
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            recordBtn.innerText = '🛑';
+            recordBtn.style.color = 'var(--danger)';
+        } catch (err) {
+            alert('Ошибка доступа к микрофону: ' + err.message);
+        }
+    } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        recordBtn.innerText = '🎙️';
+        recordBtn.style.color = 'var(--text-primary)';
+    }
 });
 
-document.getElementById('avatar-edit-btn').addEventListener('click', () => {
-    document.getElementById('avatar-file-input').click();
-});
+// КЛИКАБЕЛЬНОСТЬ КНОПОК
+document.getElementById('chat-file-btn').addEventListener('click', () => document.getElementById('chat-file-input').click());
+document.getElementById('avatar-edit-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());
+document.getElementById('post-file-btn').addEventListener('click', () => document.getElementById('post-file-input').click());
 
-document.getElementById('post-file-btn').addEventListener('click', () => {
-    document.getElementById('post-file-input').click();
-});
-
-// УТИЛИТА: ВАРИАНТ 2 — Конвертация в ультра-сжатую Base64 строку (Без Storage)
+// СЖАТИЕ КАРТИНОК В BASE64
 async function compressImageToBase64(file, maxWidth, quality) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -201,20 +305,17 @@ async function compressImageToBase64(file, maxWidth, quality) {
     });
 }
 
-// 1. СМЕНА АВАТАРКИ (Прямо в БД)
+// СМЕНА АВАТАРКИ
 document.getElementById('avatar-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
-
     try {
         const base64Avatar = await compressImageToBase64(file, 120, 0.7);
-
         await set(ref(db, `users/${currentUser.uid}`), {
             name: currentUser.email.split('@')[0],
             email: currentUser.email,
             avatar: base64Avatar
         });
-
         document.getElementById('user-avatar').src = base64Avatar;
         alert('Аватар обновлен!');
     } catch (err) {
@@ -222,26 +323,25 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
     }
 });
 
-// 2. ОТПРАВКА ФОТО В ЧАТ (Прямо в БД)
+// ОТПРАВКА ФОТО В ЧАТ
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
-    
     try {
         const base64Image = await compressImageToBase64(file, 800, 0.6);
-
         push(ref(db, `messages/${currentChatTarget}`), {
             sender: currentUser.uid,
             type: 'image',
             content: base64Image,
-            timestamp: serverTimestamp()
+            timestamp: serverTimestamp(),
+            read: false
         });
     } catch (err) {
-        alert('Ошибка отправки картинки: ' + err.message);
+        alert('Ошибка отправки файла: ' + err.message);
     }
 });
 
-// 3. ПУБЛИКАЦИЯ НА СТЕНУ (Прямо в БД)
+// 4. СТЕНА ПОСТОВ
 document.getElementById('post-file-input').addEventListener('change', (e) => {
     selectedPostImage = e.target.files[0];
     document.getElementById('post-file-name').innerText = selectedPostImage ? selectedPostImage.name : '';
@@ -269,7 +369,6 @@ document.getElementById('submit-post-btn').addEventListener('click', async () =>
     document.getElementById('post-file-name').innerText = '';
 });
 
-// ЗАГРУЗКА И УДАЛЕНИЕ ПОСТОВ
 function loadPosts() {
     onValue(ref(db, 'posts'), (snapshot) => {
         const container = document.getElementById('wall-posts');
@@ -329,14 +428,18 @@ function changeFontSize(delta) {
 }
 
 // МОБИЛЬНАЯ НАВИГАЦИЯ
+function openMobileTab(targetId) {
+    document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-target') === targetId);
+    });
+    document.querySelectorAll('.panel').forEach(p => {
+        p.classList.toggle('active', p.id === targetId);
+    });
+}
+
 document.querySelectorAll('.bottom-nav .nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        const target = btn.getAttribute('data-target');
-        document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        
-        btn.classList.add('active');
-        document.getElementById(target).classList.add('active');
+        openMobileTab(btn.getAttribute('data-target'));
     });
 });
 
