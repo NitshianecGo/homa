@@ -1,4 +1,4 @@
-const CACHE_NAME = 'privatespace-v5';
+const CACHE_NAME = 'privatespace-v6';
 const ASSETS = [
   './',
   './index.html',
