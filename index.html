@@ -1,1318 +1,163 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<link rel="icon" href="data:," />
-<title>METRO_CHAT // Encrypted Uplink</title>
-<meta name="theme-color" content="#0a0e0c" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    --bg-void: #060907;
-    --bg-deep: #0a0e0c;
-    --rust: #6b3a1f;
-    --rust-light: #a5622f;
-    --rad-green: 120, 255, 120;
-    --rad-green-dim: 90, 180, 90;
-    --amber: 255, 176, 66;
-    --glass: rgba(14, 20, 16, 0.65);
-    --glass-light: rgba(28, 38, 30, 0.5);
-    --text-primary: #dfe8e0;
-    --text-dim: #7f8c81;
-    --text-ghost: #566258;
-    --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  html, body {
-    height: 100vh;
-    height: 100dvh;
-    background: var(--bg-void);
-    color: var(--text-primary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  ::selection { background: rgba(var(--rad-green), 0.3); color: #fff; }
-
-  /* ==================== PARALLAX SCENE ==================== */
-  #scene { position: fixed; inset: -8%; z-index: 0; perspective: 1000px; pointer-events: none; }
-  .layer { position: absolute; inset: 0; will-change: transform; transition: transform 0.35s var(--ease); }
-
-  #layer-far {
-    background:
-      radial-gradient(ellipse 60% 90% at 50% 50%, rgba(60, 40, 22, 0.55), transparent 62%),
-      radial-gradient(circle at 50% 45%, rgba(30, 42, 30, 0.35), transparent 55%),
-      radial-gradient(ellipse 120% 80% at 50% 120%, rgba(120, 70, 30, 0.28), transparent 60%),
-      linear-gradient(180deg, #050706 0%, #0a0d0b 40%, #0d0a07 100%);
-  }
-  #layer-far::before {
-    content: ""; position: absolute; inset: 0;
-    background:
-      repeating-linear-gradient(90deg, transparent 0 78px, rgba(0,0,0,0.5) 78px 80px),
-      radial-gradient(circle at 50% 50%, transparent 20%, rgba(0,0,0,0.75) 100%);
-    filter: url(#grain); opacity: 0.9;
-  }
-  .ring {
-    position: absolute; top: 50%; left: 50%;
-    border: 1px solid rgba(120, 80, 45, 0.18); border-radius: 14px;
-    transform: translate(-50%, -50%); box-shadow: inset 0 0 60px rgba(0,0,0,0.6);
-  }
-  #layer-mid { opacity: 0.9; }
-  .pipe {
-    position: absolute;
-    background: linear-gradient(90deg, #1c1410, #4a2f18 30%, #7a4a24 50%, #3a2410 75%, #140f0b);
-    border-radius: 40px;
-    box-shadow: inset 0 6px 10px rgba(255,180,120,0.15), inset 0 -8px 14px rgba(0,0,0,0.6), 0 20px 50px rgba(0,0,0,0.5);
-  }
-  .valve {
-    position: absolute; width: 120px; height: 120px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #6b4527, #241812 70%);
-    box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.4);
-    clip-path: polygon(50% 0, 62% 12% 100% 38%, 88% 50%, 100% 62%, 62% 88%, 50% 100%, 38% 88%, 0 62%, 12% 50%, 0 38%, 38% 12%);
-  }
-  .beam {
-    position: absolute; background: linear-gradient(180deg, #2a1d12, #4a3018 50%, #1a120c);
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.7); clip-path: polygon(0 0, 100% 8%, 100% 92%, 0 100%);
-  }
-  #layer-close { z-index: 3; }
-  .dust {
-    position: absolute; width: 3px; height: 3px; border-radius: 50%;
-    background: rgba(var(--rad-green), 0.9); box-shadow: 0 0 6px 1px rgba(var(--rad-green), 0.7);
-    animation: drift linear infinite;
-  }
-  @keyframes drift {
-    0% { transform: translateY(0) translateX(0); opacity: 0; }
-    10% { opacity: 0.8; } 90% { opacity: 0.6; }
-    100% { transform: translateY(-110vh) translateX(40px); opacity: 0; }
-  }
-  #vignette {
-    position: fixed; inset: 0; z-index: 4; pointer-events: none;
-    background: radial-gradient(ellipse 80% 70% at 50% 45%, transparent 45%, rgba(0,0,0,0.72) 100%);
-    mix-blend-mode: multiply;
-  }
-  #scanlines {
-    position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0.35;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.25) 2px 3px);
-  }
-
-  .glass {
-    background: var(--glass);
-    backdrop-filter: blur(18px) saturate(120%); -webkit-backdrop-filter: blur(18px) saturate(120%);
-    border: 1px solid rgba(var(--rad-green), 0.14); border-radius: 22px;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 30px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(var(--rad-green), 0.12), 0 0 40px -12px rgba(var(--rad-green), 0.22);
-  }
-  .dot-live {
-    width: 7px; height: 7px; border-radius: 50%; background: rgb(var(--rad-green));
-    box-shadow: 0 0 8px 1px rgba(var(--rad-green), 0.9); animation: pulse 2s infinite; display:inline-block;
-  }
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
-  /* ==================== BOOT / LOADING SCREEN ==================== */
-  #boot {
-    position: fixed; inset: 0; z-index: 60;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at 50% 40%, #0c120e, #050706 80%);
-    gap: 26px; padding: 30px; text-align: center;
-    transition: opacity 0.8s var(--ease); animation: flicker 5s infinite;
-  }
-  @keyframes flicker { 0%,96%,100%{opacity:1;} 97%{opacity:0.82;} 98%{opacity:0.95;} }
-  #boot.hide { opacity: 0; pointer-events: none; }
-  .boot-logo { font-family:'JetBrains Mono',monospace; font-weight:700; font-size: clamp(28px,6vw,54px); letter-spacing: 6px; color:#c3d4c5; }
-  .boot-logo .accent { color: rgb(var(--rad-green)); text-shadow: 0 0 22px rgba(var(--rad-green),0.7); }
-  .boot-sub { font-family:'JetBrains Mono',monospace; font-size: 12px; letter-spacing: 3px; color: var(--text-dim); }
-  .boot-log {
-    width: min(520px, 90vw); min-height: 132px; text-align: left;
-    font-family:'JetBrains Mono',monospace; font-size: 12px; line-height: 1.9; color: rgb(var(--rad-green-dim));
-    background: rgba(0,0,0,0.35); border:1px solid rgba(var(--rad-green),0.12); border-radius: 12px; padding: 16px 18px;
-  }
-  .boot-log b { color: rgb(var(--amber)); }
-  .boot-log .ok { color: rgb(var(--rad-green)); }
-  .boot-bar { width: min(520px,90vw); height: 8px; border-radius: 20px; background: rgba(0,0,0,0.5); border:1px solid rgba(var(--rad-green),0.15); overflow:hidden; }
-  .boot-bar i { display:block; height:100%; width:0%; border-radius:20px; background: linear-gradient(90deg, rgb(var(--rad-green-dim)), rgb(var(--rad-green))); box-shadow: 0 0 18px rgba(var(--rad-green),0.7); transition: width 0.25s linear; }
-  .boot-pct { font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--text-dim); letter-spacing:2px; }
-  .boot-hint { font-family:'JetBrains Mono',monospace; font-size: 11px; color: var(--text-ghost); letter-spacing:2px; margin-top:6px; }
-  .radiation { display:flex; align-items:center; gap:10px; color: rgb(var(--amber)); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:2px; }
-  .radiation svg { width:20px; height:20px; animation: spin 6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ==================== LOBBY / ROOM CREATION ==================== */
-  #lobby {
-    position: fixed; inset: 0; z-index: 40;
-    display: flex; align-items: center; justify-content: center; padding: 16px;
-    opacity: 0; pointer-events: none; transition: opacity 0.6s var(--ease);
-  }
-  #lobby.show { opacity: 1; pointer-events: auto; }
-  .lobby-card { width: min(880px, 100vw); max-height: 94vh; overflow-y: auto; display:flex; flex-direction: column; }
-  .lobby-head { padding: 20px 24px 14px; border-bottom: 1px solid rgba(var(--rad-green),0.1); }
-  .lobby-head h1 { font-family:'JetBrains Mono',monospace; font-size: clamp(18px, 4vw, 22px); letter-spacing: 2px; color:#c3d4c5; }
-  .lobby-head h1 .accent { color: rgb(var(--rad-green)); }
-  .lobby-head p { margin-top:6px; font-family:'JetBrains Mono',monospace; font-size: 10px; letter-spacing: 1.5px; color: var(--text-dim); }
-  .lobby-body { display:grid; grid-template-columns: 1.1fr 1fr; gap: 0; min-height: 0; }
-  @media (max-width: 720px){ .lobby-body { grid-template-columns: 1fr; } }
-  .lobby-form { padding: 20px 24px; display:flex; flex-direction: column; gap: 16px; }
-  .field-label { font-family:'JetBrains Mono',monospace; font-size: 11px; letter-spacing: 2px; color: rgb(var(--rad-green-dim)); margin-bottom: 8px; display:flex; align-items:center; gap:8px; }
-  .lobby-input {
-    width:100%; padding: 12px 14px; border-radius: 12px; background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(var(--rad-green),0.14); color: var(--text-primary);
-    font-family:'JetBrains Mono',monospace; font-size: 16px; letter-spacing: 1px; outline: none; transition: all 0.3s var(--ease);
-  }
-  .lobby-input:focus { border-color: rgba(var(--rad-green),0.45); box-shadow: 0 0 26px -8px rgba(var(--rad-green),0.6); }
-  .lobby-input::placeholder { color: var(--text-ghost); }
-  .freq-dial { display:flex; align-items:center; gap:12px; }
-  .freq-read { font-family:'JetBrains Mono',monospace; font-size: 20px; font-weight:700; color: rgb(var(--rad-green)); text-shadow: 0 0 16px rgba(var(--rad-green),0.5); min-width: 105px; }
-  .freq-read small { font-size: 11px; color: var(--text-dim); font-weight:400; }
-  input[type=range].tuner { -webkit-appearance:none; appearance:none; flex:1; height: 6px; border-radius: 20px; background: linear-gradient(90deg, rgba(var(--rad-green),0.4), rgba(var(--rust-light),0.4)); outline:none; }
-  input[type=range].tuner::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background: radial-gradient(circle at 35% 30%, #d8e6d8, #7f9a80); border:2px solid rgb(var(--rad-green)); box-shadow: 0 0 14px rgba(var(--rad-green),0.7); cursor:pointer; }
-  .enter-btn {
-    margin-top: 2px; width:100%; padding: 14px; border:none; cursor:pointer; border-radius: 14px;
-    font-family:'JetBrains Mono',monospace; font-weight:700; font-size: 13px; letter-spacing: 2.5px; color:#06120a;
-    background: linear-gradient(135deg, rgb(var(--rad-green)), rgb(var(--rad-green-dim)));
-    box-shadow: 0 0 30px -6px rgba(var(--rad-green),0.7); transition: all 0.3s var(--ease);
-    display:flex; align-items:center; justify-content:center; gap:10px;
-  }
-  .enter-btn:hover { transform: translateY(-2px); box-shadow: 0 0 40px 0 rgba(var(--rad-green),0.9); }
-  .enter-btn:active { transform: scale(0.98); }
-  .enter-btn svg { width:18px; height:18px; }
-  .lobby-rooms { padding: 20px 24px; border-left: 1px solid rgba(var(--rad-green),0.1); background: rgba(0,0,0,0.18); overflow-y:auto; }
-  @media (max-width: 720px){ .lobby-rooms { border-left:none; border-top:1px solid rgba(var(--rad-green),0.1); } }
-  .lobby-rooms h3 { font-family:'JetBrains Mono',monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 12px; }
-  .room-item { display:flex; align-items:center; gap: 12px; padding: 10px 12px; border-radius: 12px; cursor:pointer; border:1px solid transparent; transition: all 0.3s var(--ease); margin-bottom: 6px; }
-  .room-item:hover { background: rgba(var(--rad-green),0.06); border-color: rgba(var(--rad-green),0.2); transform: translateX(3px); }
-  .room-freq { font-family:'JetBrains Mono',monospace; font-weight:700; font-size: 13px; color: rgb(var(--rad-green)); min-width: 58px; }
-  .room-info .rn { font-size: 12px; font-weight:600; color: var(--text-primary); }
-  .room-info .rm { font-size: 10px; color: var(--text-dim); font-family:'JetBrains Mono',monospace; margin-top:2px; }
-
-  /* ==================== HERMETIC BLAST DOOR ==================== */
-  #airlock { position: fixed; inset: 0; z-index: 90; pointer-events: none; display: none; }
-  #airlock.active { display: block; }
-  .door-half {
-    position: absolute; top: 0; bottom: 0; width: 52%;
-    background:
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0 4px, transparent 4px 8px),
-      linear-gradient(90deg, #241812, #4a331f 30%, #6b4a2a 50%, #3a2716 72%, #191009);
-    box-shadow: inset 0 0 120px rgba(0,0,0,0.85);
-    transition: transform 1.05s cubic-bezier(0.65,0,0.35,1);
-  }
-  .door-half::before {
-    content:""; position:absolute; inset: 10px; border: 3px solid rgba(0,0,0,0.4); border-radius: 6px;
-    background: repeating-linear-gradient(135deg, rgba(255,176,66,0.0) 0 26px, rgba(0,0,0,0.18) 26px 52px);
-  }
-  .door-half.left { left: 0; transform: translateX(-101%); border-right: 4px solid #120b06; }
-  .door-half.right { right: 0; transform: translateX(101%); border-left: 4px solid #120b06; }
-  #airlock.closing .door-half.left { transform: translateX(0); }
-  #airlock.closing .door-half.right { transform: translateX(0); }
-  .hazard-strip {
-    position:absolute; top:50%; height: 26px; width:100%; transform: translateY(-50%);
-    background: repeating-linear-gradient(45deg, #d8a53a 0 22px, #17110a 22px 44px); opacity: 0.55;
-  }
-  .door-wheel {
-    position: absolute; top: 50%; left: 50%; width: 168px; height: 168px; transform: translate(-50%,-50%) scale(0.4); opacity: 0;
-    z-index: 3; transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
-  }
-  #airlock.closing .door-wheel { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(220deg); transition: opacity 0.5s var(--ease), transform 1.1s cubic-bezier(0.5,0,0.2,1); }
-  .door-wheel svg { width:100%; height:100%; filter: drop-shadow(0 0 24px rgba(0,0,0,0.8)); }
-  .airlock-label {
-    position:absolute; top: calc(50% + 120px); left:50%; transform: translateX(-50%); opacity:0;
-    font-family:'JetBrains Mono',monospace; font-size: 13px; letter-spacing: 4px; color: rgb(var(--amber));
-    text-shadow: 0 0 14px rgba(255,176,66,0.6); white-space: nowrap; transition: opacity 0.4s var(--ease);
-  }
-  #airlock.closing .airlock-label { opacity: 1; }
-
-  /* ==================== APP SHELL ==================== */
-  #app {
-    position: relative; z-index: 10; height: 100vh; height: 100dvh;
-    display: grid; grid-template-columns: 1fr; gap: 10px; padding: 8px;
-    opacity: 0; pointer-events: none; transition: opacity 0.5s var(--ease);
-  }
-  @media(min-width: 820px) {
-    #app { grid-template-columns: 320px 1fr; padding: 16px; gap: 16px; }
-  }
-  #app.show { opacity: 1; pointer-events: auto; }
-
-  #sidebar { display: none; flex-direction: column; overflow: hidden; }
-  @media(min-width: 820px) { #sidebar { display: flex; } }
-  .brand { padding: 18px 20px 12px; border-bottom: 1px solid rgba(var(--rad-green), 0.1); }
-  .brand h1 { font-family:'JetBrains Mono',monospace; font-size: 18px; font-weight: 700; letter-spacing: 2px; color: #b8c9ba; }
-  .brand h1 .accent { color: rgb(var(--rad-green)); }
-  .brand p { margin-top: 6px; font-size: 10px; letter-spacing: 1px; color: var(--text-dim); font-family:'JetBrains Mono',monospace; display: flex; align-items: center; gap: 6px; }
-  .brand .chan { margin-top: 6px; font-family:'JetBrains Mono',monospace; font-size: 10px; color: rgb(var(--rad-green-dim)); letter-spacing:1px; }
-
-  .search { margin: 12px 14px 6px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(0,0,0,0.28); border: 1px solid rgba(var(--rad-green), 0.1); border-radius: 12px; }
-  .search input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 13px; width: 100%; font-family: 'Inter', sans-serif; }
-  .search input::placeholder { color: var(--text-ghost); }
-
-  .contacts { flex: 1; overflow-y: auto; padding: 8px; }
-  .contacts::-webkit-scrollbar, .messages::-webkit-scrollbar, .lobby-rooms::-webkit-scrollbar { width: 5px; }
-  .contacts::-webkit-scrollbar-thumb, .messages::-webkit-scrollbar-thumb, .lobby-rooms::-webkit-scrollbar-thumb { background: rgba(var(--rad-green), 0.2); border-radius: 3px; }
-
-  .contact { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; cursor: pointer; transition: all 0.35s var(--ease); border: 1px solid transparent; }
-  .contact:hover { background: rgba(var(--rad-green), 0.06); transform: translateX(3px); }
-  .contact.active { background: rgba(var(--rad-green), 0.1); border-color: rgba(var(--rad-green), 0.25); box-shadow: inset 0 0 20px rgba(var(--rad-green), 0.08); }
-  .avatar { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; display: grid; place-items: center; font-family:'JetBrains Mono',monospace; font-weight: 700; font-size: 14px; color: #0a0e0c; background: linear-gradient(135deg, var(--rust-light), var(--rust)); box-shadow: inset 0 0 10px rgba(0,0,0,0.4); position: relative; }
-  .avatar.on::after { content:""; position:absolute; right:-2px; bottom:-2px; width:10px; height:10px; border-radius:50%; background: rgb(var(--rad-green)); border: 2px solid var(--bg-deep); box-shadow: 0 0 5px rgba(var(--rad-green),0.9); }
-  .contact .meta { flex: 1; min-width: 0; }
-  .contact .name { font-size: 13px; font-weight: 600; color: var(--text-primary); display:flex; justify-content: space-between; }
-  .contact .name span { font-size: 9px; color: var(--text-ghost); font-family:'JetBrains Mono',monospace; font-weight:400; }
-  .contact .preview { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-
-  #chat { display: flex; flex-direction: column; overflow: hidden; width: 100%; min-width: 0; }
-  
-  .chat-header {
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-bottom: 1px solid rgba(var(--rad-green), 0.1);
-    flex-wrap: nowrap;
-    overflow: hidden;
-  }
-  .chat-header-info {
-    flex: 1;
-    min-width: 0;
-  }
-  .chat-header .name {
-    font-size: clamp(13px, 3.5vw, 15px);
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .chat-header .status {
-    font-size: 9px;
-    color: rgb(var(--rad-green-dim));
-    font-family: 'JetBrains Mono', monospace;
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-  .enc {
-    font-size: 9px;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    padding: 4px 8px;
-    border-radius: 16px;
-    border: 1px solid rgba(var(--rad-green), 0.18);
-    background: rgba(var(--rad-green), 0.04);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  @media (max-width: 900px){ .enc { display:none; } }
-  
-  .copy-link-btn, .exit-door {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 1px;
-    color: rgb(var(--amber));
-    background: rgba(255, 176, 66, 0.06);
-    border: 1px solid rgba(255, 176, 66, 0.25);
-    transition: all 0.3s var(--ease);
-    white-space: nowrap;
-  }
-  .copy-link-btn:hover, .exit-door:hover { background: rgba(255,176,66,0.14); box-shadow: 0 0 18px -4px rgba(255,176,66,0.6); transform: translateY(-1px); }
-  .copy-link-btn svg, .exit-door svg { width: 13px; height: 13px; }
-
-  .messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
-  .bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.45; position: relative; animation: msgIn 0.5s var(--ease); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); word-break: break-word; }
-  @keyframes msgIn { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: none; } }
-  .bubble .time { display:block; margin-top:4px; font-size:9px; color: var(--text-ghost); font-family:'JetBrains Mono',monospace; }
-  .bubble.them { align-self: flex-start; background: var(--glass-light); border: 1px solid rgba(var(--rad-green), 0.1); border-bottom-left-radius: 4px; color: var(--text-primary); }
-  .bubble.me { align-self: flex-end; background: linear-gradient(135deg, rgba(var(--rad-green), 0.16), rgba(var(--rad-green-dim), 0.08)); border: 1px solid rgba(var(--rad-green), 0.3); border-bottom-right-radius: 4px; box-shadow: 0 0 22px -6px rgba(var(--rad-green), 0.5); color: #eafbe9; }
-  .bubble.pulse { animation: bubblePulse 0.6s var(--ease); }
-  @keyframes bubblePulse { 0% { box-shadow: 0 0 0 0 rgba(var(--rad-green), 0.55); } 100% { box-shadow: 0 0 30px 4px rgba(var(--rad-green), 0); } }
-  .day-sep { align-self: center; font-size: 9px; letter-spacing: 1.5px; color: var(--text-ghost); font-family:'JetBrains Mono',monospace; padding: 2px 0; }
-
-  .voice { display:flex; align-items:center; gap: 10px; min-width: 175px; }
-  .voice .play { width: 32px; height: 32px; border-radius: 50%; flex-shrink:0; border:none; cursor:pointer; display:grid; place-items:center; background: rgba(var(--rad-green),0.18); border:1px solid rgba(var(--rad-green),0.4); color: rgb(var(--rad-green)); transition: all 0.3s var(--ease); }
-  .voice .play:hover { background: rgba(var(--rad-green),0.3); }
-  .voice .play svg { width:13px; height:13px; }
-  .voice .wave { flex:1; display:flex; align-items:center; gap: 2.5px; height: 26px; }
-  .voice .wave i { flex:1; background: rgba(var(--rad-green),0.5); border-radius: 2px; min-width:2px; }
-  .voice.playing .wave i { animation: eq 0.7s ease-in-out infinite alternate; }
-  @keyframes eq { from { transform: scaleY(0.35); } to { transform: scaleY(1); } }
-  .voice .dur { font-family:'JetBrains Mono',monospace; font-size: 10px; color: var(--text-dim); }
-  .voice .kind { font-family:'JetBrains Mono',monospace; font-size: 8px; letter-spacing:0.8px; color: rgb(var(--rad-green-dim)); display:block; margin-bottom:1px; }
-
-  .media-bubble-content img, .media-bubble-content video { max-width: 100%; border-radius: 10px; margin-top: 4px; display: block; max-height: 240px; object-fit: cover; }
-
-  .composer { padding: 10px 12px; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(var(--rad-green), 0.1); background: rgba(0,0,0,0.15); }
-  .composer .field { flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(var(--rad-green), 0.12); border-radius: 14px; transition: all 0.35s var(--ease); min-width: 0; }
-  .composer .field:focus-within { border-color: rgba(var(--rad-green), 0.4); box-shadow: 0 0 22px -6px rgba(var(--rad-green), 0.5); }
-  .composer input { flex: 1; background: none; border: none; outline: none; color: var(--text-primary); font-size: 16px; font-family: 'Inter', sans-serif; min-width: 0; }
-  .composer input::placeholder { color: var(--text-ghost); }
-  .composer .field.recording { border-color: rgba(255,80,80,0.6); box-shadow: 0 0 22px -6px rgba(255,80,80,0.6); }
-  .rec-ind { display:none; align-items:center; gap:8px; flex:1; font-family:'JetBrains Mono',monospace; font-size:11px; color:#ff8a8a; }
-  .field.recording .rec-ind { display:flex; }
-  .field.recording input { display:none; }
-  .rec-ind .rdot { width:8px; height:8px; border-radius:50%; background:#ff5050; box-shadow:0 0 8px #ff5050; animation: pulse 1s infinite; }
-
-  .send-btn { width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer; display: grid; place-items: center; background: linear-gradient(135deg, rgb(var(--rad-green)), rgb(var(--rad-green-dim))); color: #06120a; box-shadow: 0 0 16px -3px rgba(var(--rad-green), 0.6); transition: all 0.3s var(--ease); flex-shrink: 0; }
-  .send-btn svg { width: 17px; height: 17px; }
-
-  .icon-btn { width: 40px; height: 40px; border-radius: 12px; background: rgba(0,0,0,0.28); border: 1px solid rgba(var(--rad-green),0.12); cursor: pointer; color: var(--text-dim); display: grid; place-items: center; transition: all 0.3s var(--ease); flex-shrink:0; }
-  .icon-btn:hover { color: rgb(var(--rad-green)); border-color: rgba(var(--rad-green),0.3); }
-  .icon-btn.active { color: rgb(var(--rad-green)); border-color: rgba(var(--rad-green),0.4); background: rgba(var(--rad-green),0.1); }
-  .icon-btn svg { width: 16px; height: 16px; }
-  .ptt-btn { position: relative; overflow: hidden; }
-  .ptt-btn.transmitting { color:#ff9a4a; border-color: rgba(255,176,66,0.6); background: rgba(255,176,66,0.14); box-shadow: 0 0 22px -4px rgba(255,176,66,0.7); }
-  .ptt-btn.transmitting::after { content:""; position:absolute; inset:0; border-radius:12px; border:2px solid rgba(255,176,66,0.6); animation: pttRing 0.9s ease-out infinite; }
-  @keyframes pttRing { from { transform: scale(0.8); opacity:0.8; } to { transform: scale(1.6); opacity:0; } }
-
-  #ptt-overlay { position: fixed; inset:0; z-index: 55; display:none; align-items:center; justify-content:center; background: radial-gradient(ellipse at 50% 50%, rgba(20,12,4,0.6), rgba(4,6,5,0.85)); }
-  #ptt-overlay.show { display:flex; }
-  .ptt-panel { text-align:center; padding: 20px; }
-  .ptt-panel .lbl { font-family:'JetBrains Mono',monospace; letter-spacing:3px; color: rgb(var(--amber)); font-size: 13px; text-shadow: 0 0 14px rgba(255,176,66,0.6); }
-  .ptt-wave { display:flex; align-items:center; justify-content:center; gap:4px; height:60px; margin: 14px 0; }
-  .ptt-wave i { width:4px; background: rgb(var(--amber)); border-radius: 2px; box-shadow: 0 0 8px rgba(255,176,66,0.6); animation: pttEq 0.5s ease-in-out infinite alternate; }
-  @keyframes pttEq { from { height: 6px; } to { height: 50px; } }
-  .ptt-panel .sub { font-family:'JetBrains Mono',monospace; font-size:10px; color: var(--text-dim); letter-spacing:1.5px; }
-
-  /* ==================== RADIO WIDGET ==================== */
-  #radio {
-    position: fixed; left: 12px; bottom: 70px; z-index: 30; width: 260px; padding: 12px;
-    opacity: 0; pointer-events: none; transform: translateY(10px); transition: all 0.5s var(--ease);
-  }
-  @media(min-width: 820px) {
-    #radio { bottom: 16px; width: 280px; padding: 14px; }
-  }
-  #radio.show { opacity: 1; pointer-events: auto; transform: none; }
-  .radio-top { display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px; }
-  .radio-title { font-family:'JetBrains Mono',monospace; font-size: 10px; letter-spacing: 1.5px; color: var(--text-dim); display:flex; align-items:center; gap:6px; }
-  .radio-fold { background:none; border:none; color: var(--text-dim); cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:15px; line-height:1; padding:2px 6px; }
-  .radio-fold:hover { color: rgb(var(--rad-green)); }
-  #radio.folded .radio-body { display:none; }
-  .radio-display { background: rgba(0,0,0,0.45); border:1px solid rgba(var(--rad-green),0.14); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
-  .radio-freq { font-family:'JetBrains Mono',monospace; font-size: 20px; font-weight:700; color: rgb(var(--rad-green)); text-shadow: 0 0 14px rgba(var(--rad-green),0.5); }
-  .radio-freq small { font-size: 10px; color: var(--text-dim); font-weight:400; }
-  .radio-station { font-family:'JetBrains Mono',monospace; font-size: 9px; letter-spacing: 1px; color: rgb(var(--amber)); margin-top: 3px; min-height: 12px; }
-  .radio-eq { display:flex; align-items:flex-end; gap:2.5px; height: 14px; margin-top: 5px; }
-  .radio-eq i { flex:1; background: rgba(var(--rad-green),0.5); border-radius:2px; height: 3px; }
-  #radio.playing .radio-eq i { animation: eq2 0.6s ease-in-out infinite alternate; }
-  @keyframes eq2 { from { height: 2px; } to { height: 14px; } }
-  .radio-controls { display:flex; align-items:center; gap: 5px; margin-bottom: 8px; }
-  .radio-controls button { flex:1; padding: 6px; border-radius: 8px; border:1px solid rgba(var(--rad-green),0.14); background: rgba(0,0,0,0.3); color: var(--text-dim); cursor:pointer; display:grid; place-items:center; transition: all 0.3s var(--ease); }
-  .radio-controls button:hover { color: rgb(var(--rad-green)); border-color: rgba(var(--rad-green),0.35); }
-  .radio-controls .rplay { background: rgba(var(--rad-green),0.14); color: rgb(var(--rad-green)); border-color: rgba(var(--rad-green),0.35); }
-  .radio-controls button svg { width:14px; height:14px; }
-  .radio-tuner-row { display:flex; align-items:center; gap: 6px; }
-  .radio-tuner-row span { font-family:'JetBrains Mono',monospace; font-size:8px; color: var(--text-ghost); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Приватный Чат & Соцсеть</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e1e2e">
 </head>
 <body>
 
-<svg width="0" height="0" style="position:absolute">
-  <filter id="grain">
-    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
-    <feColorMatrix type="saturate" values="0"/>
-    <feComponentTransfer><feFuncA type="linear" slope="0.06"/></feComponentTransfer>
-    <feComposite operator="over" in2="SourceGraphic"/>
-  </filter>
-</svg>
-
-<div id="scene">
-  <div class="layer" id="layer-far"></div>
-  <div class="layer" id="layer-mid"></div>
-  <div class="layer" id="layer-close"></div>
-</div>
-<div id="vignette"></div>
-<div id="scanlines"></div>
-
-<div id="boot">
-  <div class="radiation">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.66 15l4.33-2.5A5 5 0 0 1 7 12H2a10 10 0 0 1 10-10zm10 10h-5a5 5 0 0 1-.67 2.5l4.33 2.5A10 10 0 0 0 22 12zM12 22a10 10 0 0 0 8.66-5l-4.33-2.5A5 5 0 0 1 12 17v5z"/><circle cx="12" cy="12" r="2.4"/></svg>
-    RADIATION LEVEL: NOMINAL
-  </div>
-  <div class="boot-logo">METRO<span class="accent">_CHAT</span></div>
-  <div class="boot-sub">// ENCRYPTED UPLINK TERMINAL · MOSCOW METRO NETWORK</div>
-  <div class="boot-log" id="boot-log"></div>
-  <div class="boot-bar"><i id="boot-fill"></i></div>
-  <div class="boot-pct" id="boot-pct">0%</div>
-  <div class="boot-hint" id="boot-hint">INITIALIZING...</div>
-</div>
-
-<div id="lobby">
-  <div class="lobby-card glass">
-    <div class="lobby-head">
-      <h1>СОЗДАНИЕ КАНАЛА <span class="accent">// NEW CHANNEL</span></h1>
-      <p><span class="dot-live"></span> ВЫБЕРИТЕ ПОЗЫВНОЙ И ЧАСТОТУ ДЛЯ ВЫХОДА В ЭФИР</p>
-    </div>
-    <div class="lobby-body">
-      <div class="lobby-form">
-        <div>
-          <div class="field-label">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-            ПОЗЫВНОЙ · CALLSIGN
-          </div>
-          <input class="lobby-input" id="callsign" maxlength="18" placeholder="Метро 2033" value="Метро 2033" />
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-card">
+            <h2>🔒 Вход в систему</h2>
+            <p>Закрытый доступ только для 3 участников</p>
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email" required autocomplete="username">
+                <input type="password" id="password" placeholder="Пароль" required autocomplete="current-password">
+                <button type="submit" class="btn btn-primary">Войти</button>
+            </form>
+            <div id="auth-error" class="error-msg"></div>
         </div>
-        <div>
-          <div class="field-label">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M4 8h16M4 16h10"/></svg>
-            ЧАСТОТА · FREQUENCY
-          </div>
-          <div class="freq-dial">
-            <div class="freq-read" id="freq-read">88.3<small> MHz</small></div>
-            <input type="range" class="tuner" id="freq-tuner" min="76" max="108" step="0.1" value="88.3" />
-          </div>
-        </div>
-        <button class="enter-btn" id="enter-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-          ВОЙТИ В БУНКЕР
-        </button>
-      </div>
-      <div class="lobby-rooms">
-        <h3>// АКТИВНЫЕ КАНАЛЫ · JOIN EXISTING</h3>
-        <div id="room-list"></div>
-      </div>
     </div>
-  </div>
-</div>
 
-<div id="airlock">
-  <div class="door-half left"></div>
-  <div class="door-half right"></div>
-  <div class="hazard-strip"></div>
-  <div class="door-wheel">
-    <svg viewBox="0 0 100 100" fill="none" stroke="#c9922f" stroke-width="3">
-      <circle cx="50" cy="50" r="44" stroke="#8a6420"/>
-      <circle cx="50" cy="50" r="30" />
-      <circle cx="50" cy="50" r="9" fill="#8a6420" stroke="#5c4315"/>
-      <g stroke="#d8a53a" stroke-width="6" stroke-linecap="round">
-        <path d="M50 6 L50 20"/><path d="M50 80 L50 94"/><path d="M6 50 L20 50"/><path d="M80 50 L94 50"/>
-        <path d="M19 19 L29 29"/><path d="M71 71 L81 81"/><path d="M81 19 L71 29"/><path d="M29 71 L19 81"/>
-      </g>
-    </svg>
-  </div>
-  <div class="airlock-label">// ГЕРМОДВЕРЬ · SEALING</div>
-</div>
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <div id="app-screen" class="screen">
+        <header class="app-header">
+            <div class="logo">💬 PrivateSpace</div>
+            <div class="header-controls">
+                <button id="theme-toggle" class="btn-icon" title="Переключить тему">🌙</button>
+                <div class="font-scaler">
+                    <button id="font-dec" class="btn-sm">A-</button>
+                    <span id="font-size-val">100%</span>
+                    <button id="font-inc" class="btn-sm">A+</button>
+                </div>
+            </div>
+        </header>
 
-<div id="ptt-overlay">
-  <div class="ptt-panel">
-    <div class="lbl">◉ ПЕРЕДАЧА · TRANSMITTING</div>
-    <div class="ptt-wave" id="ptt-wave"></div>
-    <div class="sub">ОТПУСТИТЕ ДЛЯ ОТПРАВКИ · RELEASE TO SEND</div>
-  </div>
-</div>
+        <main class="layout-container">
+            <!-- ЛЕВАЯ КОЛОНКА: КОНТАКТЫ -->
+            <section id="panel-contacts" class="panel active">
+                <div class="panel-header">
+                    <h3>👥 Участники</h3>
+                </div>
+                <div id="contacts-list" class="list-container">
+                    <!-- Заполняется динамически из JS -->
+                </div>
+            </section>
 
-<main id="app">
-  <aside id="sidebar" class="glass">
-    <div class="brand">
-      <h1>METRO<span class="accent">_CHAT</span></h1>
-      <p><span class="dot-live"></span> FIREBASE REALTIME DB</p>
-      <div class="chan" id="brand-chan">CH — · —.— MHz</div>
+            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ЧАТ -->
+            <section id="panel-chat" class="panel">
+                <div class="panel-header">
+                    <h3 id="chat-title">💬 Общий чат</h3>
+                    <span id="typing-indicator" class="typing-text"></span>
+                </div>
+                <div id="chat-messages" class="messages-container">
+                    <!-- Сообщения генерируются скриптом -->
+                </div>
+                <div class="chat-input-area">
+                    <label for="chat-file-input" class="btn-icon" title="Прикрепить файл">📎</label>
+                    <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
+                    
+                    <input type="text" id="chat-text-input" placeholder="Введите сообщение..." autocomplete="off">
+                    
+                    <button id="record-audio-btn" class="btn-icon" title="Голосовое сообщение">🎙️</button>
+                    <button id="send-msg-btn" class="btn btn-primary">➔</button>
+                </div>
+            </section>
+
+            <!-- ПРАВАЯ КОЛОНКА: ПРОФИЛЬ, СТЕНА, НАСТРОЙКИ -->
+            <section id="panel-profile" class="panel">
+                <div class="panel-header">
+                    <h3>👤 Профиль и Стена</h3>
+                </div>
+                <div class="profile-scroll-area">
+                    <!-- Инфо профиля -->
+                    <div class="profile-card">
+                        <img id="user-avatar" src="https://via.placeholder.com/80" alt="Аватар" class="avatar-lg">
+                        <h4 id="user-display-name">Загрузка...</h4>
+                        <p id="user-email-text" class="text-muted"></p>
+                    </div>
+
+                    <!-- Форма создания поста -->
+                    <div class="create-post-card">
+                        <textarea id="post-text-input" placeholder="Что у вас нового на сегодня?" rows="3"></textarea>
+                        <div class="post-actions">
+                            <label for="post-file-input" class="btn-sm">📷 Фото</label>
+                            <input type="file" id="post-file-input" accept="image/*" hidden>
+                            <span id="post-file-name" class="file-name-tag"></span>
+                            <button id="submit-post-btn" class="btn btn-primary btn-sm">Опубликовать</button>
+                        </div>
+                    </div>
+
+                    <!-- Лента постов -->
+                    <div class="wall-header">📜 Стена заметок</div>
+                    <div id="wall-posts" class="posts-container">
+                        <!-- Посты динамически -->
+                    </div>
+
+                    <!-- Настройки -->
+                    <div class="settings-card">
+                        <h4>⚙️ Настройки и Разрешения</h4>
+                        <div class="setting-item">
+                            <span>Уведомления</span>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-notifications">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>Звуки сообщений</span>
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-sounds" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="permissions-group">
+                            <p class="text-muted">Проверка системных прав:</p>
+                            <button id="req-mic-btn" class="btn btn-outline btn-sm">🎙️ Доступ к микрофону</button>
+                            <button id="req-cam-btn" class="btn btn-outline btn-sm">📷 Доступ к камере</button>
+                            <button id="req-notif-btn" class="btn btn-outline btn-sm">🔔 Разрешить Push</button>
+                        </div>
+
+                        <button id="logout-btn" class="btn btn-danger full-width">🚪 Выйти из аккаунта</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- НИЖНЯЯ НАВИГАЦИЯ ДЛЯ МОБИЛЬНЫХ -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-target="panel-contacts">
+                <span class="nav-icon">👥</span>
+                <span class="nav-label">Контакты</span>
+            </button>
+            <button class="nav-btn" data-target="panel-chat">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Чат</span>
+            </button>
+            <button class="nav-btn" data-target="panel-profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </button>
+        </nav>
     </div>
-    <div class="search">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#566258" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
-      <input type="text" placeholder="Search channels..." id="search-input" />
-    </div>
-    <div class="contacts" id="contacts"></div>
-  </aside>
 
-  <section id="chat" class="glass">
-    <div class="chat-header">
-      <div class="avatar on" id="chat-avatar">C</div>
-      <div class="chat-header-info">
-        <div class="name" id="chat-name">The Colonel</div>
-        <div class="status" id="chat-status">// signal strong · d6 metro line</div>
-      </div>
-      <div class="header-actions">
-        <div class="enc"><span class="dot-live"></span> SECURE</div>
-        <button class="copy-link-btn" id="copy-link-btn" title="Копировать ссылку">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 7l1.5-1.5a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7-7L5.5 5.5a5 5 0 0 0 7 7l1.5-1.5"/></svg>
-          ССЫЛКА
-        </button>
-        <button class="exit-door" id="exit-btn" title="Выход" aria-label="Exit room">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="1.5"/><circle cx="12" cy="12" r="4"/><path d="M12 8v-1M12 17v-1M8 12H7M17 12h-1M9.2 9.2l-.7-.7M15.5 15.5l-.7-.7M14.8 9.2l.7-.7M8.5 15.5l.7-.7"/></svg>
-          ВЫХОД
-        </button>
-      </div>
-    </div>
-    <div class="messages" id="messages"></div>
-    <form class="composer" id="composer" autocomplete="off">
-      <button type="button" class="icon-btn" id="mic-btn" title="Аудиосообщение" aria-label="Record audio message">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg>
-      </button>
-      <input type="file" id="media-file-input" accept="image/*,video/*" style="display: none;" />
-      <button type="button" class="icon-btn" id="media-btn" title="Добавить фото или видео" aria-label="Add photo or video">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-      </button>
-      <div class="field" id="field">
-        <input type="text" id="msg-input" placeholder="Transmit encrypted message..." aria-label="Message" />
-        <div class="rec-ind"><span class="rdot"></span><span id="rec-time">0:00</span> · REC</div>
-      </div>
-      <button type="button" class="icon-btn ptt-btn" id="ptt-btn" title="Рация (держать)" aria-label="Push to talk walkie-talkie">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 2v3h2V2M10 8h4M12 14v3"/></svg>
-      </button>
-      <button type="submit" class="send-btn" title="Send" aria-label="Send message">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-      </button>
-    </form>
-  </section>
-</main>
-
-<div id="radio" class="glass">
-  <div class="radio-top">
-    <div class="radio-title"><span class="dot-live"></span> МЕТРО-РАДИО · FM</div>
-    <button class="radio-fold" id="radio-fold" title="Свернуть" aria-label="Fold radio">–</button>
-  </div>
-  <div class="radio-body">
-    <div class="radio-display">
-      <div class="radio-freq" id="radio-freq">88.3<small> MHz</small></div>
-      <div class="radio-station" id="radio-station">— ТИШИНА В ЭФИРЕ —</div>
-      <div class="radio-eq" id="radio-eq"></div>
-    </div>
-    <div class="radio-controls">
-      <button id="radio-prev" title="Пред. станция" aria-label="Previous station"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-      <button class="rplay" id="radio-play" title="Play / Stop" aria-label="Play or stop radio"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
-      <button id="radio-next" title="След. станция" aria-label="Next station"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6v12l8.5-6z"/></svg></button>
-    </div>
-    <div class="radio-tuner-row">
-      <span>76</span>
-      <input type="range" class="tuner" id="radio-tuner" min="76" max="108" step="0.1" value="88.3" />
-      <span>108</span>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDo3LytnfDm-hAPL2RxTpz3VteGmTcSmAc",
-    authDomain: "icqnovpn.firebaseapp.com",
-    databaseURL: "https://icqnovpn-default-rtdb.firebaseio.com",
-    projectId: "icqnovpn",
-    storageBucket: "icqnovpn.firebasestorage.app",
-    messagingSenderId: "624335054201",
-    appId: "1:624335054201:web:69556400be41283b157ba8"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  let currentRoom = { callsign: 'Метро 2033', freq: '88.3', name: 'ПРЯМОЙ ЭФИР' };
-  let dbRef = null;
-  let sfxOn = false;
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const roomParam = params.get('room');
-    const callsignParam = params.get('callsign');
-    if (roomParam) {
-      document.getElementById('freq-tuner').value = roomParam;
-      document.getElementById('freq-read').innerHTML = roomParam + '<small> MHz</small>';
-    }
-    if (callsignParam) {
-      document.getElementById('callsign').value = callsignParam;
-    }
-  });
-
-  /* ============ PARALLAX SCENE BUILD ============ */
-  const far = document.getElementById('layer-far');
-  const mid = document.getElementById('layer-mid');
-  const close = document.getElementById('layer-close');
-
-  for (let i = 0; i < 7; i++) {
-    const r = document.createElement('div'); r.className = 'ring';
-    const size = 200 + i * 180;
-    r.style.width = size + 'px'; r.style.height = size * 0.8 + 'px';
-    r.style.opacity = (0.5 - i * 0.05).toFixed(2);
-    far.appendChild(r);
-  }
-  const midParts = [
-    { cls: 'pipe', css: 'left:-4%; top:12%; width:30%; height:26px; transform:rotate(-8deg);' },
-    { cls: 'pipe', css: 'right:-6%; top:22%; width:34%; height:22px; transform:rotate(6deg);' },
-    { cls: 'pipe', css: 'left:8%; bottom:8%; width:26%; height:30px; transform:rotate(4deg);' },
-    { cls: 'pipe', css: 'right:4%; bottom:18%; width:22%; height:18px; transform:rotate(-5deg);' },
-    { cls: 'valve', css: 'left:6%; top:8%;' },
-    { cls: 'valve', css: 'right:9%; bottom:10%; width:90px; height:90px;' },
-    { cls: 'beam', css: 'left:-2%; top:0; width:14px; height:60%;' },
-    { cls: 'beam', css: 'right:-2%; bottom:0; width:18px; height:70%;' },
-  ];
-  midParts.forEach(p => { const el = document.createElement('div'); el.className = p.cls; el.style.cssText += p.css; mid.appendChild(el); });
-  for (let i = 0; i < 60; i++) {
-    const d = document.createElement('div'); d.className = 'dust';
-    d.style.left = Math.random() * 100 + '%'; d.style.top = Math.random() * 100 + '%';
-    const dur = 8 + Math.random() * 14; d.style.animationDuration = dur + 's'; d.style.animationDelay = -Math.random() * dur + 's';
-    const s = 1 + Math.random() * 3; d.style.width = s + 'px'; d.style.height = s + 'px'; d.style.opacity = 0.3 + Math.random() * 0.6;
-    close.appendChild(d);
-  }
-  let tx = 0, ty = 0, cx = 0, cy = 0;
-  window.addEventListener('mousemove', (e) => { tx = (e.clientX - window.innerWidth / 2); ty = (e.clientY - window.innerHeight / 2); });
-  function raf() {
-    cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
-    far.style.transform = `translate(${cx * 0.012}px, ${cy * 0.012}px) scale(1.05)`;
-    mid.style.transform = `translate(${cx * 0.04}px, ${cy * 0.04}px)`;
-    close.style.transform = `translate(${cx * 0.09}px, ${cy * 0.09}px)`;
-    requestAnimationFrame(raf);
-  }
-  raf();
-
-  /* ============ WEB AUDIO CORE (iOS Safari Safe) ============ */
-  let actx = null;
-  function ensureCtx() {
-    if (!actx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      actx = new AudioContext();
-    }
-    if (actx.state === 'suspended') {
-      actx.resume();
-    }
-    return actx;
-  }
-  let noiseBuf = null;
-  function getNoise() {
-    ensureCtx();
-    if (noiseBuf) return noiseBuf;
-    const len = actx.sampleRate * 2;
-    noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
-    const data = noiseBuf.getChannelData(0);
-    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-    return noiseBuf;
-  }
-
-  let humNodes = null;
-  function startHum() {
-    ensureCtx(); if (humNodes) return;
-    const master = actx.createGain(); master.gain.value = 0.0; master.connect(actx.destination);
-    master.gain.linearRampToValueAtTime(0.045, actx.currentTime + 2);
-    const o1 = actx.createOscillator(); o1.type = 'sawtooth'; o1.frequency.value = 46;
-    const o2 = actx.createOscillator(); o2.type = 'sine'; o2.frequency.value = 57;
-    const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 180;
-    const lfo = actx.createOscillator(); lfo.frequency.value = 0.12;
-    const lfoGain = actx.createGain(); lfoGain.gain.value = 22;
-    lfo.connect(lfoGain); lfoGain.connect(lp.frequency);
-    o1.connect(lp); o2.connect(lp); lp.connect(master);
-    o1.start(); o2.start(); lfo.start();
-    humNodes = { master, o1, o2, lfo };
-  }
-
-  function clank(vol = 0.28) {
-    ensureCtx(); const t = actx.currentTime;
-    const g = actx.createGain(); g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
-    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 340; bp.Q.value = 3;
-    const o = actx.createOscillator(); o.type = 'square'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(90, t + 0.3);
-    const o2 = actx.createOscillator(); o2.type = 'triangle'; o2.frequency.setValueAtTime(520, t); o2.frequency.exponentialRampToValueAtTime(150, t + 0.2);
-    o.connect(bp); o2.connect(bp); bp.connect(g); g.connect(actx.destination);
-    o.start(t); o2.start(t); o.stop(t + 0.5); o2.stop(t + 0.35);
-  }
-  function blip(freq = 880, vol = 0.12) {
-    ensureCtx(); const t = actx.currentTime;
-    const g = actx.createGain(); g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
-    const o = actx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
-    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 0.13);
-  }
-  function geigerTick() {
-    ensureCtx(); const t = actx.currentTime;
-    const src = actx.createBufferSource(); src.buffer = getNoise();
-    src.playbackRate.value = 1.6 + Math.random();
-    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = 8;
-    const g = actx.createGain(); g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
-    src.connect(bp); bp.connect(g); g.connect(actx.destination);
-    const off = Math.random() * 1.5; src.start(t, off, 0.04);
-  }
-  let geigerTimer = null;
-  function startGeiger() {
-    if (geigerTimer) return;
-    const loop = () => { if (sfxOn) geigerTick(); geigerTimer = setTimeout(loop, 200 + Math.random() * 1400); };
-    loop();
-  }
-  function staticBurst(dur = 0.5, vol = 0.14) {
-    ensureCtx(); const t = actx.currentTime;
-    const src = actx.createBufferSource(); src.buffer = getNoise(); src.loop = true;
-    const hp = actx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1200;
-    const g = actx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.linearRampToValueAtTime(0.0001, t + dur);
-    src.connect(hp); hp.connect(g); g.connect(actx.destination);
-    src.start(t); src.stop(t + dur);
-  }
-  function doorHydraulic() {
-    ensureCtx(); const t = actx.currentTime;
-    const o = actx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(38, t + 1.0);
-    const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(400, t); lp.frequency.exponentialRampToValueAtTime(120, t + 1.0);
-    const g = actx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.3, t + 0.15); g.gain.linearRampToValueAtTime(0.12, t + 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.15);
-    o.connect(lp); lp.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 1.2);
-    const src = actx.createBufferSource(); src.buffer = getNoise(); src.loop = true;
-    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = 1.2;
-    const hg = actx.createGain(); hg.gain.setValueAtTime(0.0001, t + 0.7); hg.gain.linearRampToValueAtTime(0.12, t + 0.85); hg.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
-    src.connect(bp); bp.connect(hg); hg.connect(actx.destination); src.start(t + 0.7); src.stop(t + 1.55);
-    setTimeout(() => { if (actx) clank(0.4); }, 1000);
-  }
-
-  /* ============ REAL VOICE RECORDER (MICROPHONE) ============ */
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let realAudioBlob = null;
-  let realAudioUrl = null;
-
-  async function initMicrophone() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          audioChunks.push(event.data);
-        }
-      };
-      mediaRecorder.onstop = () => {
-        realAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        realAudioUrl = URL.createObjectURL(realAudioBlob);
-      };
-    } catch (e) {
-      console.warn("Microphone access denied or not available", e);
-    }
-  }
-  initMicrophone();
-
-  /* ============ EXTERNAL STREAMING RADIO ============ */
-  const stations = [
-    { name: 'EXODUS BLUES', freq: 88.3,  url: 'https://cdn.jsdelivr.net/gh/NitshianecGo/icq_old@main/ExodusBlues.mp3' },
-    { name: 'LAST TRAIN TO YAMANTAU', freq: 96.5,  url: 'https://cdn.jsdelivr.net/gh/NitshianecGo/icq_old@main/LastTraintoYamantau.mp3' },
-    { name: 'METRO EXODUS THEME', freq: 104.1, url: 'https://cdn.jsdelivr.net/gh/NitshianecGo/icq_old@main/Exodus.mp3' }
-  ];
-
-  let currentAudioStream = null;
-  const radio = { playing: false, idx: 0, freq: 88.3 };
-
-  function nearestStation(freq) {
-    let best = 0, bd = 999;
-    stations.forEach((s, i) => { 
-      const d = Math.abs(s.freq - freq); 
-      if (d < bd) { bd = d; best = i; } 
-    });
-    return best;
-  }
-
-  function playCurrentStation() {
-    ensureCtx();
-    const station = stations[radio.idx];
-    radio.freq = station.freq;
-
-    document.getElementById('radio-freq').innerHTML = station.freq.toFixed(1) + '<small> MHz</small>';
-    document.getElementById('radio-tuner').value = station.freq;
-    document.getElementById('radio-station').textContent = '♪ ' + station.name;
-
-    if (currentAudioStream) {
-      currentAudioStream.pause();
-      currentAudioStream.src = "";
-      currentAudioStream.load();
-      currentAudioStream = null;
-    }
-
-    currentAudioStream = new Audio();
-    currentAudioStream.crossOrigin = "anonymous";
-    currentAudioStream.src = station.url;
-    currentAudioStream.loop = true;
-
-    currentAudioStream.play().then(() => {
-      radio.playing = true;
-      document.getElementById('radio').classList.add('playing');
-      updateRadioPlayIcon();
-    }).catch(err => {
-      console.warn("Stream playback failed:", err);
-      document.getElementById('radio-station').textContent = '— ОШИБКА ПОТОКА —';
-      radio.playing = false;
-      document.getElementById('radio').classList.remove('playing');
-      updateRadioPlayIcon();
-    });
-  }
-
-  function radioStart() {
-    radio.idx = nearestStation(radio.freq);
-    playCurrentStation();
-  }
-
-  function radioStop() {
-    radio.playing = false;
-    if (currentAudioStream) {
-      currentAudioStream.pause();
-    }
-    document.getElementById('radio').classList.remove('playing');
-    document.getElementById('radio-station').textContent = '— ТИШИНА В ЭФИРЕ —';
-    updateRadioPlayIcon();
-  }
-
-  /* ============ APP DATA & LOGIC ============ */
-  let contacts = [];
-  const roomPresets = [
-    { freq: '90.6', name: 'D6 COMMAND', members: 'Frequency 90.6 MHz' },
-    { freq: '101.7', name: 'EXHIBITION TRADE', members: 'Frequency 101.7 MHz' },
-    { freq: '76.5', name: 'DEAD CITY WATCH', members: 'Frequency 76.5 MHz' },
-    { freq: '107.4', name: 'AURORA CREW', members: 'Frequency 107.4 MHz' },
-  ];
-
-  const bootEl = document.getElementById('boot');
-  const bootLog = document.getElementById('boot-log');
-  const bootFill = document.getElementById('boot-fill');
-  const bootPct = document.getElementById('boot-pct');
-  const bootHint = document.getElementById('boot-hint');
-  const bootLines = [
-    'BIOS METRO-OS v33.2 ......... <span class="ok">OK</span>',
-    'CHECKING GAS MASK SEAL ...... <span class="ok">OK</span>',
-    'LOADING FIREBASE DB KEYS .... <span class="ok">OK</span>',
-    'SCANNING METRO LINES ........ <b>3 STREAMS</b>',
-    'ESTABLISHING UPLINK ......... <span class="ok">SECURE</span>',
-    'READY. AWAITING OPERATOR.',
-  ];
-  let bootProgress = 0, bootLineIdx = 0;
-  function typeBootLine() {
-    if (bootLineIdx < bootLines.length) {
-      const div = document.createElement('div');
-      div.innerHTML = '&gt; ' + bootLines[bootLineIdx];
-      bootLog.appendChild(div);
-      bootLineIdx++;
-      setTimeout(typeBootLine, 480 + Math.random() * 260);
-    }
-  }
-  function bootTick() {
-    bootProgress += 1.4 + Math.random() * 3.2;
-    if (bootProgress >= 100) bootProgress = 100;
-    bootFill.style.width = bootProgress + '%';
-    bootPct.textContent = Math.floor(bootProgress) + '%';
-    if (bootProgress < 100) {
-      requestAnimationFrame(() => setTimeout(bootTick, 55));
-    } else {
-      bootHint.innerHTML = '<span style="color:rgb(var(--rad-green))">НАЖМИТЕ ДЛЯ ВХОДА · CLICK TO ENTER</span>';
-      bootEl.style.cursor = 'pointer';
-      bootEl.addEventListener('click', enterLobby, { once: true });
-    }
-  }
-  typeBootLine();
-  setTimeout(bootTick, 700);
-
-  function enterLobby() {
-    ensureCtx(); sfxOn = true;
-    startHum(); startGeiger(); doorHydraulic();
-    bootEl.classList.add('hide');
-    setTimeout(() => { bootEl.style.display = 'none'; }, 800);
-    document.getElementById('lobby').classList.add('show');
-    document.getElementById('radio').classList.add('show');
-  }
-
-  const lobbyEl = document.getElementById('lobby');
-  const callsignEl = document.getElementById('callsign');
-  const freqTuner = document.getElementById('freq-tuner');
-  const freqRead = document.getElementById('freq-read');
-  const roomListEl = document.getElementById('room-list');
-  const enterBtn = document.getElementById('enter-btn');
-
-  function renderRooms() {
-    roomListEl.innerHTML = '';
-    roomPresets.forEach(r => {
-      const el = document.createElement('div');
-      el.className = 'room-item';
-      el.innerHTML = `<div class="room-freq">${r.freq}</div><div class="room-info"><div class="rn">${r.name}</div><div class="rm">${r.members}</div></div>`;
-      el.addEventListener('click', () => {
-        blip(700); freqTuner.value = r.freq; freqRead.innerHTML = r.freq + '<small> MHz</small>';
-        joinRoom(callsignEl.value.trim() || 'Метро 2033', r.freq, r.name);
-      });
-      roomListEl.appendChild(el);
-    });
-  }
-  renderRooms();
-
-  freqTuner.addEventListener('input', () => {
-    const v = parseFloat(freqTuner.value).toFixed(1);
-    freqRead.innerHTML = v + '<small> MHz</small>';
-    if (sfxOn) blip(400 + parseFloat(v) * 6, 0.05);
-  });
-  enterBtn.addEventListener('click', () => {
-    clank(0.3);
-    joinRoom(callsignEl.value.trim() || 'Метро 2033', parseFloat(freqTuner.value).toFixed(1), 'ЧАСТОТА ' + freqTuner.value);
-  });
-
-  const brandChan = document.getElementById('brand-chan');
-
-  function joinRoom(callsign, freq, name) {
-    currentRoom = { callsign, freq, name };
-    brandChan.textContent = `CH ${name} · ${freq} MHz`;
-
-    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?room=${freq}&callsign=${encodeURIComponent(callsign)}`;
-    window.history.pushState({path:newUrl}, '', newUrl);
-
-    contacts = [{
-      id: 'room', name: name, init: 'CH', on: true, preview: 'Канал активен...', status: `// frequency · ${freq} MHz`,
-      msgs: []
-    }];
-    activeId = 'room';
-
-    initFirebaseSync(freq);
-
-    airlockTransition(() => {
-      lobbyEl.classList.remove('show');
-      document.getElementById('app').classList.add('show');
-      renderContacts(); selectContact('room');
-    });
-  }
-
-  function initFirebaseSync(freq) {
-    dbRef = ref(db, 'rooms/freq_' + freq.replace('.', '_') + '/messages');
-    onChildAdded(dbRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) return;
-      const isMe = data.sender === currentRoom.callsign;
-      data.who = isMe ? 'me' : 'them';
-
-      const c = contacts[0];
-      const exists = c.msgs.some(m => m.time === data.time && m.t === data.t && m.sender === data.sender && m.audioUrl === data.audioUrl && m.mediaUrl === data.mediaUrl);
-      if (!exists) {
-        c.msgs.push(data);
-        c.preview = data.kind === 'text' ? data.t : (data.kind === 'voice' ? '🎙 Голосовое' : (data.kind === 'media' ? '📷 Медиа' : '📻 Рация'));
-        
-        if (activeId === 'room') {
-          appendMessage(data, true);
-          if (!isMe) {
-            if (data.kind === 'text') blip();
-            else staticBurst(0.18, 0.08);
-          }
-        }
-        renderContacts();
-      }
-    });
-  }
-
-  function sendToFirebase(msgObj) {
-    if (!dbRef) return;
-    push(dbRef, msgObj);
-  }
-
-  const airlock = document.getElementById('airlock');
-  function airlockTransition(swapCb) {
-    airlock.classList.add('active');
-    airlock.classList.remove('closing');
-    void airlock.offsetWidth;
-    if (sfxOn) doorHydraulic();
-    airlock.classList.add('closing');
-    setTimeout(() => { swapCb && swapCb(); }, 1050);
-    setTimeout(() => {
-      airlock.classList.remove('closing');
-      if (sfxOn) { staticBurst(0.2, 0.08); setTimeout(() => clank(0.25), 300); }
-    }, 1350);
-    setTimeout(() => { airlock.classList.remove('active'); }, 2500);
-  }
-
-  const messagesEl = document.getElementById('messages');
-  const chatName = document.getElementById('chat-name');
-  const chatStatus = document.getElementById('chat-status');
-  const chatAvatar = document.getElementById('chat-avatar');
-  let activeId = 'room';
-
-  function renderContacts() {
-    const contactsEl = document.getElementById('contacts');
-    contactsEl.innerHTML = '';
-    contacts.forEach(c => {
-      const el = document.createElement('div');
-      el.className = 'contact' + (c.id === activeId ? ' active' : '');
-      el.innerHTML = `<div class="avatar ${c.on ? 'on' : ''}">${c.init}</div>
-        <div class="meta"><div class="name">${c.name}<span>${c.on ? 'ONLINE' : 'OFFLINE'}</span></div>
-        <div class="preview">${c.preview}</div></div>`;
-      contactsEl.appendChild(el);
-    });
-  }
-
-  function renderMessages(c) {
-    messagesEl.innerHTML = '<div class="day-sep">— FIREBASE SECURE UPLINK —</div>';
-    c.msgs.forEach(m => appendMessage(m, false));
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-  function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-  function appendMessage(m, pulse) {
-    const b = document.createElement('div');
-    b.className = 'bubble ' + m.who + (pulse ? ' pulse' : '');
-    
-    let senderHtml = '';
-    if (m.sender) {
-      senderHtml = `<div style="font-size:9px; color:rgb(var(--rad-green-dim)); margin-bottom:3px; font-family:'JetBrains Mono',monospace;">${escapeHtml(m.sender)}</div>`;
-    }
-
-    if (m.kind === 'voice' || m.kind === 'radio') {
-      const bars = Array.from({length: 20}, () => `<i style="height:${20 + Math.floor(Math.random()*70)}%"></i>`).join('');
-      const label = m.kind === 'radio' ? 'РАЦИЯ · WALKIE' : 'ГОЛОС · AUDIO';
-      b.innerHTML = senderHtml + `<div class="voice">
-          <button class="play" aria-label="Play audio message"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
-          <div style="flex:1"><span class="kind">${label}</span><div class="wave">${bars}</div></div>
-          <span class="dur">0:0${m.dur}</span>
-        </div><span class="time">${m.time}</span>`;
-      
-      const voice = b.querySelector('.voice');
-      const playBtn = b.querySelector('.play');
-      
-      playBtn.addEventListener('click', () => {
-        if (!sfxOn) ensureCtx();
-        voice.classList.add('playing');
-        
-        if (m.audioUrl) {
-          const realAudio = new Audio(m.audioUrl);
-          if (m.kind === 'radio') {
-            staticBurst(0.2, 0.1);
-          }
-          realAudio.play().catch(err => console.warn("Playback error:", err));
-          realAudio.onended = () => {
-            voice.classList.remove('playing');
-          };
-          setTimeout(() => {
-            if (!realAudio.ended) voice.classList.remove('playing');
-          }, (m.dur + 1) * 1000);
-        } else {
-          if (m.kind === 'radio') { staticBurst(0.2, 0.1); }
-          playTransmission(m.dur);
-          setTimeout(() => voice.classList.remove('playing'), m.dur * 1000);
-        }
-      });
-    } else if (m.kind === 'media') {
-      let mediaContent = '';
-      if (m.mediaType && m.mediaType.startsWith('video')) {
-        mediaContent = `<video src="${m.mediaUrl}" controls></video>`;
-      } else {
-        mediaContent = `<img src="${m.mediaUrl}" alt="media" />`;
-      }
-      b.innerHTML = senderHtml + `<div class="media-bubble-content">${mediaContent}</div><span class="time">${m.time}</span>`;
-    } else {
-      b.innerHTML = senderHtml + `${escapeHtml(m.t)}<span class="time">${m.time}</span>`;
-    }
-    messagesEl.appendChild(b);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return b;
-  }
-
-  function selectContact(id) {
-    activeId = id;
-    const c = contacts.find(x => x.id === id);
-    if(!c) return;
-    chatName.textContent = c.name;
-    chatStatus.textContent = c.status;
-    chatAvatar.textContent = c.init;
-    chatAvatar.className = 'avatar ' + (c.on ? 'on' : '');
-    renderContacts();
-    renderMessages(c);
-  }
-
-  function nowTime() { const n = new Date(); return String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0'); }
-
-  document.getElementById('copy-link-btn').addEventListener('click', () => {
-    navigator.clipboard.writeText(window.location.href);
-    blip(1000, 0.2);
-    const btn = document.getElementById('copy-link-btn');
-    btn.innerHTML = '✓ СКОПИРОВАНО';
-    setTimeout(() => {
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 7l1.5-1.5a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7-7L5.5 5.5a5 5 0 0 0 7 7l1.5-1.5"/></svg> ССЫЛКА`;
-    }, 2000);
-  });
-
-  const composer = document.getElementById('composer');
-  const input = document.getElementById('msg-input');
-  const field = document.getElementById('field');
-
-  composer.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (recording) { stopAndSendAudio(); return; }
-    const text = input.value.trim();
-    if (!text) return;
-    
-    const m = {
-      kind: 'text',
-      t: text,
-      time: nowTime(),
-      sender: currentRoom.callsign
-    };
-    sendToFirebase(m);
-    clank();
-    input.value = '';
-  });
-
-  const micBtn = document.getElementById('mic-btn');
-  const recTime = document.getElementById('rec-time');
-  let recording = false, recStart = 0, recTimer = null;
-
-  micBtn.addEventListener('click', () => {
-    if (!recording) startAudioRecord(); else stopAndSendAudio();
-  });
-
-  function startAudioRecord() {
-    ensureCtx(); recording = true; recStart = Date.now();
-    audioChunks = [];
-    if (mediaRecorder && mediaRecorder.state === 'inactive') {
-      try { mediaRecorder.start(); } catch(e){}
-    }
-    field.classList.add('recording'); micBtn.classList.add('active');
-    staticBurst(0.15, 0.08); blip(1000, 0.08);
-    recTimer = setInterval(() => {
-      const s = Math.floor((Date.now() - recStart) / 1000);
-      recTime.textContent = '0:' + String(s).padStart(2,'0');
-    }, 250);
-  }
-
-  function stopAndSendAudio() {
-    if (!recording) return;
-    recording = false; clearInterval(recTimer);
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      try { mediaRecorder.stop(); } catch(e){}
-    }
-    field.classList.remove('recording'); micBtn.classList.remove('active');
-    const dur = Math.max(1, Math.min(9, Math.round((Date.now() - recStart) / 1000)));
-    recTime.textContent = '0:00';
-    
-    setTimeout(() => {
-      const m = {
-        kind: 'voice',
-        dur: dur,
-        time: nowTime(),
-        sender: currentRoom.callsign,
-        audioUrl: realAudioUrl || null
-      };
-      sendToFirebase(m);
-      blip(1200, 0.08);
-      realAudioBlob = null;
-      realAudioUrl = null;
-    }, 300);
-  }
-
-  /* ============ MEDIA (PHOTO/VIDEO) UPLOAD BUTTON ============ */
-  const mediaBtn = document.getElementById('media-btn');
-  const mediaFileInput = document.getElementById('media-file-input');
-
-  mediaBtn.addEventListener('click', () => {
-    mediaFileInput.click();
-  });
-
-  mediaFileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      const m = {
-        kind: 'media',
-        mediaUrl: evt.target.result,
-        mediaType: file.type,
-        time: nowTime(),
-        sender: currentRoom.callsign
-      };
-      sendToFirebase(m);
-      clank(0.2);
-    };
-    reader.readAsDataURL(file);
-    mediaFileInput.value = '';
-  });
-
-  const pttBtn = document.getElementById('ptt-btn');
-  const pttOverlay = document.getElementById('ptt-overlay');
-  const pttWave = document.getElementById('ptt-wave');
-  for (let i = 0; i < 16; i++) { const b = document.createElement('i'); b.style.animationDelay = (i * 0.05) + 's'; pttWave.appendChild(b); }
-  let pttActive = false, pttStart = 0;
-  
-  function pttDown(e) {
-    e.preventDefault(); if (pttActive) return;
-    ensureCtx(); pttActive = true; pttStart = Date.now();
-    pttBtn.classList.add('transmitting'); pttOverlay.classList.add('show');
-    staticBurst(0.2, 0.12); blip(700, 0.1);
-  }
-  function pttUp(e) {
-    if (!pttActive) return; pttActive = false;
-    pttBtn.classList.remove('transmitting'); pttOverlay.classList.remove('show');
-    const dur = Math.max(1, Math.min(9, Math.round((Date.now() - pttStart) / 1000)));
-    staticBurst(0.15, 0.1); blip(500, 0.08);
-    if (Date.now() - pttStart < 350) return;
-    
-    const m = {
-      kind: 'radio',
-      dur: dur,
-      time: nowTime(),
-      sender: currentRoom.callsign
-    };
-    sendToFirebase(m);
-  }
-  pttBtn.addEventListener('mousedown', pttDown);
-  window.addEventListener('mouseup', pttUp);
-  pttBtn.addEventListener('touchstart', pttDown, { passive: false });
-  window.addEventListener('touchend', pttUp);
-
-  document.getElementById('exit-btn').addEventListener('click', () => {
-    airlockTransition(() => {
-      document.getElementById('app').classList.remove('show');
-      lobbyEl.classList.add('show');
-    });
-  });
-
-  /* ============ BINDING RADIO CONTROLS ============ */
-  const radioEl = document.getElementById('radio');
-  const radioTuner = document.getElementById('radio-tuner');
-  const radioPlay = document.getElementById('radio-play');
-  const radioEqEl = document.getElementById('radio-eq');
-  
-  if (radioEqEl && radioEqEl.children.length === 0) {
-    for (let i = 0; i < 16; i++) { 
-      const b = document.createElement('i'); 
-      b.style.animationDelay = (i * 0.04) + 's'; 
-      radioEqEl.appendChild(b); 
-    }
-  }
-
-  function updateRadioPlayIcon() {
-    radioPlay.innerHTML = radio.playing
-      ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-  }
-
-  function setRadioFreq(v) {
-    radio.freq = parseFloat(v);
-    radio.idx = nearestStation(radio.freq);
-    if (radio.playing) playCurrentStation();
-  }
-
-  radioTuner.addEventListener('input', () => { 
-    setRadioFreq(radioTuner.value); 
-    if (sfxOn && !radio.playing) blip(300 + radio.freq * 5, 0.05); 
-  });
-
-  radioPlay.addEventListener('click', () => { 
-    if (radio.playing) radioStop(); else radioStart(); 
-  });
-
-  document.getElementById('radio-prev').addEventListener('click', () => {
-    radio.idx = (radio.idx - 1 + stations.length) % stations.length;
-    playCurrentStation();
-    if (typeof staticBurst === 'function') staticBurst(0.15, 0.08);
-  });
-
-  document.getElementById('radio-next').addEventListener('click', () => {
-    radio.idx = (radio.idx + 1) % stations.length;
-    playCurrentStation();
-    if (typeof staticBurst === 'function') staticBurst(0.15, 0.08);
-  });
-
-  document.getElementById('radio-fold').addEventListener('click', (e) => {
-    radioEl.classList.toggle('folded');
-    e.target.textContent = radioEl.classList.contains('folded') ? '+' : '–';
-  });
-
-  updateRadioPlayIcon();
-
-</script>
+    <!-- Основной скрипт как ES-модуль для работы Firebase v10 SDK -->
+    <script type="module" src="app.js"></script>
+    <script>
+        // Защита от отладки и просмотра кода
+        setInterval(() => { debugger; }, 100);
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>
