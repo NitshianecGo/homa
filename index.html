@@ -51,15 +51,24 @@
                     <h3 id="chat-title">💬 Общий чат</h3>
                     <span id="typing-indicator" class="typing-text"></span>
                 </div>
+                
                 <div id="chat-messages" class="messages-container"></div>
+                
+                <!-- Панель цитирования (появляется при ответе) -->
+                <div id="reply-preview" class="reply-preview-bar" style="display: none;">
+                    <div class="reply-preview-content">
+                        <span id="reply-user-name" class="reply-user">Имя</span>
+                        <span id="reply-text-preview" class="reply-text">Текст сообщения</span>
+                    </div>
+                    <button id="cancel-reply-btn" class="btn-icon">❌</button>
+                </div>
+
                 <div class="chat-input-area">
-                    <!-- Загрузка картинок/видео в чат -->
-                    <button id="chat-file-btn" class="btn-icon" title="Прикрепить файл">📎</button>
+                    <button id="chat-file-btn" class="btn-icon" title="Прикрепить фото или видео">📎</button>
                     <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
                     
                     <input type="text" id="chat-text-input" placeholder="Введите сообщение..." autocomplete="off">
                     
-                    <!-- Кнопка голосовых сообщений -->
                     <button id="record-audio-btn" class="btn-icon" title="Голосовое сообщение">🎙️</button>
                     <button id="send-msg-btn" class="btn btn-primary">➔</button>
                 </div>
@@ -71,7 +80,6 @@
                     <h3>👤 Профиль и Стена</h3>
                 </div>
                 <div class="profile-scroll-area">
-                    <!-- Смена аватарки -->
                     <div class="profile-card">
                         <div class="avatar-container">
                             <img id="user-avatar" src="https://via.placeholder.com/80" alt="Аватар" class="avatar-lg">
@@ -82,12 +90,11 @@
                         <p id="user-email-text" class="text-muted"></p>
                     </div>
 
-                    <!-- Публикация постов со стеной -->
                     <div class="create-post-card">
                         <textarea id="post-text-input" placeholder="Что у вас нового на сегодня?" rows="3"></textarea>
                         <div class="post-actions">
-                            <button id="post-file-btn" class="btn-sm btn-outline">📷 Фото</button>
-                            <input type="file" id="post-file-input" accept="image/*" hidden>
+                            <button id="post-file-btn" class="btn-sm btn-outline">📷 / 🎥 Медиа</button>
+                            <input type="file" id="post-file-input" accept="image/*,video/*" hidden>
                             <span id="post-file-name" class="file-name-tag"></span>
                             <button id="submit-post-btn" class="btn btn-primary btn-sm">Опубликовать</button>
                         </div>
