@@ -222,7 +222,6 @@ function loadMessages(targetId) {
             const bubble = document.createElement('div');
             bubble.className = `msg-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
             
-            // Клик для цитирования сообщения
             bubble.onclick = () => {
                 replyTargetMessage = msg;
                 document.getElementById('reply-user-name').innerText = msg.senderName || 'Пользователь';
@@ -246,15 +245,10 @@ function loadMessages(targetId) {
             } else if (msg.type === 'video') {
                 body = `<video src="${msg.content}" controls class="chat-media-video"></video>`;
             } else if (msg.type === 'audio') {
-                const uniqueAudioId = `audio_${msgKey}`;
+                // Исправленный HTML5 аудиоплеер
                 body = `
-                    <div class="audio-player-custom">
-                        <button class="audio-play-btn" onclick="event.stopPropagation(); window.toggleAudioPlay('${uniqueAudioId}')">▶</button>
-                        <div class="audio-track" onclick="event.stopPropagation(); window.seekAudio('${uniqueAudioId}', event)">
-                            <div id="progress_${uniqueAudioId}" class="audio-progress"></div>
-                        </div>
-                        <span id="time_${uniqueAudioId}" class="audio-time">0:00</span>
-                        <audio id="${uniqueAudioId}" src="${msg.content}" preload="metadata" style="display:none;"></audio>
+                    <div class="audio-player-container" style="padding: 4px 0;">
+                        <audio src="${msg.content}" controls preload="metadata" style="max-width: 210px; height: 40px; border-radius: 20px;"></audio>
                     </div>
                 `;
             }
@@ -267,73 +261,12 @@ function loadMessages(targetId) {
             const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
             bubble.innerHTML = `${quoteHTML}${body} <div class="msg-meta">${timeStr} ${checkMark}</div>`;
             container.appendChild(bubble);
-
-            // Инициализация кастомного аудиоплеера
-            if (msg.type === 'audio') {
-                setTimeout(() => initAudioPlayerEvents(`audio_${msgKey}`), 50);
-            }
         });
         container.scrollTop = container.scrollHeight;
     });
 }
 
-// 3. АУДИОСООБЩЕНИЯ С ПАУЗОЙ И ТАЙМЕРОМ
-window.toggleAudioPlay = function(audioId) {
-    const audio = document.getElementById(audioId);
-    if (!audio) return;
-    const playBtn = audio.parentElement.querySelector('.audio-play-btn');
-
-    // Остановка всех остальных плееров
-    document.querySelectorAll('audio').forEach(a => {
-        if (a.id !== audioId && !a.paused) {
-            a.pause();
-            const btn = a.parentElement.querySelector('.audio-play-btn');
-            if (btn) btn.innerText = '▶';
-        }
-    });
-
-    if (audio.paused) {
-        audio.play();
-        playBtn.innerText = '⏸';
-    } else {
-        audio.pause();
-        playBtn.innerText = '▶';
-    }
-};
-
-window.seekAudio = function(audioId, e) {
-    const audio = document.getElementById(audioId);
-    if (!audio || !audio.duration) return;
-    const track = e.currentTarget;
-    const rect = track.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = pos * audio.duration;
-};
-
-function initAudioPlayerEvents(audioId) {
-    const audio = document.getElementById(audioId);
-    if (!audio) return;
-    const progress = document.getElementById(`progress_${audioId}`);
-    const timeDisplay = document.getElementById(`time_${audioId}`);
-
-    audio.ontimeupdate = () => {
-        if (audio.duration) {
-            const pct = (audio.currentTime / audio.duration) * 100;
-            if (progress) progress.style.width = `${pct}%`;
-            
-            const mins = Math.floor(audio.currentTime / 60);
-            const secs = Math.floor(audio.currentTime % 60);
-            if (timeDisplay) timeDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-    };
-
-    audio.onended = () => {
-        if (progress) progress.style.width = '0%';
-        const playBtn = audio.parentElement.querySelector('.audio-play-btn');
-        if (playBtn) playBtn.innerText = '▶';
-    };
-}
-
+// 3. ИСПРАВЛЕННАЯ ЗАПИСЬ И ОТПРАВКА ГОЛОСОВЫХ СООБЩЕНИЙ (iOS & ANDROID)
 const recordBtn = document.getElementById('record-audio-btn');
 recordBtn.addEventListener('click', async () => {
     if (!isRecording) {
@@ -342,14 +275,19 @@ recordBtn.addEventListener('click', async () => {
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
 
-            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) audioChunks.push(e.data);
+            };
 
             mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const mimeType = mediaRecorder.mimeType || 'audio/mp4';
+                const audioBlob = new Blob(audioChunks, { type: mimeType });
                 const reader = new FileReader();
+                
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = () => {
                     const base64Audio = reader.result;
+
                     push(ref(db, `messages/${currentChatTarget}`), {
                         sender: currentUser.uid,
                         senderName: currentUser.email.split('@')[0],
@@ -414,7 +352,7 @@ async function fileToBase64(file, maxWidth = 800) {
     });
 }
 
-// 4. ОТПРАВКА МЕДИСФАЙЛОВ В ЧАТ (ПК И СМАРТФОН)
+// 4. ОТПРАВКА МЕДИАСФАЙЛОВ В ЧАТ (ПК И СМАРТФОН)
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -506,7 +444,6 @@ function loadPosts() {
                 }
             }
 
-            // Кнопка УДАЛИТЬ только для создателя поста
             let deleteBtn = isMyPost ? `<button class="btn-delete-post" onclick="window.deletePost('${key}')">🗑️ Удалить</button>` : '';
 
             item.innerHTML = `
