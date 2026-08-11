@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Приватный Чат & Соцсеть</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
@@ -37,6 +37,7 @@
         </header>
 
         <main class="layout-container">
+            <!-- КОНТАКТЫ -->
             <section id="panel-contacts" class="panel active">
                 <div class="panel-header">
                     <h3>👥 Участники</h3>
@@ -44,6 +45,7 @@
                 <div id="contacts-list" class="list-container"></div>
             </section>
 
+            <!-- ЧАТ -->
             <section id="panel-chat" class="panel">
                 <div class="panel-header">
                     <h3 id="chat-title">💬 Общий чат</h3>
@@ -51,36 +53,40 @@
                 </div>
                 <div id="chat-messages" class="messages-container"></div>
                 <div class="chat-input-area">
-                    <label for="chat-file-input" class="btn-icon" title="Прикрепить файл">📎</label>
+                    <!-- Загрузка картинок/видео в чат -->
+                    <button id="chat-file-btn" class="btn-icon" title="Прикрепить файл">📎</button>
                     <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
                     
                     <input type="text" id="chat-text-input" placeholder="Введите сообщение..." autocomplete="off">
                     
+                    <!-- Кнопка голосовых сообщений -->
                     <button id="record-audio-btn" class="btn-icon" title="Голосовое сообщение">🎙️</button>
                     <button id="send-msg-btn" class="btn btn-primary">➔</button>
                 </div>
             </section>
 
+            <!-- ПРОФИЛЬ И СТЕНА -->
             <section id="panel-profile" class="panel">
                 <div class="panel-header">
                     <h3>👤 Профиль и Стена</h3>
                 </div>
                 <div class="profile-scroll-area">
-                    <!-- Блок смены аватарки -->
+                    <!-- Смена аватарки -->
                     <div class="profile-card">
                         <div class="avatar-container">
                             <img id="user-avatar" src="https://via.placeholder.com/80" alt="Аватар" class="avatar-lg">
-                            <label for="avatar-file-input" class="avatar-edit-badge" title="Сменить аватар">📷</label>
+                            <button id="avatar-edit-btn" class="avatar-edit-badge" title="Сменить аватар">📷</button>
                             <input type="file" id="avatar-file-input" accept="image/*" hidden>
                         </div>
                         <h4 id="user-display-name">Загрузка...</h4>
                         <p id="user-email-text" class="text-muted"></p>
                     </div>
 
+                    <!-- Публикация постов со стеной -->
                     <div class="create-post-card">
                         <textarea id="post-text-input" placeholder="Что у вас нового на сегодня?" rows="3"></textarea>
                         <div class="post-actions">
-                            <label for="post-file-input" class="btn-sm">📷 Фото</label>
+                            <button id="post-file-btn" class="btn-sm btn-outline">📷 Фото</button>
                             <input type="file" id="post-file-input" accept="image/*" hidden>
                             <span id="post-file-name" class="file-name-tag"></span>
                             <button id="submit-post-btn" class="btn btn-primary btn-sm">Опубликовать</button>
@@ -97,6 +103,7 @@
                             <button id="req-cam-btn" class="btn btn-outline btn-sm">📷 Доступ к камере</button>
                             <button id="req-notif-btn" class="btn btn-outline btn-sm">🔔 Разрешить Push</button>
                         </div>
+                        <br>
                         <button id="logout-btn" class="btn btn-danger full-width">🚪 Выйти из аккаунта</button>
                     </div>
                 </div>
@@ -120,14 +127,5 @@
     </div>
 
     <script type="module" src="app.js"></script>
-    <script>
-        setInterval(() => { debugger; }, 100);
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'u')) {
-                e.preventDefault();
-            }
-        });
-    </script>
 </body>
 </html>
