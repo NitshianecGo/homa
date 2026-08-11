@@ -254,10 +254,10 @@ function loadMessages(targetId) {
             } else if (msg.type === 'video') {
                 body = `<video src="${msg.content}" controls class="chat-media-video"></video>`;
             } else if (msg.type === 'audio') {
-                // Воспроизведение прямого аудиопотока без перекодировок
+                // Адаптированный аудиоплеер с поддержкой iOS Safari Safari Touch Unlocking
                 body = `
                     <div class="audio-player-container" style="padding: 4px 0;">
-                        <audio src="${msg.content}" controls preload="metadata" style="max-width: 210px; height: 40px; border-radius: 20px;"></audio>
+                        <audio src="${msg.content}" controls playsinline preload="metadata" style="max-width: 210px; height: 40px; border-radius: 20px;"></audio>
                     </div>
                 `;
             }
@@ -275,31 +275,60 @@ function loadMessages(targetId) {
     });
 }
 
-// 3. ПРЯМАЯ ЗАПИСЬ И МГНОВЕННАЯ ОТПРАВКА ГОЛОСОВЫХ БЕЗ ШИФРОВАНИЯ И КОДИРОВАНИЯ В BASE64
+// 3. АДАПТИРОВАННАЯ ЗАПИСЬ ГОЛОСОВЫХ ДЛЯ iOS SAFARI & PWA
 const recordBtn = document.getElementById('record-audio-btn');
+
+// Определение лучшего формата записи для устройства
+function getSupportedMimeType() {
+    const types = [
+        'audio/mp4',
+        'audio/aac',
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg'
+    ];
+    for (let type of types) {
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
+            return type;
+        }
+    }
+    return '';
+}
+
 recordBtn.addEventListener('click', async () => {
     if (!isRecording) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
+            const mimeType = getSupportedMimeType();
+            
+            mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
             audioChunks = [];
 
             mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) audioChunks.push(e.data);
+                if (e.data && e.data.size > 0) audioChunks.push(e.data);
             };
 
             mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/mp4' });
-                const audioUrl = URL.createObjectURL(audioBlob);
+                const finalMime = mediaRecorder.mimeType || 'audio/mp4';
+                const audioBlob = new Blob(audioChunks, { type: finalMime });
+                
+                // Конвертируем в надежную компактную DataURL для передачи
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const audioDataUrl = reader.result;
+                    push(ref(db, `messages/${currentChatTarget}`), {
+                        sender: currentUser.uid,
+                        senderName: currentUser.email.split('@')[0],
+                        type: 'audio',
+                        content: audioDataUrl,
+                        timestamp: serverTimestamp(),
+                        read: false
+                    });
+                };
 
-                push(ref(db, `messages/${currentChatTarget}`), {
-                    sender: currentUser.uid,
-                    senderName: currentUser.email.split('@')[0],
-                    type: 'audio',
-                    content: audioUrl,
-                    timestamp: serverTimestamp(),
-                    read: false
-                });
+                // Отключаем микрофон после записи
+                stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorder.start();
@@ -307,10 +336,12 @@ recordBtn.addEventListener('click', async () => {
             recordBtn.innerText = '🛑';
             recordBtn.style.color = 'var(--danger)';
         } catch (err) {
-            alert('Ошибка доступа к микрофону: ' + err.message);
+            alert('Для записи разрешите доступ к микрофону в настройках Safari / iOS');
         }
     } else {
-        mediaRecorder.stop();
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
         isRecording = false;
         recordBtn.innerText = '🎙️';
         recordBtn.style.color = 'var(--text-primary)';
@@ -322,7 +353,7 @@ document.getElementById('chat-file-btn').addEventListener('click', () => documen
 document.getElementById('avatar-edit-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());
 document.getElementById('post-file-btn').addEventListener('click', () => document.getElementById('post-file-input').click());
 
-// ЧТЕНИЕ И МИНИМИЗАЦИЯ ФОТО ДЛЯ СТЕНЫ И АВАТАРКИ
+// ЧТЕНИЕ И СЖАТИЕ ФОТО ДЛЯ СТЕНЫ И АВАТАРКИ
 async function fileToBase64(file, maxWidth = 800) {
     return new Promise((resolve, reject) => {
         if (file.type.startsWith('video/')) {
@@ -355,19 +386,19 @@ async function fileToBase64(file, maxWidth = 800) {
     });
 }
 
-// 4. ОТПРАВКА МЕДИАФАЙЛОВ В ЧАТ
+// 4. ОТПРАВКА МЕДИАТЕКИ В ЧАТ
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
     try {
         const isVideo = file.type.startsWith('video/');
-        const mediaUrl = URL.createObjectURL(file);
+        const mediaData = await fileToBase64(file, 800);
 
         push(ref(db, `messages/${currentChatTarget}`), {
             sender: currentUser.uid,
             senderName: currentUser.email.split('@')[0],
             type: isVideo ? 'video' : 'image',
-            content: mediaUrl,
+            content: mediaData,
             timestamp: serverTimestamp(),
             read: false
         });
