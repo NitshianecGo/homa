@@ -24,6 +24,15 @@ let isRecording = false;
 let typingTimeout = null;
 let replyTargetMessage = null;
 
+// ФИКС ДИНАМИЧЕСКОЙ ВЫСОТЫ ЭКРАНА SAFARI
+function fixIOSHeight() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+window.addEventListener('resize', fixIOSHeight);
+window.addEventListener('orientationchange', fixIOSHeight);
+fixIOSHeight();
+
 // АВТОРИЗАЦИЯ
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -245,7 +254,7 @@ function loadMessages(targetId) {
             } else if (msg.type === 'video') {
                 body = `<video src="${msg.content}" controls class="chat-media-video"></video>`;
             } else if (msg.type === 'audio') {
-                // Исправленный HTML5 аудиоплеер
+                // Воспроизведение прямого аудиопотока без перекодировок
                 body = `
                     <div class="audio-player-container" style="padding: 4px 0;">
                         <audio src="${msg.content}" controls preload="metadata" style="max-width: 210px; height: 40px; border-radius: 20px;"></audio>
@@ -266,7 +275,7 @@ function loadMessages(targetId) {
     });
 }
 
-// 3. ИСПРАВЛЕННАЯ ЗАПИСЬ И ОТПРАВКА ГОЛОСОВЫХ СООБЩЕНИЙ (iOS & ANDROID)
+// 3. ПРЯМАЯ ЗАПИСЬ И МГНОВЕННАЯ ОТПРАВКА ГОЛОСОВЫХ БЕЗ ШИФРОВАНИЯ И КОДИРОВАНИЯ В BASE64
 const recordBtn = document.getElementById('record-audio-btn');
 recordBtn.addEventListener('click', async () => {
     if (!isRecording) {
@@ -280,23 +289,17 @@ recordBtn.addEventListener('click', async () => {
             };
 
             mediaRecorder.onstop = () => {
-                const mimeType = mediaRecorder.mimeType || 'audio/mp4';
-                const audioBlob = new Blob(audioChunks, { type: mimeType });
-                const reader = new FileReader();
-                
-                reader.readAsDataURL(audioBlob);
-                reader.onloadend = () => {
-                    const base64Audio = reader.result;
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/mp4' });
+                const audioUrl = URL.createObjectURL(audioBlob);
 
-                    push(ref(db, `messages/${currentChatTarget}`), {
-                        sender: currentUser.uid,
-                        senderName: currentUser.email.split('@')[0],
-                        type: 'audio',
-                        content: base64Audio,
-                        timestamp: serverTimestamp(),
-                        read: false
-                    });
-                };
+                push(ref(db, `messages/${currentChatTarget}`), {
+                    sender: currentUser.uid,
+                    senderName: currentUser.email.split('@')[0],
+                    type: 'audio',
+                    content: audioUrl,
+                    timestamp: serverTimestamp(),
+                    read: false
+                });
             };
 
             mediaRecorder.start();
@@ -319,7 +322,7 @@ document.getElementById('chat-file-btn').addEventListener('click', () => documen
 document.getElementById('avatar-edit-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());
 document.getElementById('post-file-btn').addEventListener('click', () => document.getElementById('post-file-input').click());
 
-// ФУНКЦИЯ ЧТЕНИЯ И КОНВЕРТАЦИИ В BASE64 ДЛЯ ФОТО И ВИДЕО
+// ЧТЕНИЕ И МИНИМИЗАЦИЯ ФОТО ДЛЯ СТЕНЫ И АВАТАРКИ
 async function fileToBase64(file, maxWidth = 800) {
     return new Promise((resolve, reject) => {
         if (file.type.startsWith('video/')) {
@@ -352,19 +355,19 @@ async function fileToBase64(file, maxWidth = 800) {
     });
 }
 
-// 4. ОТПРАВКА МЕДИАСФАЙЛОВ В ЧАТ (ПК И СМАРТФОН)
+// 4. ОТПРАВКА МЕДИАФАЙЛОВ В ЧАТ
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
     try {
         const isVideo = file.type.startsWith('video/');
-        const base64Content = await fileToBase64(file, 800);
+        const mediaUrl = URL.createObjectURL(file);
 
         push(ref(db, `messages/${currentChatTarget}`), {
             sender: currentUser.uid,
             senderName: currentUser.email.split('@')[0],
             type: isVideo ? 'video' : 'image',
-            content: base64Content,
+            content: mediaUrl,
             timestamp: serverTimestamp(),
             read: false
         });
