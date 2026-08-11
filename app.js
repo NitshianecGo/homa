@@ -3,9 +3,9 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 import { getDatabase, ref, set, push, onValue, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// Конфигурация Firebase
+// Ваши интегрированные ключи Firebase:
 const firebaseConfig = {
-    apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
+  apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
   authDomain: "homa-27efb.firebaseapp.com",
   databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
   projectId: "homa-27efb",
@@ -23,7 +23,7 @@ let currentUser = null;
 let currentChatTarget = 'global';
 let selectedPostImage = null;
 
-// ИНИЦИАЛИЗАЦИЯ И АВТОРИЗАЦИЯ
+// АВТОРИЗАЦИЯ
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
@@ -48,7 +48,7 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
 
 document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-// СИСТЕМА ОНЛАЙН СТАТУСА (PRESENCE)
+// ОНЛАЙН СТАТУС
 function setupPresence(uid) {
     const userStatusRef = ref(db, `/status/${uid}`);
     const connectedRef = ref(db, '.info/connected');
@@ -61,7 +61,7 @@ function setupPresence(uid) {
     });
 }
 
-// ИНИЦИАЛИЗАЦИЯ ДАННЫХ ПРИЛОЖЕНИЯ
+// ИНИЦИАЛИЗАЦИЯ
 function initAppData() {
     loadContacts();
     loadMessages('global');
@@ -69,16 +69,23 @@ function initAppData() {
     
     document.getElementById('user-email-text').innerText = currentUser.email;
     document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
+
+    // Загрузка аватарки текущего пользователя
+    onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
+        const userData = snapshot.val();
+        if (userData && userData.avatar) {
+            document.getElementById('user-avatar').src = userData.avatar;
+        }
+    });
 }
 
-// 1. КОНТАКТЫ
+// КОНТАКТЫ
 function loadContacts() {
     onValue(ref(db, 'users'), (snapshot) => {
         const container = document.getElementById('contacts-list');
         container.innerHTML = '';
         const users = snapshot.val() || {};
         
-        // Добавляем Общий Чат
         const globalChatDiv = document.createElement('div');
         globalChatDiv.className = 'contact-item';
         globalChatDiv.innerHTML = `<strong>📢 Общий Чат</strong>`;
@@ -100,7 +107,6 @@ function loadContacts() {
             div.onclick = () => switchChat(uid, u.name || u.email);
             container.appendChild(div);
 
-            // Отслеживание статусов пользователей
             onValue(ref(db, `/status/${uid}`), (sSnap) => {
                 const st = sSnap.val();
                 const el = document.getElementById(`status-${uid}`);
@@ -112,7 +118,7 @@ function loadContacts() {
     });
 }
 
-// 2. ЧАТ И СООБЩЕНИЯ
+// ЧАТ
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
     document.getElementById('chat-title').innerText = title;
@@ -129,8 +135,7 @@ function sendTextMessage() {
     const text = input.value.trim();
     if(!text) return;
 
-    const msgRef = ref(db, `messages/${currentChatTarget}`);
-    push(msgRef, {
+    push(ref(db, `messages/${currentChatTarget}`), {
         sender: currentUser.uid,
         type: 'text',
         content: text,
@@ -163,7 +168,7 @@ function loadMessages(targetId) {
     });
 }
 
-// УТИЛИТА: Клиентское сжатие картинок в WebP
+// СЖАТИЕ ИЗОБРАЖЕНИЙ В WebP
 async function compressImage(file, maxWidth, quality) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -189,7 +194,31 @@ async function compressImage(file, maxWidth, quality) {
     });
 }
 
-// Отправка изображений в чат
+// СМЕНА АВАТАРКИ
+document.getElementById('avatar-file-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentUser) return;
+
+    try {
+        const compressedAvatar = await compressImage(file, 150, 0.8);
+        const avatarStorageRef = storageRef(storage, `avatars/${currentUser.uid}.webp`);
+        await uploadBytes(avatarStorageRef, compressedAvatar);
+        const downloadURL = await getDownloadURL(avatarStorageRef);
+
+        await set(ref(db, `users/${currentUser.uid}`), {
+            name: currentUser.email.split('@')[0],
+            email: currentUser.email,
+            avatar: downloadURL
+        });
+
+        document.getElementById('user-avatar').src = downloadURL;
+        alert('Аватар успешно обновлен!');
+    } catch (err) {
+        alert('Ошибка смены аватарки: ' + err.message);
+    }
+});
+
+// ОТПРАВКА ИЗОБРАЖЕНИЙ В ЧАТ
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -208,7 +237,7 @@ document.getElementById('chat-file-input').addEventListener('change', async (e) 
     });
 });
 
-// 3. СТЕНА ПОСТОВ
+// СТЕНА ПОСТОВ
 document.getElementById('post-file-input').addEventListener('change', (e) => {
     selectedPostImage = e.target.files[0];
     document.getElementById('post-file-name').innerText = selectedPostImage ? selectedPostImage.name : '';
@@ -220,7 +249,6 @@ document.getElementById('submit-post-btn').addEventListener('click', async () =>
 
     let mediaUrl = '';
     if(selectedPostImage) {
-        // Ультра-сжатие до 800px WebP для постов
         const compressed = await compressImage(selectedPostImage, 800, 0.6);
         const pRef = storageRef(storage, `posts/${Date.now()}.webp`);
         await uploadBytes(pRef, compressed);
@@ -272,16 +300,13 @@ window.likePost = function(postKey) {
     set(likeRef, true);
 };
 
-// 4. НАСТРОЙКИ И ИНТЕРФЕЙС
-// Переключение темы
+// НАСТРОЙКИ
 document.getElementById('theme-toggle').addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
 });
 
-// Масштаб шрифта
 let fontSize = 100;
 document.getElementById('font-inc').addEventListener('click', () => changeFontSize(10));
 document.getElementById('font-dec').addEventListener('click', () => changeFontSize(-10));
@@ -292,26 +317,20 @@ function changeFontSize(delta) {
     document.getElementById('font-size-val').innerText = `${fontSize}%`;
 }
 
-// Запросы разрешений браузера
+// РАЗРЕШЕНИЯ
 document.getElementById('req-mic-btn').addEventListener('click', () => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(() => alert('Микрофон разрешен!'))
-        .catch(err => alert('Ошибка доступа: ' + err.message));
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => alert('Микрофон разрешен!'));
 });
-
 document.getElementById('req-cam-btn').addEventListener('click', () => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(() => alert('Камера разрешена!'))
-        .catch(err => alert('Ошибка доступа: ' + err.message));
+    navigator.mediaDevices.getUserMedia({ video: true }).then(() => alert('Камера разрешена!'));
 });
-
 document.getElementById('req-notif-btn').addEventListener('click', () => {
     Notification.requestPermission().then(perm => alert('Статус уведомлений: ' + perm));
 });
 
-// Навигация Нижней панели (Мобильный режим)
+// МОБИЛЬНАЯ НАВИГАЦИЯ
 document.querySelectorAll('.bottom-nav .nav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
         const target = btn.getAttribute('data-target');
         document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -321,7 +340,6 @@ document.querySelectorAll('.bottom-nav .nav-btn').forEach(btn => {
     });
 });
 
-// Регистрация Service Worker для PWA
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(console.error);
 }
