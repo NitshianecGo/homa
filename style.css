@@ -1,345 +1,507 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, set, push, onValue, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
-  authDomain: "homa-27efb.firebaseapp.com",
-  databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
-  projectId: "homa-27efb",
-  messagingSenderId: "365610803694",
-  appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-let currentUser = null;
-let currentChatTarget = 'global';
-let selectedPostImage = null;
-
-// АВТОРИЗАЦИЯ
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUser = user;
-        document.getElementById('auth-screen').classList.remove('active');
-        document.getElementById('app-screen').classList.add('active');
-        setupPresence(user.uid);
-        initAppData();
-    } else {
-        currentUser = null;
-        document.getElementById('app-screen').classList.remove('active');
-        document.getElementById('auth-screen').classList.add('active');
-    }
-});
-
-document.getElementById('login-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, email, pass)
-        .catch(err => document.getElementById('auth-error').innerText = "Ошибка входа: " + err.message);
-});
-
-document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-
-// ОНЛАЙН СТАТУС
-function setupPresence(uid) {
-    const userStatusRef = ref(db, `/status/${uid}`);
-    const connectedRef = ref(db, '.info/connected');
-
-    onValue(connectedRef, (snap) => {
-        if (snap.val() === true) {
-            onDisconnect(userStatusRef).set({ state: 'offline', lastChanged: serverTimestamp() });
-            set(userStatusRef, { state: 'online', lastChanged: serverTimestamp() });
-        }
-    });
+:root {
+    --bg-primary: #1e1e2e;
+    --bg-secondary: #252538;
+    --bg-tertiary: #2b2b40;
+    --text-primary: #cdd6f4;
+    --text-muted: #a6adc8;
+    --accent: #89b4fa;
+    --accent-hover: #b4befe;
+    --danger: #f38ba8;
+    --success: #a6e3a1;
+    --border-color: #45475a;
+    --font-size-base: 100%;
 }
 
-function initAppData() {
-    loadContacts();
-    loadMessages('global');
-    loadPosts();
-    
-    document.getElementById('user-email-text').innerText = currentUser.email;
-    document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
-
-    onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
-        const userData = snapshot.val();
-        if (userData && userData.avatar) {
-            document.getElementById('user-avatar').src = userData.avatar;
-        }
-    });
+[data-theme="light"] {
+    --bg-primary: #eff1f5;
+    --bg-secondary: #e6e9ef;
+    --bg-tertiary: #dce0e8;
+    --text-primary: #4c4f69;
+    --text-muted: #6c6f85;
+    --accent: #1e66f5;
+    --accent-hover: #209fb5;
+    --danger: #d20f39;
+    --success: #40a02b;
+    --border-color: #bcc0cc;
 }
 
-// КОНТАКТЫ
-function loadContacts() {
-    onValue(ref(db, 'users'), (snapshot) => {
-        const container = document.getElementById('contacts-list');
-        container.innerHTML = '';
-        const users = snapshot.val() || {};
-        
-        const globalChatDiv = document.createElement('div');
-        globalChatDiv.className = 'contact-item';
-        globalChatDiv.innerHTML = `<strong>📢 Общий Чат</strong>`;
-        globalChatDiv.onclick = () => switchChat('global', 'Общий чат');
-        container.appendChild(globalChatDiv);
-
-        Object.keys(users).forEach(uid => {
-            if(uid === currentUser.uid) return;
-            const u = users[uid];
-            const div = document.createElement('div');
-            div.className = 'contact-item';
-            div.innerHTML = `
-                <img src="${u.avatar || 'https://via.placeholder.com/35'}" class="avatar-sm">
-                <div>
-                    <div><strong>${u.name || u.email}</strong></div>
-                    <span id="status-${uid}" class="text-muted" style="font-size:0.75rem;">⚪ Оффлайн</span>
-                </div>
-            `;
-            div.onclick = () => switchChat(uid, u.name || u.email);
-            container.appendChild(div);
-
-            onValue(ref(db, `/status/${uid}`), (sSnap) => {
-                const st = sSnap.val();
-                const el = document.getElementById(`status-${uid}`);
-                if(el && st) {
-                    el.innerText = st.state === 'online' ? '🟢 В сети' : '⚪ Был(а) недавно';
-                }
-            });
-        });
-    });
+html {
+    font-size: var(--font-size-base);
+    box-sizing: border-box;
+    height: 100%;
 }
 
-// ЧАТ И СООБЩЕНИЯ
-function switchChat(targetId, title) {
-    currentChatTarget = targetId;
-    document.getElementById('chat-title').innerText = title;
-    loadMessages(targetId);
+*, *:before, *:after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0;
 }
 
-document.getElementById('send-msg-btn').addEventListener('click', sendTextMessage);
-document.getElementById('chat-text-input').addEventListener('keypress', (e) => {
-    if(e.key === 'Enter') sendTextMessage();
-});
-
-function sendTextMessage() {
-    const input = document.getElementById('chat-text-input');
-    const text = input.value.trim();
-    if(!text) return;
-
-    push(ref(db, `messages/${currentChatTarget}`), {
-        sender: currentUser.uid,
-        type: 'text',
-        content: text,
-        timestamp: serverTimestamp()
-    });
-    input.value = '';
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
 }
 
-function loadMessages(targetId) {
-    onValue(ref(db, `messages/${targetId}`), (snapshot) => {
-        const container = document.getElementById('chat-messages');
-        container.innerHTML = '';
-        const data = snapshot.val() || {};
-        
-        Object.values(data).forEach(msg => {
-            const isOutgoing = msg.sender === currentUser.uid;
-            const bubble = document.createElement('div');
-            bubble.className = `msg-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
-            
-            let body = msg.content;
-            if(msg.type === 'image') {
-                body = `<img src="${msg.content}" class="chat-media-img">`;
-            }
-
-            const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
-            bubble.innerHTML = `${body} <div class="msg-meta">${timeStr} ✓</div>`;
-            container.appendChild(bubble);
-        });
-        container.scrollTop = container.scrollHeight;
-    });
+.screen {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    height: -webkit-fill-available;
+    width: 100vw;
 }
 
-// ПРИВЯЗКА НАЖАТИЙ КНОПОК
-document.getElementById('chat-file-btn').addEventListener('click', () => {
-    document.getElementById('chat-file-input').click();
-});
-
-document.getElementById('avatar-edit-btn').addEventListener('click', () => {
-    document.getElementById('avatar-file-input').click();
-});
-
-document.getElementById('post-file-btn').addEventListener('click', () => {
-    document.getElementById('post-file-input').click();
-});
-
-// УТИЛИТА: ВАРИАНТ 2 — Конвертация в ультра-сжатую Base64 строку (Без Storage)
-async function compressImageToBase64(file, maxWidth, quality) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let w = img.width;
-                let h = img.height;
-                if (w > maxWidth) {
-                    h = Math.round((h * maxWidth) / w);
-                    w = maxWidth;
-                }
-                canvas.width = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                resolve(canvas.toDataURL('image/webp', quality));
-            };
-        };
-    });
+.screen.active {
+    display: flex;
 }
 
-// 1. СМЕНА АВАТАРКИ (Прямо в БД)
-document.getElementById('avatar-file-input').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file || !currentUser) return;
-
-    try {
-        const base64Avatar = await compressImageToBase64(file, 120, 0.7);
-
-        await set(ref(db, `users/${currentUser.uid}`), {
-            name: currentUser.email.split('@')[0],
-            email: currentUser.email,
-            avatar: base64Avatar
-        });
-
-        document.getElementById('user-avatar').src = base64Avatar;
-        alert('Аватар обновлен!');
-    } catch (err) {
-        alert('Ошибка смены аватарки: ' + err.message);
-    }
-});
-
-// 2. ОТПРАВКА ФОТО В ЧАТ (Прямо в БД)
-document.getElementById('chat-file-input').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if(!file) return;
-    
-    try {
-        const base64Image = await compressImageToBase64(file, 800, 0.6);
-
-        push(ref(db, `messages/${currentChatTarget}`), {
-            sender: currentUser.uid,
-            type: 'image',
-            content: base64Image,
-            timestamp: serverTimestamp()
-        });
-    } catch (err) {
-        alert('Ошибка отправки картинки: ' + err.message);
-    }
-});
-
-// 3. ПУБЛИКАЦИЯ НА СТЕНУ (Прямо в БД)
-document.getElementById('post-file-input').addEventListener('change', (e) => {
-    selectedPostImage = e.target.files[0];
-    document.getElementById('post-file-name').innerText = selectedPostImage ? selectedPostImage.name : '';
-});
-
-document.getElementById('submit-post-btn').addEventListener('click', async () => {
-    const text = document.getElementById('post-text-input').value.trim();
-    if(!text && !selectedPostImage) return;
-
-    let mediaUrl = '';
-    if(selectedPostImage) {
-        mediaUrl = await compressImageToBase64(selectedPostImage, 600, 0.5);
-    }
-
-    push(ref(db, 'posts'), {
-        author: currentUser.uid,
-        authorEmail: currentUser.email,
-        text: text,
-        mediaUrl: mediaUrl,
-        timestamp: serverTimestamp()
-    });
-
-    document.getElementById('post-text-input').value = '';
-    selectedPostImage = null;
-    document.getElementById('post-file-name').innerText = '';
-});
-
-// ЗАГРУЗКА И УДАЛЕНИЕ ПОСТОВ
-function loadPosts() {
-    onValue(ref(db, 'posts'), (snapshot) => {
-        const container = document.getElementById('wall-posts');
-        container.innerHTML = '';
-        const data = snapshot.val() || {};
-        
-        Object.keys(data).reverse().forEach(key => {
-            const post = data[key];
-            const isMyPost = post.author === currentUser.uid;
-            const item = document.createElement('div');
-            item.className = 'post-item';
-            
-            let imgHTML = post.mediaUrl ? `<img src="${post.mediaUrl}" class="post-media-img">` : '';
-            let deleteBtn = isMyPost ? `<button class="btn-delete-post" onclick="window.deletePost('${key}')">🗑️ Удалить</button>` : '';
-
-            item.innerHTML = `
-                <div class="post-header-row">
-                    <strong>${post.authorEmail.split('@')[0]}</strong>
-                    ${deleteBtn}
-                </div>
-                <p style="margin-top: 4px;">${post.text}</p>
-                ${imgHTML}
-                <div class="post-footer">
-                    <button class="btn-sm btn-outline" onclick="window.likePost('${key}')">❤️ ${post.likes ? Object.keys(post.likes).length : 0}</button>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-    });
+/* Авторизация */
+#auth-screen {
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-primary);
 }
 
-window.likePost = function(postKey) {
-    const likeRef = ref(db, `posts/${postKey}/likes/${currentUser.uid}`);
-    set(likeRef, true);
-};
-
-window.deletePost = function(postKey) {
-    if(confirm("Удалить эту запись со стены?")) {
-        remove(ref(db, `posts/${postKey}`));
-    }
-};
-
-// НАСТРОЙКИ
-document.getElementById('theme-toggle').addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-});
-
-let fontSize = 100;
-document.getElementById('font-inc').addEventListener('click', () => changeFontSize(10));
-document.getElementById('font-dec').addEventListener('click', () => changeFontSize(-10));
-
-function changeFontSize(delta) {
-    fontSize = Math.min(Math.max(fontSize + delta, 80), 150);
-    document.documentElement.style.setProperty('--font-size-base', `${fontSize}%`);
-    document.getElementById('font-size-val').innerText = `${fontSize}%`;
+.auth-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    width: 90%;
+    max-width: 340px;
+    text-align: center;
 }
 
-// МОБИЛЬНАЯ НАВИГАЦИЯ
-document.querySelectorAll('.bottom-nav .nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const target = btn.getAttribute('data-target');
-        document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        
-        btn.classList.add('active');
-        document.getElementById(target).classList.add('active');
-    });
-});
+.auth-card input {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(console.error);
+.error-msg {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.app-header {
+    height: 48px;
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.layout-container {
+    flex: 1 1 auto;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+.panel {
+    display: none;
+    flex-direction: column;
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border-color);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.panel.active {
+    display: flex;
+}
+
+.panel-header {
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.panel-header h3 {
+    font-size: 0.9rem;
+}
+
+.list-container,
+.messages-container,
+.profile-scroll-area {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.75rem;
+}
+
+.messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.profile-scroll-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Пузыри сообщений */
+.msg-bubble {
+    max-width: 82%;
+    padding: 0.5rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    position: relative;
+    word-break: break-word;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.msg-bubble:active {
+    opacity: 0.8;
+}
+
+.msg-bubble.incoming {
+    align-self: flex-start;
+    background: var(--bg-tertiary);
+}
+
+.msg-bubble.outgoing {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #ffffff;
+}
+
+/* Стили цитаты внутри пузыря */
+.quote-block {
+    border-left: 3px solid var(--accent-hover);
+    background: rgba(0, 0, 0, 0.15);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+}
+
+.quote-user {
+    font-weight: bold;
+    display: block;
+    color: var(--accent-hover);
+}
+
+.quote-text {
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    display: block;
+}
+
+/* Панель ответа на сообщение */
+.reply-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-tertiary);
+    border-top: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent);
+}
+
+.reply-preview-content {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    overflow: hidden;
+}
+
+.reply-user {
+    font-weight: bold;
+    color: var(--accent);
+}
+
+.reply-text {
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Плеер аудиосообщений */
+.audio-player-custom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 6px 10px;
+    border-radius: 20px;
+    min-width: 180px;
+}
+
+.audio-play-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.audio-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+}
+
+.audio-progress {
+    height: 100%;
+    background: var(--accent-hover);
+    width: 0%;
+    border-radius: 2px;
+}
+
+.audio-time {
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+.msg-meta {
+    font-size: 0.65rem;
+    opacity: 0.75;
+    text-align: right;
+    margin-top: 2px;
+}
+
+.chat-media-img, .chat-media-video {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 8px;
+    margin-top: 5px;
+    display: block;
+}
+
+.chat-input-area {
+    padding: 0.4rem 0.6rem;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.chat-input-area input[type="text"] {
+    flex: 1;
+    padding: 0.5rem 0.7rem;
+    border-radius: 18px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-card, .create-post-card, .settings-card, .post-item {
+    background: var(--bg-secondary);
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-lg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-edit-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--accent);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.65rem;
+    border: 2px solid var(--bg-secondary);
+}
+
+.create-post-card textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.5rem;
+    resize: none;
+    font-size: 0.85rem;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.4rem;
+}
+
+.file-name-tag {
+    font-size: 0.75rem;
+    color: var(--accent);
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.post-media-img, .post-media-video {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin: 0.4rem 0;
+}
+
+.post-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+}
+
+.btn-delete-post {
+    background: var(--danger);
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-outline { border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); }
+.btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+.full-width { width: 100%; }
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+.bottom-nav {
+    height: 56px;
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+    display: flex;
+    border-top: 1px solid var(--border-color);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.nav-btn.active { color: var(--accent); }
+.nav-icon { font-size: 1.1rem; }
+.nav-label { font-size: 0.65rem; }
+
+@media (min-width: 768px) {
+    .bottom-nav { display: none; }
+    .panel { display: flex !important; }
+    #panel-contacts { flex: 0 0 25%; }
+    #panel-chat { flex: 0 0 50%; }
+    #panel-profile { flex: 0 0 25%; border-right: none; }
 }
