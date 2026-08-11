@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, set, push, onValue, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, off, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
@@ -24,7 +24,11 @@ let isRecording = false;
 let typingTimeout = null;
 let replyTargetMessage = null;
 
-// ФИКС ДИНАМИЧЕСКОЙ ВЫСОТЫ ЭКРАНА SAFARI
+// Ссылки для отмены дублирующихся подписок Firebase
+let messagesRefUnsub = null;
+let typingRefUnsub = null;
+
+// ФИКС ВЫСОТЫ iOS SAFARI
 function fixIOSHeight() {
     let vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -161,7 +165,13 @@ document.getElementById('chat-text-input').addEventListener('input', () => {
 });
 
 function listenTyping(chatId) {
-    onValue(ref(db, `typing/${chatId}`), (snapshot) => {
+    // Отписываемся от старого слушателя набора текста
+    if (typingRefUnsub) {
+        off(typingRefUnsub);
+    }
+    
+    typingRefUnsub = ref(db, `typing/${chatId}`);
+    onValue(typingRefUnsub, (snapshot) => {
         const typingData = snapshot.val() || {};
         let isTyping = false;
         
@@ -215,7 +225,13 @@ function cancelReply() {
 document.getElementById('cancel-reply-btn').addEventListener('click', cancelReply);
 
 function loadMessages(targetId) {
-    onValue(ref(db, `messages/${targetId}`), (snapshot) => {
+    // УДАЛЯЕМ СТАРУЮ ПОДПИСКУ (Убирает дублирование 2-4 сообщений)
+    if (messagesRefUnsub) {
+        off(messagesRefUnsub);
+    }
+
+    messagesRefUnsub = ref(db, `messages/${targetId}`);
+    onValue(messagesRefUnsub, (snapshot) => {
         const container = document.getElementById('chat-messages');
         container.innerHTML = '';
         const data = snapshot.val() || {};
@@ -254,10 +270,9 @@ function loadMessages(targetId) {
             } else if (msg.type === 'video') {
                 body = `<video src="${msg.content}" controls class="chat-media-video"></video>`;
             } else if (msg.type === 'audio') {
-                // Адаптированный аудиоплеер с поддержкой iOS Safari Safari Touch Unlocking
                 body = `
-                    <div class="audio-player-container" style="padding: 4px 0;">
-                        <audio src="${msg.content}" controls playsinline preload="metadata" style="max-width: 210px; height: 40px; border-radius: 20px;"></audio>
+                    <div class="audio-voice-message">
+                        <audio src="${msg.content}" controls playsinline preload="metadata" class="custom-audio-elem"></audio>
                     </div>
                 `;
             }
@@ -275,10 +290,9 @@ function loadMessages(targetId) {
     });
 }
 
-// 3. АДАПТИРОВАННАЯ ЗАПИСЬ ГОЛОСОВЫХ ДЛЯ iOS SAFARI & PWA
+// 3. ПОШАГОВАЯ СИСТЕМА ЗАПИСИ
 const recordBtn = document.getElementById('record-audio-btn');
 
-// Определение лучшего формата записи для устройства
 function getSupportedMimeType() {
     const types = [
         'audio/mp4',
@@ -288,7 +302,7 @@ function getSupportedMimeType() {
         'audio/ogg'
     ];
     for (let type of types) {
-        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
+        if (window.MediaRecorder && MediaRecorder.isTypeSupported(type)) {
             return type;
         }
     }
@@ -298,9 +312,11 @@ function getSupportedMimeType() {
 recordBtn.addEventListener('click', async () => {
     if (!isRecording) {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mimeType = getSupportedMimeType();
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: true, noiseSuppression: true } 
+            });
             
+            const mimeType = getSupportedMimeType();
             mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
             audioChunks = [];
 
@@ -312,11 +328,11 @@ recordBtn.addEventListener('click', async () => {
                 const finalMime = mediaRecorder.mimeType || 'audio/mp4';
                 const audioBlob = new Blob(audioChunks, { type: finalMime });
                 
-                // Конвертируем в надежную компактную DataURL для передачи
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = () => {
                     const audioDataUrl = reader.result;
+                    
                     push(ref(db, `messages/${currentChatTarget}`), {
                         sender: currentUser.uid,
                         senderName: currentUser.email.split('@')[0],
@@ -327,7 +343,6 @@ recordBtn.addEventListener('click', async () => {
                     });
                 };
 
-                // Отключаем микрофон после записи
                 stream.getTracks().forEach(track => track.stop());
             };
 
@@ -336,7 +351,7 @@ recordBtn.addEventListener('click', async () => {
             recordBtn.innerText = '🛑';
             recordBtn.style.color = 'var(--danger)';
         } catch (err) {
-            alert('Для записи разрешите доступ к микрофону в настройках Safari / iOS');
+            alert('Разрешите доступ к микрофону в настройках Safari.');
         }
     } else {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -348,12 +363,12 @@ recordBtn.addEventListener('click', async () => {
     }
 });
 
-// КЛИКАБЕЛЬНОСТЬ И ВЫБОР ФАЙЛОВ
+// КЛИКАБЕЛЬНОСТЬ ФАЙЛОВ
 document.getElementById('chat-file-btn').addEventListener('click', () => document.getElementById('chat-file-input').click());
 document.getElementById('avatar-edit-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());
 document.getElementById('post-file-btn').addEventListener('click', () => document.getElementById('post-file-input').click());
 
-// ЧТЕНИЕ И СЖАТИЕ ФОТО ДЛЯ СТЕНЫ И АВАТАРКИ
+// ЧТЕНИЕ И СЖАТИЕ МЕДИА
 async function fileToBase64(file, maxWidth = 800) {
     return new Promise((resolve, reject) => {
         if (file.type.startsWith('video/')) {
@@ -386,7 +401,6 @@ async function fileToBase64(file, maxWidth = 800) {
     });
 }
 
-// 4. ОТПРАВКА МЕДИАТЕКИ В ЧАТ
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -425,7 +439,7 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
     }
 });
 
-// 5. ПУБЛИКАЦИЯ И УДАЛЕНИЕ ПОСТОВ СО СТЕНЫ
+// ПУБЛИКАЦИЯ И УДАЛЕНИЕ ПОСТОВ
 document.getElementById('post-file-input').addEventListener('change', (e) => {
     selectedPostFile = e.target.files[0];
     document.getElementById('post-file-name').innerText = selectedPostFile ? selectedPostFile.name : '';
@@ -502,7 +516,7 @@ window.likePost = function(postKey) {
 };
 
 window.deletePost = function(postKey) {
-    if(confirm("Вы уверены, что хотите удалить эту запись со стены?")) {
+    if(confirm("Удалить эту запись со стены?")) {
         remove(ref(db, `posts/${postKey}`));
     }
 };
