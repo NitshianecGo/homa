@@ -1,11 +1,9 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
-// Вставьте здесь ваши данные Firebase Config
 firebase.initializeApp({
- apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
+  apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
   authDomain: "homa-27efb.firebaseapp.com",
-  databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
   projectId: "homa-27efb",
   storageBucket: "homa-27efb.firebasestorage.app",
   messagingSenderId: "365610803694",
