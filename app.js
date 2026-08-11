@@ -5,13 +5,13 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "http
 
 // Конфигурация Firebase
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
+  authDomain: "homa-27efb.firebaseapp.com",
+  databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
+  projectId: "homa-27efb",
+  storageBucket: "homa-27efb.firebasestorage.app",
+  messagingSenderId: "365610803694",
+  appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
 };
 
 const app = initializeApp(firebaseConfig);
