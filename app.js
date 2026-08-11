@@ -1,9 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, set, push, onValue, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getDatabase, ref, set, push, onValue, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// Ваши интегрированные ключи Firebase:
 const firebaseConfig = {
   apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
   authDomain: "homa-27efb.firebaseapp.com",
@@ -22,6 +21,9 @@ const storage = getStorage(app);
 let currentUser = null;
 let currentChatTarget = 'global';
 let selectedPostImage = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
 
 // АВТОРИЗАЦИЯ
 onAuthStateChanged(auth, (user) => {
@@ -61,7 +63,6 @@ function setupPresence(uid) {
     });
 }
 
-// ИНИЦИАЛИЗАЦИЯ
 function initAppData() {
     loadContacts();
     loadMessages('global');
@@ -70,7 +71,6 @@ function initAppData() {
     document.getElementById('user-email-text').innerText = currentUser.email;
     document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
 
-    // Загрузка аватарки текущего пользователя
     onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
         const userData = snapshot.val();
         if (userData && userData.avatar) {
@@ -118,7 +118,7 @@ function loadContacts() {
     });
 }
 
-// ЧАТ
+// ЧАТ И СООБЩЕНИЯ
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
     document.getElementById('chat-title').innerText = title;
@@ -158,6 +158,8 @@ function loadMessages(targetId) {
             let body = msg.content;
             if(msg.type === 'image') {
                 body = `<img src="${msg.content}" class="chat-media-img">`;
+            } else if (msg.type === 'audio') {
+                body = `<div class="audio-player"><audio src="${msg.content}" controls preload="metadata"></audio></div>`;
             }
 
             const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
@@ -168,7 +170,62 @@ function loadMessages(targetId) {
     });
 }
 
-// СЖАТИЕ ИЗОБРАЖЕНИЙ В WebP
+// ПРИВЯЗКА НАЖАТИЙ ДЛЯ iOS SAFARI
+document.getElementById('chat-file-btn').addEventListener('click', () => {
+    document.getElementById('chat-file-input').click();
+});
+
+document.getElementById('avatar-edit-btn').addEventListener('click', () => {
+    document.getElementById('avatar-file-input').click();
+});
+
+document.getElementById('post-file-btn').addEventListener('click', () => {
+    document.getElementById('post-file-input').click();
+});
+
+// АУДИОСООБЩЕНИЯ (ЗАПИСЬ С МИКРОФОНА)
+const recordBtn = document.getElementById('record-audio-btn');
+recordBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp4' });
+                const audioStorageRef = storageRef(storage, `audio/${Date.now()}.mp4`);
+                await uploadBytes(audioStorageRef, audioBlob);
+                const url = await getDownloadURL(audioStorageRef);
+
+                push(ref(db, `messages/${currentChatTarget}`), {
+                    sender: currentUser.uid,
+                    type: 'audio',
+                    content: url,
+                    timestamp: serverTimestamp()
+                });
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            recordBtn.innerText = '🛑';
+            recordBtn.style.color = 'var(--danger)';
+        } catch (err) {
+            alert('Нет доступа к микрофону: ' + err.message);
+        }
+    } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        recordBtn.innerText = '🎙️';
+        recordBtn.style.color = 'var(--text-primary)';
+    }
+});
+
+// СЖАТИЕ КАРТИНОК
 async function compressImage(file, maxWidth, quality) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -201,9 +258,9 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
 
     try {
         const compressedAvatar = await compressImage(file, 150, 0.8);
-        const avatarStorageRef = storageRef(storage, `avatars/${currentUser.uid}.webp`);
-        await uploadBytes(avatarStorageRef, compressedAvatar);
-        const downloadURL = await getDownloadURL(avatarStorageRef);
+        const avatarRef = storageRef(storage, `avatars/${currentUser.uid}.webp`);
+        await uploadBytes(avatarRef, compressedAvatar);
+        const downloadURL = await getDownloadURL(avatarRef);
 
         await set(ref(db, `users/${currentUser.uid}`), {
             name: currentUser.email.split('@')[0],
@@ -212,29 +269,32 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
         });
 
         document.getElementById('user-avatar').src = downloadURL;
-        alert('Аватар успешно обновлен!');
+        alert('Аватар обновлен!');
     } catch (err) {
-        alert('Ошибка смены аватарки: ' + err.message);
+        alert('Ошибка загрузки аватарки: ' + err.message);
     }
 });
 
-// ОТПРАВКА ИЗОБРАЖЕНИЙ В ЧАТ
+// ОТПРАВКА КАРТИНОК В ЧАТ
 document.getElementById('chat-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
     
-    const compressedBlob = await compressImage(file, 1200, 0.7);
-    const fileStorageRef = storageRef(storage, `chat_media/${Date.now()}.webp`);
-    
-    await uploadBytes(fileStorageRef, compressedBlob);
-    const url = await getDownloadURL(fileStorageRef);
+    try {
+        const compressedBlob = await compressImage(file, 1200, 0.7);
+        const fileStorageRef = storageRef(storage, `chat_media/${Date.now()}.webp`);
+        await uploadBytes(fileStorageRef, compressedBlob);
+        const url = await getDownloadURL(fileStorageRef);
 
-    push(ref(db, `messages/${currentChatTarget}`), {
-        sender: currentUser.uid,
-        type: 'image',
-        content: url,
-        timestamp: serverTimestamp()
-    });
+        push(ref(db, `messages/${currentChatTarget}`), {
+            sender: currentUser.uid,
+            type: 'image',
+            content: url,
+            timestamp: serverTimestamp()
+        });
+    } catch (err) {
+        alert('Ошибка отправки файла: ' + err.message);
+    }
 });
 
 // СТЕНА ПОСТОВ
@@ -260,8 +320,7 @@ document.getElementById('submit-post-btn').addEventListener('click', async () =>
         authorEmail: currentUser.email,
         text: text,
         mediaUrl: mediaUrl,
-        timestamp: serverTimestamp(),
-        likesCount: 0
+        timestamp: serverTimestamp()
     });
 
     document.getElementById('post-text-input').value = '';
@@ -277,14 +336,19 @@ function loadPosts() {
         
         Object.keys(data).reverse().forEach(key => {
             const post = data[key];
+            const isMyPost = post.author === currentUser.uid;
             const item = document.createElement('div');
             item.className = 'post-item';
             
             let imgHTML = post.mediaUrl ? `<img src="${post.mediaUrl}" class="post-media-img">` : '';
-            
+            let deleteBtn = isMyPost ? `<button class="btn-delete-post" onclick="window.deletePost('${key}')">🗑️ Удалить</button>` : '';
+
             item.innerHTML = `
-                <div><strong>${post.authorEmail.split('@')[0]}</strong></div>
-                <p>${post.text}</p>
+                <div class="post-header-row">
+                    <strong>${post.authorEmail.split('@')[0]}</strong>
+                    ${deleteBtn}
+                </div>
+                <p style="margin-top: 4px;">${post.text}</p>
                 ${imgHTML}
                 <div class="post-footer">
                     <button class="btn-sm btn-outline" onclick="window.likePost('${key}')">❤️ ${post.likes ? Object.keys(post.likes).length : 0}</button>
@@ -300,11 +364,16 @@ window.likePost = function(postKey) {
     set(likeRef, true);
 };
 
-// НАСТРОЙКИ
+window.deletePost = function(postKey) {
+    if(confirm("Удалить эту запись со стены?")) {
+        remove(ref(db, `posts/${postKey}`));
+    }
+};
+
+// НАСТРОЙКИ ВЕРСТКИ
 document.getElementById('theme-toggle').addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
 });
 
 let fontSize = 100;
@@ -312,7 +381,7 @@ document.getElementById('font-inc').addEventListener('click', () => changeFontSi
 document.getElementById('font-dec').addEventListener('click', () => changeFontSize(-10));
 
 function changeFontSize(delta) {
-    fontSize = Math.min(Math.max(fontSize + delta, 80), 160);
+    fontSize = Math.min(Math.max(fontSize + delta, 80), 150);
     document.documentElement.style.setProperty('--font-size-base', `${fontSize}%`);
     document.getElementById('font-size-val').innerText = `${fontSize}%`;
 }
