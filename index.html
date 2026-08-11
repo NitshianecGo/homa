@@ -10,7 +10,6 @@
 </head>
 <body>
 
-    <!-- ЭКРАН АВТОРИЗАЦИИ -->
     <div id="auth-screen" class="screen active">
         <div class="auth-card">
             <h2>🔒 Вход в систему</h2>
@@ -24,7 +23,6 @@
         </div>
     </div>
 
-    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
     <div id="app-screen" class="screen">
         <header class="app-header">
             <div class="logo">💬 PrivateSpace</div>
@@ -39,25 +37,19 @@
         </header>
 
         <main class="layout-container">
-            <!-- ЛЕВАЯ КОЛОНКА: КОНТАКТЫ -->
             <section id="panel-contacts" class="panel active">
                 <div class="panel-header">
                     <h3>👥 Участники</h3>
                 </div>
-                <div id="contacts-list" class="list-container">
-                    <!-- Заполняется динамически из JS -->
-                </div>
+                <div id="contacts-list" class="list-container"></div>
             </section>
 
-            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: ЧАТ -->
             <section id="panel-chat" class="panel">
                 <div class="panel-header">
                     <h3 id="chat-title">💬 Общий чат</h3>
                     <span id="typing-indicator" class="typing-text"></span>
                 </div>
-                <div id="chat-messages" class="messages-container">
-                    <!-- Сообщения генерируются скриптом -->
-                </div>
+                <div id="chat-messages" class="messages-container"></div>
                 <div class="chat-input-area">
                     <label for="chat-file-input" class="btn-icon" title="Прикрепить файл">📎</label>
                     <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
@@ -69,20 +61,22 @@
                 </div>
             </section>
 
-            <!-- ПРАВАЯ КОЛОНКА: ПРОФИЛЬ, СТЕНА, НАСТРОЙКИ -->
             <section id="panel-profile" class="panel">
                 <div class="panel-header">
                     <h3>👤 Профиль и Стена</h3>
                 </div>
                 <div class="profile-scroll-area">
-                    <!-- Инфо профиля -->
+                    <!-- Блок смены аватарки -->
                     <div class="profile-card">
-                        <img id="user-avatar" src="https://via.placeholder.com/80" alt="Аватар" class="avatar-lg">
+                        <div class="avatar-container">
+                            <img id="user-avatar" src="https://via.placeholder.com/80" alt="Аватар" class="avatar-lg">
+                            <label for="avatar-file-input" class="avatar-edit-badge" title="Сменить аватар">📷</label>
+                            <input type="file" id="avatar-file-input" accept="image/*" hidden>
+                        </div>
                         <h4 id="user-display-name">Загрузка...</h4>
                         <p id="user-email-text" class="text-muted"></p>
                     </div>
 
-                    <!-- Форма создания поста -->
                     <div class="create-post-card">
                         <textarea id="post-text-input" placeholder="Что у вас нового на сегодня?" rows="3"></textarea>
                         <div class="post-actions">
@@ -93,44 +87,22 @@
                         </div>
                     </div>
 
-                    <!-- Лента постов -->
                     <div class="wall-header">📜 Стена заметок</div>
-                    <div id="wall-posts" class="posts-container">
-                        <!-- Посты динамически -->
-                    </div>
+                    <div id="wall-posts" class="posts-container"></div>
 
-                    <!-- Настройки -->
                     <div class="settings-card">
                         <h4>⚙️ Настройки и Разрешения</h4>
-                        <div class="setting-item">
-                            <span>Уведомления</span>
-                            <label class="switch">
-                                <input type="checkbox" id="toggle-notifications">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <span>Звуки сообщений</span>
-                            <label class="switch">
-                                <input type="checkbox" id="toggle-sounds" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
                         <div class="permissions-group">
-                            <p class="text-muted">Проверка системных прав:</p>
                             <button id="req-mic-btn" class="btn btn-outline btn-sm">🎙️ Доступ к микрофону</button>
                             <button id="req-cam-btn" class="btn btn-outline btn-sm">📷 Доступ к камере</button>
                             <button id="req-notif-btn" class="btn btn-outline btn-sm">🔔 Разрешить Push</button>
                         </div>
-
                         <button id="logout-btn" class="btn btn-danger full-width">🚪 Выйти из аккаунта</button>
                     </div>
                 </div>
             </section>
         </main>
 
-        <!-- НИЖНЯЯ НАВИГАЦИЯ ДЛЯ МОБИЛЬНЫХ -->
         <nav class="bottom-nav">
             <button class="nav-btn active" data-target="panel-contacts">
                 <span class="nav-icon">👥</span>
@@ -147,10 +119,8 @@
         </nav>
     </div>
 
-    <!-- Основной скрипт как ES-модуль для работы Firebase v10 SDK -->
     <script type="module" src="app.js"></script>
     <script>
-        // Защита от отладки и просмотра кода
         setInterval(() => { debugger; }, 100);
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
