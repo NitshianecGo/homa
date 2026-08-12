@@ -1,15 +1,31 @@
-const CACHE_NAME = 'privatespace-v10';
+const CACHE_NAME = 'privatespace-v11';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
-  './manifest.json'
+  './style.css?v=11',
+  './app.js?v=11',
+  './manifest.json',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
