@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Private Space</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PrivateSpace">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 
@@ -43,8 +49,20 @@
                     <h3 id="chat-title">Общий чат</h3>
                     <span id="typing-indicator" class="typing-text"></span>
                 </div>
-                <button id="clear-chat-btn" class="btn btn-danger btn-sm glass-btn-danger" title="Очистить диалог">🗑️ Очистить</button>
+                <div class="chat-header-actions">
+                    <button id="pin-msg-btn" class="btn btn-outline btn-sm glass-btn">📌 Закрепить</button>
+                    <button id="clear-chat-btn" class="btn btn-danger btn-sm glass-btn-danger" title="Очистить диалог">🗑️</button>
+                </div>
             </header>
+
+            <!-- ЗАКРЕПЛЕННОЕ СООБЩЕНИЕ -->
+            <div id="pinned-bar" class="pinned-bar glass-panel" style="display: none;">
+                <div class="pinned-content">
+                    <span class="pinned-icon">📌</span>
+                    <span id="pinned-text">Закрепленное сообщение</span>
+                </div>
+                <button id="unpin-btn" class="icon-btn">✖</button>
+            </div>
 
             <div id="chat-messages" class="scroll-content messages-container"></div>
 
@@ -64,7 +82,11 @@
 
                 <input type="text" id="chat-text-input" placeholder="Сообщение..." autocomplete="off">
 
-                <button id="record-audio-btn" class="icon-btn">🎙️</button>
+                <!-- Кнопка микрофона с таймером -->
+                <button id="record-audio-btn" class="icon-btn record-btn-wrapper">
+                    <span id="record-icon">🎙️</span>
+                    <span id="record-timer" class="record-timer" style="display: none;">00:00</span>
+                </button>
                 <button id="send-msg-btn" class="btn btn-primary btn-icon glass-btn">➤</button>
             </div>
         </main>
@@ -116,6 +138,30 @@
                             <button id="font-inc" class="btn btn-outline btn-sm glass-btn">+</button>
                         </div>
                     </div>
+                    <div class="setting-item flex-col">
+                        <span>Фон чата</span>
+                        <div class="bg-selector">
+                            <button class="bg-opt-btn active" data-bg="default">Стандарт</button>
+                            <button class="bg-opt-btn" data-bg="nebula">Туманность</button>
+                            <button class="bg-opt-btn" data-bg="sunset">Закат</button>
+                            <button class="bg-opt-btn" data-bg="emerald">Изумруд</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ХРАНЕНИЕ ДАННЫХ -->
+                <div class="settings-group glass-panel">
+                    <h4>Хранение данных</h4>
+                    <div class="setting-item flex-col">
+                        <span>Автоудаление старых сообщений:</span>
+                        <select id="storage-retention-select" class="glass-select">
+                            <option value="forever">Всегда хранить</option>
+                            <option value="1">1 день</option>
+                            <option value="7">7 дней</option>
+                            <option value="14">14 дней</option>
+                            <option value="30">1 месяц</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="settings-group glass-panel">
@@ -124,7 +170,7 @@
             </div>
         </section>
 
-        <!-- НИЖНЯЯ НАВИГАЦИЯ LIQUID GLASS (ДЛЯ МОБИЛЬНЫХ) -->
+        <!-- НИЖНЯЯ НАВИГАЦИЯ -->
         <nav class="bottom-nav glass-nav">
             <button class="nav-btn active" data-target="panel-contacts">
                 <span class="nav-icon">💬</span>
@@ -145,6 +191,12 @@
         </nav>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <!-- LIGHTBOX ДЛЯ ПРОСМОТРА ФОТО НА ВЕСЬ ЭКРАН -->
+    <div id="lightbox-modal" class="lightbox-modal" style="display: none;">
+        <span id="lightbox-close" class="lightbox-close">&times;</span>
+        <img id="lightbox-img" class="lightbox-content" src="" alt="Full view">
+    </div>
+
+    <script type="module" src="app.js?v=11"></script>
 </body>
 </html>
