@@ -13,13 +13,13 @@
 
     <!-- ЭКРАН АВТОРИЗАЦИИ -->
     <div id="auth-screen" class="screen active">
-        <div class="auth-card">
+        <div class="auth-card glass-panel">
             <h2>Private Space</h2>
             <p class="subtitle">Закрытая социальная сеть</p>
             <form id="login-form">
                 <input type="email" id="email" placeholder="Email" required autocomplete="username">
                 <input type="password" id="password" placeholder="Пароль" required autocomplete="current-password">
-                <button type="submit" class="btn btn-primary">Войти</button>
+                <button type="submit" class="btn btn-primary glass-btn">Войти</button>
             </form>
             <div id="auth-error" class="error-msg"></div>
         </div>
@@ -28,27 +28,28 @@
     <!-- ОСНОВНОЙ ЭКРАН ПРИЛОЖЕНИЯ -->
     <div id="app-screen" class="screen">
         
-        <!-- ЛЕВАЯ ПАНЕЛЬ: КОНТАКТЫ -->
-        <aside id="panel-contacts" class="panel active">
+        <!-- ЛЕВАЯ ПАНЕЛЬ: ЧАТЫ-КОНТАКТЫ -->
+        <aside id="panel-contacts" class="panel glass-panel active">
             <header class="panel-header">
-                <h3>💬 Чаты</h3>
+                <h3>💬 Чаты-контакты</h3>
             </header>
             <div id="contacts-list" class="scroll-content"></div>
         </aside>
 
         <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ: ЧАТ -->
-        <main id="panel-chat" class="panel">
+        <main id="panel-chat" class="panel glass-panel">
             <header class="panel-header chat-header">
                 <div>
                     <h3 id="chat-title">Общий чат</h3>
                     <span id="typing-indicator" class="typing-text"></span>
                 </div>
+                <button id="clear-chat-btn" class="btn btn-danger btn-sm glass-btn-danger" title="Очистить диалог">🗑️ Очистить</button>
             </header>
 
             <div id="chat-messages" class="scroll-content messages-container"></div>
 
             <!-- Предпросмотр цитаты -->
-            <div id="reply-preview" class="reply-preview-bar" style="display: none;">
+            <div id="reply-preview" class="reply-preview-bar glass-panel" style="display: none;">
                 <div class="reply-info">
                     <span class="reply-user" id="reply-user-name">Имя</span>
                     <span class="reply-text" id="reply-text-preview">Текст сообщения</span>
@@ -57,41 +58,41 @@
             </div>
 
             <!-- Панель ввода сообщения -->
-            <div class="chat-input-area">
+            <div class="chat-input-area glass-panel">
                 <button id="chat-file-btn" class="icon-btn">📎</button>
                 <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
 
                 <input type="text" id="chat-text-input" placeholder="Сообщение..." autocomplete="off">
 
                 <button id="record-audio-btn" class="icon-btn">🎙️</button>
-                <button id="send-msg-btn" class="btn btn-primary btn-icon">➤</button>
+                <button id="send-msg-btn" class="btn btn-primary btn-icon glass-btn">➤</button>
             </div>
         </main>
 
         <!-- ПРАВАЯ ПАНЕЛЬ: СТЕНА (ЛЕНТА) -->
-        <section id="panel-wall" class="panel">
+        <section id="panel-wall" class="panel glass-panel">
             <header class="panel-header">
                 <h3>📰 Стена публикаций</h3>
             </header>
-            <div class="wall-create-box">
+            <div class="wall-create-box glass-panel">
                 <textarea id="post-text-input" placeholder="Что нового?"></textarea>
                 <div class="wall-actions">
-                    <button id="post-file-btn" class="btn btn-outline btn-sm">📷 Медиа</button>
+                    <button id="post-file-btn" class="btn btn-outline btn-sm glass-btn">📷 Медиа</button>
                     <input type="file" id="post-file-input" accept="image/*,video/*" hidden>
                     <span id="post-file-name" class="file-name-indicator"></span>
-                    <button id="submit-post-btn" class="btn btn-primary btn-sm">Опубликовать</button>
+                    <button id="submit-post-btn" class="btn btn-primary btn-sm glass-btn">Опубликовать</button>
                 </div>
             </div>
             <div id="wall-posts" class="scroll-content"></div>
         </section>
 
         <!-- ПАНЕЛЬ: НАСТРОЙКИ И ПРОФИЛЬ -->
-        <section id="panel-settings" class="panel">
+        <section id="panel-settings" class="panel glass-panel">
             <header class="panel-header">
                 <h3>⚙️ Профиль и Настройки</h3>
             </header>
             <div class="scroll-content settings-content">
-                <div class="profile-card">
+                <div class="profile-card glass-panel">
                     <div class="avatar-wrapper">
                         <img id="user-avatar" src="https://via.placeholder.com/100" class="avatar-lg">
                         <button id="avatar-edit-btn" class="btn-avatar-edit">✏️</button>
@@ -101,33 +102,33 @@
                     <p id="user-email-text" class="text-muted"></p>
                 </div>
 
-                <div class="settings-group">
+                <div class="settings-group glass-panel">
                     <h4>Оформление</h4>
                     <div class="setting-item">
                         <span>Тёмная тема</span>
-                        <button id="theme-toggle" class="btn btn-outline btn-sm">Сменить тему</button>
+                        <button id="theme-toggle" class="btn btn-outline btn-sm glass-btn">Сменить тему</button>
                     </div>
                     <div class="setting-item">
                         <span>Размер шрифта</span>
                         <div class="font-controls">
-                            <button id="font-dec" class="btn btn-outline btn-sm">-</button>
+                            <button id="font-dec" class="btn btn-outline btn-sm glass-btn">-</button>
                             <span id="font-size-val">100%</span>
-                            <button id="font-inc" class="btn btn-outline btn-sm">+</button>
+                            <button id="font-inc" class="btn btn-outline btn-sm glass-btn">+</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-group">
-                    <button id="logout-btn" class="btn btn-danger btn-full">Выйти из аккаунта</button>
+                <div class="settings-group glass-panel">
+                    <button id="logout-btn" class="btn btn-danger btn-full glass-btn-danger">Выйти из аккаунта</button>
                 </div>
             </div>
         </section>
 
-        <!-- НИЖНЯЯ НАВИГАЦИЯ (ДЛЯ МОБИЛЬНЫХ) -->
-        <nav class="bottom-nav">
+        <!-- НИЖНЯЯ НАВИГАЦИЯ LIQUID GLASS (ДЛЯ МОБИЛЬНЫХ) -->
+        <nav class="bottom-nav glass-nav">
             <button class="nav-btn active" data-target="panel-contacts">
                 <span class="nav-icon">💬</span>
-                <span class="nav-label">Чаты</span>
+                <span class="nav-label">Чаты-контакты</span>
             </button>
             <button class="nav-btn" data-target="panel-chat">
                 <span class="nav-icon">✉️</span>
