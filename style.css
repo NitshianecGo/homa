@@ -26,6 +26,11 @@
     --danger: #d20f39;
 }
 
+/* ТЕМАТИЧЕСКИЕ СТЕКЛЯННЫЕ ФОНЫ ЧАТА */
+body[data-chat-bg="nebula"] { --bg-gradient: radial-gradient(circle at 50% 30%, #4a154b 0%, #110826 100%); }
+body[data-chat-bg="sunset"] { --bg-gradient: radial-gradient(circle at 80% 20%, #632c3b 0%, #1a0f24 100%); }
+body[data-chat-bg="emerald"] { --bg-gradient: radial-gradient(circle at 30% 70%, #123e36 0%, #081a17 100%); }
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -48,9 +53,9 @@ body {
     position: fixed;
     left: 0;
     top: 0;
+    transition: background 0.5s ease;
 }
 
-/* LIQUID GLASS СТИЛИ */
 .glass-panel {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
@@ -65,11 +70,11 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     color: var(--text-primary) !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
     box-shadow: 0 0 15px var(--glass-glow);
 }
 
@@ -90,7 +95,6 @@ body {
     display: flex;
 }
 
-/* АВТОРИЗАЦИЯ */
 #auth-screen {
     justify-content: center;
     align-items: center;
@@ -116,7 +120,7 @@ body {
     gap: 1rem;
 }
 
-input[type="email"], input[type="password"], input[type="text"], textarea {
+input[type="email"], input[type="password"], input[type="text"], textarea, .glass-select {
     width: 100%;
     padding: 12px 16px;
     border-radius: 14px;
@@ -126,6 +130,11 @@ input[type="email"], input[type="password"], input[type="text"], textarea {
     font-size: 1rem;
     outline: none;
     backdrop-filter: blur(5px);
+}
+
+.glass-select {
+    cursor: pointer;
+    margin-top: 6px;
 }
 
 textarea {
@@ -155,7 +164,6 @@ textarea {
 }
 .icon-btn:active { transform: scale(0.9); }
 
-/* СТРУКТУРА ПРИЛОЖЕНИЯ */
 #app-screen {
     display: flex;
     position: relative;
@@ -177,13 +185,37 @@ textarea {
     background: rgba(255, 255, 255, 0.03);
 }
 
+.chat-header-actions {
+    display: flex;
+    gap: 6px;
+}
+
 .scroll-content {
     flex: 1;
     overflow-y: auto;
     padding: 12px;
 }
 
-/* ЧАТЫ И КОНТАКТЫ */
+/* ЗАКРЕПЛЕННЫЙ БАР */
+.pinned-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    background: rgba(137, 180, 250, 0.15);
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.85rem;
+}
+.pinned-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* КОНТАКТЫ */
 #panel-contacts { width: 280px; }
 .contact-item {
     display: flex;
@@ -203,7 +235,6 @@ textarea {
     box-shadow: 0 4px 20px var(--glass-glow);
 }
 
-/* ДИАЛОГ */
 #panel-chat { flex: 1; }
 .messages-container {
     display: flex;
@@ -251,6 +282,48 @@ textarea {
     font-size: 0.8rem;
 }
 
+/* СТИЛИЗАЦИЯ ГИСТОГРАММЫ И УСКОРЕНИЯ ГОЛОСОВЫХ */
+.audio-voice-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+.waveform-visual {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 24px;
+    margin-bottom: 4px;
+}
+.wave-bar {
+    width: 3px;
+    background: var(--accent-hover);
+    border-radius: 3px;
+    animation: wavePulse 1.2s ease-in-out infinite alternate;
+}
+@keyframes wavePulse {
+    0% { height: 4px; }
+    100% { height: 20px; }
+}
+
+.speed-btn {
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    border-radius: 10px;
+}
+
+.record-btn-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.record-timer {
+    font-size: 0.85rem;
+    color: var(--danger);
+    font-weight: bold;
+}
+
 .chat-input-area {
     display: flex;
     align-items: center;
@@ -269,13 +342,23 @@ textarea {
     font-size: 0.85rem;
 }
 
-.chat-media-img, .post-media-img, .chat-media-video, .post-media-video {
+.chat-media-img, .post-media-img {
+    max-width: 100%;
+    border-radius: 12px;
+    margin-top: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.chat-media-img:active, .post-media-img:active {
+    transform: scale(0.98);
+}
+
+.chat-media-video, .post-media-video {
     max-width: 100%;
     border-radius: 12px;
     margin-top: 6px;
 }
 
-/* СТЕНА */
 #panel-wall { width: 340px; }
 .wall-create-box {
     padding: 12px;
@@ -307,7 +390,6 @@ textarea {
 }
 .post-footer { margin-top: 8px; }
 
-/* ПРОФИЛЬ И НАСТРОЙКИ */
 #panel-settings { width: 300px; }
 .profile-card {
     text-align: center;
@@ -343,8 +425,66 @@ textarea {
     align-items: center;
     margin-top: 10px;
 }
+.flex-col {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
 
-/* НИЖНЯЯ НАВИГАЦИЯ LIQUID GLASS ДЛЯ МОБИЛЬНЫХ */
+.bg-selector {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    margin-top: 4px;
+}
+.bg-opt-btn {
+    flex: 1;
+    padding: 6px 0;
+    font-size: 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+.bg-opt-btn.active {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* LIGHTBOX МЕ
+```css
+ДИА МОДАЛКА */
+.lightbox-modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(25px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.lightbox-content {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    object-fit: contain;
+}
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
@@ -374,7 +514,6 @@ textarea {
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
     }
     
-    /* ЭФФЕКТ ВЫДЕЛЕНИЯ АКТИВНОЙ ВКЛАДКИ LIQUID GLASS */
     .nav-btn {
         background: transparent;
         border: 1px solid transparent;
