@@ -24,7 +24,6 @@ let isRecording = false;
 let typingTimeout = null;
 let replyTargetMessage = null;
 
-// Ссылки для отмены дублирующихся подписок Firebase
 let messagesRefUnsub = null;
 let typingRefUnsub = null;
 
@@ -140,7 +139,7 @@ function loadContacts() {
     });
 }
 
-// 2. ЧАТ И ЦИТИРОВАНИЕ
+// 2. ЧАТ И ОЧИСТКА ДИАЛОГА
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
     document.getElementById('chat-title').innerText = title;
@@ -148,6 +147,15 @@ function switchChat(targetId, title) {
     loadMessages(targetId);
     listenTyping(targetId);
 }
+
+// КНОПКА ОЧИСТКИ ДИАЛОГА ИЗ БД
+document.getElementById('clear-chat-btn').addEventListener('click', () => {
+    if (confirm("Вы уверены, что хотите полностью очистить этот диалог? Сообщения удалятся из базы данных навсегда.")) {
+        remove(ref(db, `messages/${currentChatTarget}`))
+            .then(() => alert("Диалог успешно очищен."))
+            .catch((err) => alert("Ошибка при очистке: " + err.message));
+    }
+});
 
 document.getElementById('send-msg-btn').addEventListener('click', sendTextMessage);
 document.getElementById('chat-text-input').addEventListener('keypress', (e) => {
@@ -165,7 +173,6 @@ document.getElementById('chat-text-input').addEventListener('input', () => {
 });
 
 function listenTyping(chatId) {
-    // Отписываемся от старого слушателя набора текста
     if (typingRefUnsub) {
         off(typingRefUnsub);
     }
@@ -225,7 +232,6 @@ function cancelReply() {
 document.getElementById('cancel-reply-btn').addEventListener('click', cancelReply);
 
 function loadMessages(targetId) {
-    // УДАЛЯЕМ СТАРУЮ ПОДПИСКУ (Убирает дублирование 2-4 сообщений)
     if (messagesRefUnsub) {
         off(messagesRefUnsub);
     }
@@ -481,7 +487,7 @@ function loadPosts() {
             const post = data[key];
             const isMyPost = post.author === currentUser.uid;
             const item = document.createElement('div');
-            item.className = 'post-item';
+            item.className = 'post-item glass-panel';
             
             let mediaHTML = '';
             if (post.mediaUrl) {
@@ -502,7 +508,7 @@ function loadPosts() {
                 <p style="margin-top: 6px;">${post.text}</p>
                 ${mediaHTML}
                 <div class="post-footer">
-                    <button class="btn-sm btn-outline" onclick="window.likePost('${key}')">❤️ ${post.likes ? Object.keys(post.likes).length : 0}</button>
+                    <button class="btn-sm btn-outline glass-btn" onclick="window.likePost('${key}')">❤️ ${post.likes ? Object.keys(post.likes).length : 0}</button>
                 </div>
             `;
             container.appendChild(item);
