@@ -1,27 +1,29 @@
 :root {
-    --bg-primary: #1e1e2e;
-    --bg-secondary: #252538;
-    --bg-surface: #2b2b40;
-    --text-primary: #cdd6f4;
+    --bg-gradient: radial-gradient(circle at 20% 20%, #2b2a4a 0%, #151525 100%);
+    --glass-bg: rgba(255, 255, 255, 0.07);
+    --glass-bg-hover: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-glow: rgba(137, 180, 250, 0.35);
+    --text-primary: #f2f5f9;
     --text-muted: #a6adc8;
     --accent: #89b4fa;
     --accent-hover: #b4befe;
     --danger: #f38ba8;
-    --border-color: #313244;
     --font-size-base: 100%;
     --vh: 1vh;
 }
 
 [data-theme="light"] {
-    --bg-primary: #eff1f5;
-    --bg-secondary: #e6e9ef;
-    --bg-surface: #ffffff;
-    --text-primary: #4c4f69;
-    --text-muted: #8c8fa1;
+    --bg-gradient: radial-gradient(circle at 20% 20%, #e2e8f0 0%, #cbd5e1 100%);
+    --glass-bg: rgba(255, 255, 255, 0.45);
+    --glass-bg-hover: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-glow: rgba(30, 102, 245, 0.25);
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
     --accent: #1e66f5;
     --accent-hover: #2a72ff;
     --danger: #d20f39;
-    --border-color: #ccd0da;
 }
 
 * {
@@ -36,8 +38,9 @@ html {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
     color: var(--text-primary);
     height: calc(var(--vh, 1vh) * 100);
     width: 100vw;
@@ -45,6 +48,36 @@ body {
     position: fixed;
     left: 0;
     top: 0;
+}
+
+/* LIQUID GLASS СТИЛИ */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+}
+
+.glass-btn {
+    background: rgba(137, 180, 250, 0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 15px var(--glass-glow);
+}
+
+.glass-btn-danger {
+    background: rgba(243, 139, 168, 0.2) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(243, 139, 168, 0.4) !important;
+    color: var(--danger) !important;
 }
 
 .screen {
@@ -61,16 +94,13 @@ body {
 #auth-screen {
     justify-content: center;
     align-items: center;
-    background: var(--bg-primary);
 }
 
 .auth-card {
-    background: var(--bg-surface);
-    padding: 2rem;
-    border-radius: 16px;
+    padding: 2.5rem;
+    border-radius: 24px;
     width: 90%;
     max-width: 360px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
@@ -88,13 +118,14 @@ body {
 
 input[type="email"], input[type="password"], input[type="text"], textarea {
     width: 100%;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.15);
     color: var(--text-primary);
     font-size: 1rem;
     outline: none;
+    backdrop-filter: blur(5px);
 }
 
 textarea {
@@ -102,23 +133,14 @@ textarea {
     height: 80px;
 }
 
-/* КНОПКИ */
 .btn {
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: 14px;
     border: none;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
 }
 
-.btn:active {
-    opacity: 0.8;
-}
-
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-danger { background: var(--danger); color: #fff; }
-.btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
 .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
 .btn-full { width: 100%; }
 
@@ -129,7 +151,9 @@ textarea {
     cursor: pointer;
     padding: 6px;
     color: var(--text-primary);
+    transition: transform 0.2s;
 }
+.icon-btn:active { transform: scale(0.9); }
 
 /* СТРУКТУРА ПРИЛОЖЕНИЯ */
 #app-screen {
@@ -141,17 +165,16 @@ textarea {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: var(--bg-primary);
-    border-right: 1px solid var(--border-color);
+    border-radius: 0;
 }
 
 .panel-header {
     padding: 14px 16px;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .scroll-content {
@@ -166,38 +189,49 @@ textarea {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 12px;
+    border-radius: 16px;
     cursor: pointer;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
 }
-.contact-item:hover { background: var(--bg-secondary); }
+.contact-item:hover, .contact-item.active {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border);
+    box-shadow: 0 4px 20px var(--glass-glow);
+}
 
 /* ДИАЛОГ */
 #panel-chat { flex: 1; }
 .messages-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .msg-bubble {
     max-width: 75%;
-    padding: 8px 12px;
-    border-radius: 14px;
+    padding: 10px 14px;
+    border-radius: 18px;
     font-size: 0.95rem;
     position: relative;
     word-break: break-word;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .msg-bubble.incoming {
     align-self: flex-start;
-    background: var(--bg-surface);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
 }
 
 .msg-bubble.outgoing {
     align-self: flex-end;
-    background: var(--accent);
+    background: linear-gradient(135deg, rgba(137, 180, 250, 0.6) 0%, rgba(30, 102, 245, 0.7) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: #fff;
 }
 
@@ -209,10 +243,10 @@ textarea {
 }
 
 .quote-block {
-    background: rgba(0,0,0,0.15);
+    background: rgba(0, 0, 0, 0.2);
     border-left: 3px solid var(--accent-hover);
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 6px;
     font-size: 0.8rem;
 }
@@ -220,39 +254,32 @@ textarea {
 .chat-input-area {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 10px;
-    background: var(--bg-surface);
-    border-top: 1px solid var(--border-color);
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--glass-border);
+    border-radius: 0;
 }
 
 .reply-preview-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 12px;
-    background: var(--bg-secondary);
-    border-top: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-top: 1px solid var(--glass-border);
     font-size: 0.85rem;
 }
 
-.chat-media-img, .post-media-img {
+.chat-media-img, .post-media-img, .chat-media-video, .post-media-video {
     max-width: 100%;
-    border-radius: 8px;
-    margin-top: 4px;
-}
-.chat-media-video, .post-media-video {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-top: 4px;
+    border-radius: 12px;
+    margin-top: 6px;
 }
 
 /* СТЕНА */
 #panel-wall { width: 340px; }
 .wall-create-box {
-    background: var(--bg-surface);
-    padding: 10px;
-    border-radius: 12px;
+    padding: 12px;
+    border-radius: 18px;
     margin-bottom: 12px;
 }
 .wall-actions {
@@ -262,10 +289,9 @@ textarea {
     margin-top: 8px;
 }
 .post-item {
-    background: var(--bg-surface);
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+    padding: 14px;
+    border-radius: 18px;
+    margin-bottom: 12px;
 }
 .post-header-row {
     display: flex;
@@ -285,9 +311,8 @@ textarea {
 #panel-settings { width: 300px; }
 .profile-card {
     text-align: center;
-    padding: 16px;
-    background: var(--bg-surface);
-    border-radius: 12px;
+    padding: 20px;
+    border-radius: 20px;
     margin-bottom: 16px;
 }
 .avatar-wrapper {
@@ -295,7 +320,7 @@ textarea {
     display: inline-block;
     margin-bottom: 8px;
 }
-.avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; }
+.avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
 .avatar-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 .btn-avatar-edit {
     position: absolute;
@@ -308,9 +333,8 @@ textarea {
     cursor: pointer;
 }
 .settings-group {
-    background: var(--bg-surface);
-    padding: 12px;
-    border-radius: 12px;
+    padding: 14px;
+    border-radius: 18px;
     margin-bottom: 12px;
 }
 .setting-item {
@@ -320,7 +344,7 @@ textarea {
     margin-top: 10px;
 }
 
-/* МОБИЛЬНАЯ АДАПТАЦИЯ */
+/* НИЖНЯЯ НАВИГАЦИЯ LIQUID GLASS ДЛЯ МОБИЛЬНЫХ */
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
@@ -328,33 +352,53 @@ textarea {
         display: none;
         width: 100% !important;
         border-right: none;
-        padding-bottom: 60px;
+        padding-bottom: 75px;
     }
     .panel.active { display: flex; }
     
-    .bottom-nav {
+    .glass-nav {
         display: flex;
         position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100vw;
-        height: 60px;
-        background: var(--bg-surface);
-        border-top: 1px solid var(--border-color);
+        bottom: 12px;
+        left: 5%;
+        width: 90vw;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(25px) saturate(200%);
+        -webkit-backdrop-filter: blur(25px) saturate(200%);
+        border: 1px solid var(--glass-border);
+        border-radius: 32px;
         justify-content: space-around;
         align-items: center;
         z-index: 100;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
     }
+    
+    /* ЭФФЕКТ ВЫДЕЛЕНИЯ АКТИВНОЙ ВКЛАДКИ LIQUID GLASS */
     .nav-btn {
-        background: none;
-        border: none;
+        background: transparent;
+        border: 1px solid transparent;
         color: var(--text-muted);
         display: flex;
         flex-direction: column;
         align-items: center;
-        font-size: 0.7rem;
+        justify-content: center;
+        font-size: 0.65rem;
         cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 20px;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
     }
-    .nav-btn.active { color: var(--accent); }
+    
+    .nav-btn.active {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(15px);
+        border-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 4px 20px var(--glass-glow), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+        transform: translateY(-2px) scale(1.05);
+    }
+
     .nav-icon { font-size: 1.2rem; }
 }
