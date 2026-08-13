@@ -3,14 +3,14 @@
   "short_name": "PrivateSpace",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1e1e2e",
-  "theme_color": "#1e1e2e",
-  "orientation": "portrait",
+  "background_color": "#011713",
+  "theme_color": "#011713",
   "icons": [
     {
-      "src": "https://via.placeholder.com/512",
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23011713'/><circle cx='256' cy='256' r='180' fill='%2310b981'/><text x='50%' y='55%' font-size='200' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>💬</text></svg>",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
