@@ -1,24 +1,31 @@
 :root {
-    --bg-gradient: radial-gradient(circle at 50% 30%, #1a102f 0%, #0d0818 60%, #05030a 100%);
+    --bg-gradient: radial-gradient(circle at 20% 20%, #2b2a4a 0%, #151525 100%);
+    /* ПРОЗРАЧНОЕ ЖИДКОЕ СТЕКЛО ВМЕСТО БЕЛОЙ ЗАЛИВКИ */
+    --glass-bg: rgba(255, 255, 255, 0.18);
+    --glass-bg-hover: rgba(255, 255, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-glow: rgba(137, 180, 250, 0.45);
     
-    /* СТЕКЛО КАК НА ВКЛАДКЕ «ЧАТЫ-КОНТАКТЫ» */
-    --glass-bg: rgba(255, 255, 255, 0.12);
-    --glass-border: rgba(255, 255, 255, 0.25);
-    
-    /* СООБЩЕНИЯ */
-    --msg-incoming-bg: rgba(30, 35, 45, 0.75);
-    --msg-outgoing-bg: linear-gradient(135deg, rgba(16, 112, 84, 0.85) 0%, rgba(6, 78, 59, 0.9) 100%);
-    
-    --text-primary: #ffffff;
-    --text-muted: #cbd5e1;
-    --accent: #10b981;
-    --danger: #f43f5e;
+    --text-primary: #111827;
+    --text-muted: #374151;
+    --accent: #1e66f5;
+    --accent-hover: #2a72ff;
+    --danger: #d20f39;
     --font-size-base: 100%;
     --vh: 1vh;
 }
 
 [data-theme="light"] {
-    --bg-gradient: radial-gradient(circle at 50% 30%, #2d3748 0%, #1a202c 100%);
+    --bg-gradient: radial-gradient(circle at 20% 20%, #e2e8f0 0%, #cbd5e1 100%);
+    --glass-bg: rgba(255, 255, 255, 0.35);
+    --glass-bg-hover: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-glow: rgba(30, 102, 245, 0.35);
+    --text-primary: #0f172a;
+    --text-muted: #334155;
+    --accent: #1e66f5;
+    --accent-hover: #2a72ff;
+    --danger: #d20f39;
 }
 
 * {
@@ -30,9 +37,8 @@
 
 html {
     font-size: var(--font-size-base);
-    background-color: #05030a !important;
+    background-color: #151525 !important;
     height: 100%;
-    width: 100%;
 }
 
 body {
@@ -42,7 +48,7 @@ body {
     background-position: center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
     height: calc(var(--vh, 1vh) * 100);
     width: 100vw;
     overflow: hidden;
@@ -51,114 +57,47 @@ body {
     top: 0;
 }
 
-/* 🖼️ БЕСШОВНЫЙ СВОЙ ФОН */
+/* ОВЕРЛЕЙ ДЛЯ ПОЛЬЗОВАТЕЛЬСКОГО ФОНА С ВЫСОКИМ ПРИОРИТЕТОМ */
 body.has-custom-bg {
     background-image: var(--custom-bg-url) !important;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
 }
 
 .hidden { display: none !important; }
 
-/* 💎 ЕДИНЫЙ ДИЗАЙН КАРТОЧЕК ДЛЯ ВСЕХ ВКЛАДОК (КАК НА ВКЛАДКЕ ЧАТЫ) */
-.glass-panel, 
-.profile-card, 
-.settings-group, 
-.wall-create-box, 
-.post-item,
-.contact-item {
-    background: rgba(255, 255, 255, 0.12) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
-    backdrop-filter: blur(25px) saturate(190%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25) !important;
-    border-radius: 20px !important;
-    color: #ffffff !important;
+/* КАРТОЧКИ - ЖИДКОЕ СТЕКЛО С ЛЕГКОЙ ПРОЗРАЧНОСТЬЮ */
+.glass-panel, .profile-card, .settings-group, .wall-create-box, .post-item {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(25px) saturate(190%) -webkit-backdrop-filter: blur(25px) saturate(190%);
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
 }
 
-/* ⚙️ ЕДИНЫЙ БЕЛЫЙ ЦВЕТ ТЕКСТА ВО ВСЕХ ПАНЕЛЯХ */
-h2, h3, h4, p, span, label, div,
-#panel-settings h3, 
-#panel-settings h4, 
-#panel-settings span, 
-#panel-settings p, 
-#panel-settings label,
-.retention-desc,
-.setting-item span {
-    color: #ffffff !important;
-    opacity: 1 !important;
-    font-weight: 500;
+.glass-btn {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
 }
 
-/* 🔘 СТЕКЛЯННЫЕ КНОПКИ С БЕЛЫМ ТЕКСТОМ (ИСПРАВЛЯЕТ БЕЛЫЕ ПЛАШКИ В SAFARI/IOS) */
-button, 
-.btn,
-.glass-btn, 
-.btn-outline, 
-label.btn {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    background: rgba(255, 255, 255, 0.18) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    color: #ffffff !important;
-    border-radius: 14px;
-    padding: 10px 16px;
-    font-weight: 600 !important;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-button:active, .glass-btn:active, .btn-outline:active {
+.glass-btn:active {
     transform: scale(0.96);
-    background: rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 0 15px var(--glass-glow);
 }
 
-/* 🛑 ОПАСНЫЕ КНОПКИ (КРАСНОЕ СТЕКЛО С БЕЛЫМ ТЕКСТОМ) */
-.glass-btn-danger, .btn-danger, #reset-bg-btn, #logout-btn {
-    background: rgba(220, 38, 38, 0.4) !important;
-    border: 1px solid rgba(248, 113, 113, 0.6) !important;
-    color: #ffffff !important;
-}
-
-/* 📝 ПОЛЯ ВВОДА И ТЕКСТА */
-input[type="email"], 
-input[type="password"], 
-input[type="text"], 
-textarea, 
-select.glass-select {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    background: rgba(0, 0, 0, 0.25) !important;
-    color: #ffffff !important;
-    font-size: 1rem;
-    outline: none;
-    -webkit-backdrop-filter: blur(15px) !important;
-    backdrop-filter: blur(15px) !important;
-    font-weight: 500;
-}
-
-textarea::placeholder, input::placeholder {
-    color: rgba(255, 255, 255, 0.6) !important;
-}
-
-select.glass-select option {
-    background: #1e1b2e !important;
-    color: #ffffff !important;
-}
-
-textarea {
-    resize: none;
-    height: 90px;
+.glass-btn-danger, .btn-danger {
+    background: rgba(210, 15, 57, 0.22) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(210, 15, 57, 0.5) !important;
+    color: #dc2626 !important;
+    font-weight: 700;
 }
 
 .screen {
@@ -167,9 +106,11 @@ textarea {
     width: 100vw;
 }
 
-.screen.active { display: flex; }
+.screen.active {
+    display: flex;
+}
 
-/* 🔒 АВТОРИЗАЦИЯ */
+/* АВТОРИЗАЦИЯ */
 #auth-screen {
     justify-content: center;
     align-items: center;
@@ -177,14 +118,14 @@ textarea {
 
 .auth-card {
     padding: 2.5rem;
-    border-radius: 24px !important;
+    border-radius: 24px;
     width: 90%;
     max-width: 360px;
     text-align: center;
 }
 
 .subtitle {
-    color: var(--text-muted) !important;
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
 }
@@ -195,20 +136,46 @@ textarea {
     gap: 1rem;
 }
 
-.btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+input[type="email"], input[type="password"], input[type="text"], textarea, select.glass-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.35) !important;
+    color: var(--text-primary) !important;
+    font-size: 1rem;
+    outline: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-weight: 500;
+}
+
+textarea {
+    resize: none;
+    height: 80px;
+}
+
+.btn {
+    padding: 10px 16px;
+    border-radius: 14px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-sm { padding: 6px 12px; font-size: 0.85rem; }
 .btn-full { width: 100%; }
 
 .icon-btn {
-    background: none !important;
-    border: none !important;
+    background: none;
+    border: none;
     font-size: 1.3rem;
     cursor: pointer;
     padding: 6px;
-    color: #ffffff !important;
-    box-shadow: none !important;
+    color: var(--text-primary) !important;
 }
 
-/* 📱 ОСНОВНОЙ ИНТЕРФЕЙС И БЕСШОВНЫЕ ПАНЕЛИ */
+/* СТРУКТУРА ПРИЛОЖЕНИЯ */
 #app-screen {
     display: flex;
     position: relative;
@@ -218,22 +185,16 @@ textarea {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
 }
 
-/* 🔝 ПРОЗРАЧНЫЙ ШАПКА-ЗАГОЛОВОК */
 .panel-header {
     padding: 14px 16px;
     padding-top: calc(14px + env(safe-area-inset-top));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(0, 0, 0, 0.12) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    backdrop-filter: blur(20px) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .scroll-content {
@@ -242,7 +203,7 @@ textarea {
     padding: 12px;
 }
 
-/* 💬 КОНТАКТЫ */
+/* ЧАТЫ И КОНТАКТЫ */
 #panel-contacts { width: 280px; }
 
 .contact-item {
@@ -250,16 +211,24 @@ textarea {
     align-items: center;
     gap: 12px;
     padding: 12px;
+    border-radius: 16px;
     cursor: pointer;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    color: var(--text-primary) !important;
 }
 
 .contact-item.active, .contact-item:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-glow) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* ✉️ ДИАЛОГ */
+/* ДИАЛОГ */
 #panel-chat { flex: 1; }
 
 .pinned-bar {
@@ -267,57 +236,55 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 8px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.25) !important;
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
 .pinned-info { display: flex; flex-direction: column; }
 .pinned-label { font-weight: bold; font-size: 0.75rem; color: var(--accent); }
-.pinned-text { color: #ffffff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px; }
+.pinned-text { color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px; }
 
 .messages-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .msg-bubble {
-    max-width: 80%;
+    max-width: 75%;
     padding: 10px 14px;
     border-radius: 18px;
     font-size: 0.95rem;
     position: relative;
     word-break: break-word;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    color: #ffffff !important;
-    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: var(--text-primary) !important;
 }
 
 .msg-bubble.incoming {
     align-self: flex-start;
-    background: var(--msg-incoming-bg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-bottom-left-radius: 4px;
+    background: rgba(255, 255, 255, 0.35) !important;
+    border: 1px solid var(--glass-border);
 }
 
 .msg-bubble.outgoing {
     align-self: flex-end;
-    background: var(--msg-outgoing-bg) !important;
-    border: 1px solid rgba(52, 211, 153, 0.3);
-    border-bottom-right-radius: 4px;
+    background: rgba(137, 180, 250, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .msg-meta {
-    font-size: 0.68rem;
-    opacity: 0.75;
+    font-size: 0.7rem;
+    opacity: 0.8;
     text-align: right;
     margin-top: 4px;
 }
 
 .quote-block {
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.08);
     border-left: 3px solid var(--accent);
     padding: 4px 8px;
     border-radius: 6px;
@@ -325,16 +292,30 @@ textarea {
     font-size: 0.8rem;
 }
 
+.audio-voice-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.speed-btn {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
 .chat-input-area {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    background: rgba(0, 0, 0, 0.2) !important;
-    -webkit-backdrop-filter: blur(25px) !important;
-    backdrop-filter: blur(25px) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--glass-border);
     border-radius: 0 !important;
 }
 
@@ -343,8 +324,7 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 8px 14px;
-    background: rgba(0, 0, 0, 0.2) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid var(--glass-border);
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
@@ -355,21 +335,9 @@ textarea {
     margin-top: 6px;
 }
 
-/* 📰 СТЕНА И ⚙️ НАСТРОЙКИ */
+/* СТЕНА И ПРОФИЛЬ */
 #panel-wall { width: 340px; }
 #panel-settings { width: 300px; }
-
-.wall-create-box {
-    padding: 14px;
-    margin-bottom: 16px;
-}
-
-.wall-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    align-items: center;
-}
 
 .profile-card {
     text-align: center;
@@ -382,30 +350,30 @@ textarea {
     display: inline-block;
     margin-bottom: 8px;
 }
-.avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); }
+.avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
 .avatar-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 
 .btn-avatar-edit {
     position: absolute;
     bottom: 0;
     right: 0;
-    background: var(--accent) !important;
-    border: none !important;
+    background: var(--accent);
+    border: none;
     border-radius: 50%;
     padding: 6px;
     cursor: pointer;
 }
 
 .settings-group {
-    padding: 16px;
-    margin-bottom: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
 }
 
 .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 12px;
+    margin-top: 10px;
 }
 
 .flex-col {
@@ -413,7 +381,15 @@ textarea {
     align-items: flex-start;
 }
 
-/* 📱 МОБИЛЬНАЯ ПЛАВАЮЩАЯ НАВИГАЦИЯ */
+/* ОТНОСИТЕЛЬНЫЕ ЕДИНИЦЫ ДЛЯ МАСШТАБИРОВАНИЯ ВСЕХ ЭЛЕМЕНТОВ НОМИНАЛЬНО */
+.retention-desc {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--text-primary) !important;
+    font-weight: 500;
+}
+
+/* НИЖНЯЯ НАВИГАЦИЯ ДЛЯ МОБИЛЬНЫХ */
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
@@ -432,45 +408,43 @@ textarea {
         left: 5%;
         width: 90vw;
         height: 64px;
-        background: rgba(15, 12, 28, 0.6) !important;
-        -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-        backdrop-filter: blur(25px) saturate(200%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        background: rgba(255, 255, 255, 0.22) !important;
+        backdrop-filter: blur(25px) saturate(200%);
+        -webkit-backdrop-filter: blur(25px) saturate(200%);
+        border: 1px solid var(--glass-border) !important;
         border-radius: 32px;
         justify-content: space-around;
         align-items: center;
         z-index: 100;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     }
     
+    /* СТЕКЛЯННЫЙ И ПОЛУПРОЗРАЧНЫЙ ВИД ДЛЯ АКТИВНОЙ ВКЛАДКИ (БЕЗ БЕЛОЙ ЗАЛИВКИ) */
     .nav-btn {
         background: transparent !important;
-        border: 1px solid transparent !important;
-        color: #ffffff !important;
+        border: 1px solid transparent;
+        color: var(--text-muted);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
+        font-size: 0.65rem;
         cursor: pointer;
-        padding: 6px 14px;
+        padding: 6px 12px;
         border-radius: 20px;
-        transition: all 0.25s ease;
-        font-weight: 500;
-        opacity: 0.8;
-        box-shadow: none !important;
+        transition: all 0.3s ease;
+        font-weight: 600;
     }
     
-    .nav-btn.active, .nav-btn:active {
-        color: #ffffff !important;
-        opacity: 1 !important;
-        background: rgba(255, 255, 255, 0.22) !important;
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
-        backdrop-filter: blur(12px) !important;
-        transform: translateY(-1px) scale(1.02);
+    .nav-btn.active {
+        color: var(--text-primary) !important;
+        background: rgba(255, 255, 255, 0.38) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-glow) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px) scale(1.04);
     }
 
-    .nav-icon { font-size: 1.2rem; margin-bottom: 2px; }
+    .nav-icon { font-size: 1.2rem; }
 }
