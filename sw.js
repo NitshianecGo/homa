@@ -1,11 +1,14 @@
-const CACHE_NAME = 'privatespace-v16';
+const CACHE_NAME = 'homespace-v23';
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=16',
-  './app.js?v=16',
+  './style.css',
+  './app.js',
   './manifest.json',
-  './apple-touch-icon.png'
+  './favicon.png',
+  './apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
@@ -25,7 +28,7 @@ self.addEventListener('activate', (e) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            return caches.delete(key); // Удаляем старый кэш со светлой темой
+            return caches.delete(key);
           }
         })
       );
@@ -37,7 +40,7 @@ self.addEventListener('fetch', (e) => {
   if (!e.request.url.startsWith(self.location.origin)) {
     return;
   }
-  
+
   e.respondWith(
     caches.match(e.request).then((res) => res || fetch(e.request))
   );
