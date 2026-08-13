@@ -1,3 +1,23 @@
+/* 1. Сброс системных стилей iOS Safari для ВСЕХ элементов ввода и кнопок */
+input, button, select, textarea, label {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    -webkit-border-radius: 0; /* Снимает принудительное системное скругление iOS */
+}
+
+/* 2. Принудительное включение поддержки размытия стекла для WebKit */
+.glass-panel, .glass-nav, .nav-btn, .msg-bubble, button {
+    -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
+    backdrop-filter: blur(25px) saturate(190%) !important;
+}
+
+/* 3. Фикс фиксированного фона на iPhone (убирает артефакты скролла) */
+@supports (-webkit-touch-callout: none) {
+    body {
+        background-attachment: scroll !important; /* На iOS fixed фон ломает верстку */
+    }
+}
 /* 📱 ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА НАВИГАЦИИ (iOS GLASS) */
 .glass-nav {
     display: flex;
