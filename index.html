@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- PWA & Apple Web App Settings -->
+    <!-- PWA & Apple Settings -->
     <meta name="apple-mobile-web-app-title" content="HomeSpace">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,21 +19,20 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-    <!-- CSS Стили -->
-    <link rel="stylesheet" href="style.css?v=19">
+    <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 
     <!-- 1. Экран Авторизации -->
     <div id="auth-screen" class="screen active">
         <div class="auth-card glass-panel">
-            <img src="icon-192.png" alt="HomeSpace Logo" class="auth-logo" style="width: 80px; height: 80px; border-radius: 18px; margin-bottom: 12px;">
+            <img src="icon-192.png" alt="HomeSpace Logo" style="width: 80px; height: 80px; border-radius: 18px; margin-bottom: 12px;">
             <h2>HomeSpace</h2>
             <p class="subtitle">Приватный мессенджер</p>
             <form id="login-form">
                 <input type="text" id="username-input" placeholder="Имя пользователя" required autocomplete="off">
                 <input type="password" id="password-input" placeholder="Пароль" required>
-                <button type="submit" class="btn glass-btn btn-full">Войти</button>
+                <button type="submit" id="btn-login" class="btn glass-btn btn-full">Войти</button>
             </form>
         </div>
     </div>
@@ -42,13 +41,19 @@
     <div id="app-screen" class="screen">
         
         <!-- Панель 1: Контакты / Чаты -->
-        <div id="panel-contacts" class="panel glass-panel">
+        <div id="panel-contacts" class="panel glass-panel active">
             <div class="panel-header">
                 <h3>Чаты</h3>
                 <button id="btn-add-contact" class="icon-btn" title="Добавить контакт">➕</button>
             </div>
             <div class="scroll-content" id="contacts-list">
-                <!-- Динамический список контактов -->
+                <div class="contact-item active">
+                    <img src="icon-192.png" class="avatar-sm">
+                    <div>
+                        <strong>Общий чат</strong>
+                        <p class="subtitle" style="margin:0;">Онлайн</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -65,7 +70,6 @@
                 </div>
             </div>
 
-            <!-- Закрепленное сообщение -->
             <div id="pinned-message-bar" class="pinned-bar hidden">
                 <div class="pinned-content">
                     <span class="pinned-icon">📌</span>
@@ -74,18 +78,18 @@
                 <button id="btn-unpin" class="icon-btn">❌</button>
             </div>
 
-            <!-- Область сообщений -->
             <div class="scroll-content messages-container" id="messages-container">
-                <!-- Динамические сообщения -->
+                <div class="msg-bubble incoming">
+                    Добро пожаловать в HomeSpace!
+                    <div class="msg-meta">12:00</div>
+                </div>
             </div>
 
-            <!-- Предпросмотр ответа -->
             <div id="reply-preview-bar" class="reply-preview-bar hidden">
                 <span id="reply-preview-text">Ответ на...</span>
                 <button id="btn-cancel-reply" class="icon-btn">❌</button>
             </div>
 
-            <!-- Поле ввода -->
             <div class="chat-input-area glass-panel">
                 <label for="chat-file-input" class="icon-btn">📎</label>
                 <input type="file" id="chat-file-input" accept="image/*,video/*" style="display:none;">
@@ -112,9 +116,7 @@
                         <button id="btn-publish-post" class="btn glass-btn btn-sm">Опубликовать</button>
                     </div>
                 </div>
-                <div id="wall-posts-container">
-                    <!-- Посты -->
-                </div>
+                <div id="wall-posts-container"></div>
             </div>
         </div>
 
@@ -131,7 +133,7 @@
                         <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
                     </div>
                     <h4 id="user-display-name">Пользователь</h4>
-                    <p id="user-display-handle" class="subtitle">@username</p>
+                    <p id="user-display-handle" class="subtitle">@user</p>
                 </div>
 
                 <div class="settings-group glass-panel">
@@ -186,23 +188,11 @@
                     </div>
                 </div>
 
-                <div class="settings-group glass-panel">
-                    <h4>Доступ и разрешения</h4>
-                    <div class="setting-item">
-                        <span>Уведомления</span>
-                        <button id="btn-perm-notif" class="btn glass-btn btn-sm">Запросить</button>
-                    </div>
-                    <div class="setting-item">
-                        <span>Микрофон</span>
-                        <button id="btn-perm-mic" class="btn glass-btn btn-sm">Проверить</button>
-                    </div>
-                </div>
-
                 <button id="btn-logout" class="btn glass-btn-danger btn-full" style="margin-top: 15px;">Выйти из аккаунта</button>
             </div>
         </div>
 
-        <!-- Нижняя стеклянная навигация (Telegram Style Liquid Glass) -->
+        <!-- Нижняя стеклянная навигация -->
         <nav class="glass-nav">
             <button class="nav-btn active" data-target="panel-contacts">
                 <span class="nav-icon">💬</span>
@@ -224,18 +214,11 @@
 
     </div>
 
-    <!-- Модальное окно просмотра изображений -->
-    <div id="lightbox-modal" class="lightbox-modal hidden">
-        <span id="lightbox-close" class="lightbox-close">&times;</span>
-        <img id="lightbox-img" class="lightbox-content" src="" alt="Enlarged image">
-    </div>
-
-    <!-- Скрипт приложения и Service Worker -->
-    <script type="module" src="app.js?v=19"></script>
+    <script src="app.js?v=21"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed:', err));
             });
         }
     </script>
