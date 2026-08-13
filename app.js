@@ -1,11 +1,11 @@
-import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js)";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "[https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js)";
-import { getDatabase, ref, set, push, onValue, off, remove, onDisconnect, serverTimestamp } from "[https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js)";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, set, push, onValue, off, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
   authDomain: "homa-27efb.firebaseapp.com",
-  databaseURL: "[https://homa-27efb-default-rtdb.firebaseio.com](https://homa-27efb-default-rtdb.firebaseio.com)",
+  databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
   projectId: "homa-27efb",
   messagingSenderId: "365610803694",
   appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
@@ -30,7 +30,9 @@ let messagesRefUnsub = null;
 let typingRefUnsub = null;
 let pinnedRefUnsub = null;
 
-// WEB AUDIO API СИНТЕТИКА ЗВУКОВ ОПОВЕЩЕНИЙ
+// ВСТРОЕННАЯ АВТОМАШИНА SVG-АВАТАРОК (БЕЗ ВНЕШНИХ СЕРВЕРОВ)
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2389b4fa'/><text x='50%' y='55%' font-size='40' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>👤</text></svg>";
+
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
@@ -59,14 +61,12 @@ function playSound(type) {
     } catch(e) {}
 }
 
-// HAPTIC FEEDBACK (ВИБРООТКЛИК)
 function triggerHaptic() {
     if ("vibrate" in navigator) {
         navigator.vibrate(40);
     }
 }
 
-// Web Push Уведомления
 if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
 }
@@ -77,7 +77,6 @@ function showNotification(title, body) {
     }
 }
 
-// ФИКС ВЫСОТЫ iOS SAFARI
 function fixIOSHeight() {
     let vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -86,7 +85,6 @@ window.addEventListener('resize', fixIOSHeight);
 window.addEventListener('orientationchange', fixIOSHeight);
 fixIOSHeight();
 
-// АВТОРИЗАЦИЯ
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
@@ -115,7 +113,6 @@ document.getElementById('logout-btn').addEventListener('click', () => {
     signOut(auth);
 });
 
-// ОНЛАЙН СТАТУС И lastSeen
 function setupPresence(uid) {
     const userStatusRef = ref(db, `/status/${uid}`);
     const connectedRef = ref(db, '.info/connected');
@@ -141,11 +138,12 @@ function initAppData() {
         const userData = snapshot.val();
         if (userData && userData.avatar) {
             document.getElementById('user-avatar').src = userData.avatar;
+        } else {
+            document.getElementById('user-avatar').src = DEFAULT_AVATAR;
         }
     });
 }
 
-// 1. КОНТАКТЫ С ВРЕМЕНЕМ ПОСЛЕДНЕГО ВИЗИТА
 function loadContacts() {
     onValue(ref(db, 'users'), (snapshot) => {
         const container = document.getElementById('contacts-list');
@@ -171,7 +169,7 @@ function loadContacts() {
             const privateChatId = currentUser.uid < uid ? `private_${currentUser.uid}_${uid}` : `private_${uid}_${currentUser.uid}`;
 
             div.innerHTML = `
-                <img src="${u.avatar || '[https://via.placeholder.com/35](https://via.placeholder.com/35)'}" class="avatar-sm">
+                <img src="${u.avatar || DEFAULT_AVATAR}" class="avatar-sm">
                 <div>
                     <div><strong>${u.name || u.email.split('@')[0]}</strong></div>
                     <span id="status-${uid}" class="text-muted" style="font-size:0.75rem;">⚪ Оффлайн</span>
@@ -203,7 +201,6 @@ function loadContacts() {
     });
 }
 
-// 2. ЧАТ, ЗАКРЕП И ОЧИСТКА
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
     document.getElementById('chat-title').innerText = title;
@@ -222,7 +219,6 @@ document.getElementById('clear-chat-btn').addEventListener('click', () => {
     }
 });
 
-// ЗАКРЕПЛЕНИЕ СООБЩЕНИЙ
 document.getElementById('pin-msg-btn').addEventListener('click', () => {
     triggerHaptic();
     const text = prompt("Введите текст для закрепления в шапке чата:");
@@ -408,7 +404,6 @@ function loadMessages(targetId) {
     });
 }
 
-// УСКОРЕНИЕ ГОЛОСОВЫХ
 window.toggleAudioSpeed = function(audioId, btn) {
     triggerHaptic();
     const audio = document.getElementById(audioId);
@@ -425,7 +420,6 @@ window.toggleAudioSpeed = function(audioId, btn) {
     }
 };
 
-// LIGHTBOX ДЛЯ ФОТО
 window.openLightbox = function(src) {
     triggerHaptic();
     const modal = document.getElementById('lightbox-modal');
@@ -443,7 +437,6 @@ document.getElementById('lightbox-modal').addEventListener('click', (e) => {
     }
 });
 
-// 3. ЗАПИСЬ ГОЛОСОВЫХ С ТАЙМЕРОМ
 const recordBtn = document.getElementById('record-audio-btn');
 const recordTimerElem = document.getElementById('record-timer');
 
@@ -499,7 +492,6 @@ recordBtn.addEventListener('click', async () => {
             isRecording = true;
             document.getElementById('record-icon').innerText = '🛑';
             
-            // Запуск таймера
             recordSeconds = 0;
             recordTimerElem.innerText = '00:00';
             recordTimerElem.style.display = 'inline';
@@ -520,7 +512,6 @@ recordBtn.addEventListener('click', async () => {
     }
 });
 
-// ФАЙЛЫ И ВЫБОР
 document.getElementById('chat-file-btn').addEventListener('click', () => { triggerHaptic(); document.getElementById('chat-file-input').click(); });
 document.getElementById('avatar-edit-btn').addEventListener('click', () => { triggerHaptic(); document.getElementById('avatar-file-input').click(); });
 document.getElementById('post-file-btn').addEventListener('click', () => { triggerHaptic(); document.getElementById('post-file-input').click(); });
@@ -578,7 +569,6 @@ document.getElementById('chat-file-input').addEventListener('change', async (e) 
     }
 });
 
-// СМЕНА АВАТАРКИ
 document.getElementById('avatar-file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
@@ -596,7 +586,6 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
     }
 });
 
-// ПУБЛИКАЦИЯ И УДАЛЕНИЕ ПОСТОВ
 document.getElementById('post-file-input').addEventListener('change', (e) => {
     selectedPostFile = e.target.files[0];
     document.getElementById('post-file-name').innerText = selectedPostFile ? selectedPostFile.name : '';
@@ -681,7 +670,6 @@ window.deletePost = function(postKey) {
     }
 };
 
-// НАСТРОЙКИ ФОНА ЧАТА И ТЕМЫ
 document.querySelectorAll('.bg-opt-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         triggerHaptic();
@@ -712,7 +700,6 @@ function changeFontSize(delta) {
     document.getElementById('font-size-val').innerText = `${fontSize}%`;
 }
 
-// АВТОУДАЛЕНИЕ СООБЩЕНИЙ ПО СРОКУ ХРАНЕНИЯ
 document.getElementById('storage-retention-select').addEventListener('change', (e) => {
     triggerHaptic();
     const days = e.target.value;
@@ -742,7 +729,6 @@ function checkAutoRetention() {
     }, { onlyOnce: true });
 }
 
-// МОБИЛЬНАЯ НАВИГАЦИЯ
 function openMobileTab(targetId) {
     document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-target') === targetId);
