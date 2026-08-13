@@ -215,7 +215,7 @@ function listenTyping(chatId) {
     });
 }
 
-// ЗАКРЕПЛЕНИЕ СООБЩЕНИЯВ ЧАТЕ
+// ЗАКРЕПЛЕНИЕ СООБЩЕНИЯ В ЧАТЕ
 function listenPinnedMessage(chatId) {
     if (pinnedRefUnsub) off(pinnedRefUnsub);
 
@@ -294,7 +294,6 @@ function loadMessages(targetId) {
             const bubble = document.createElement('div');
             bubble.className = `msg-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
             
-            // Клик по сообщению для цитирования или закрепления
             bubble.onclick = (e) => {
                 if (e.target.tagName === 'BUTTON' || e.target.tagName === 'AUDIO') return;
                 
@@ -350,7 +349,6 @@ function loadMessages(targetId) {
     });
 }
 
-// ПЕРЕКЛЮЧЕНИЕ СКОРОСТИ ВОСПРОИЗВЕДЕНИЯ ГУДИО (1x -> 1.5x -> 2x)
 window.changeAudioSpeed = function(audioId, btnId) {
     const audio = document.getElementById(audioId);
     const btn = document.getElementById(btnId);
@@ -629,15 +627,16 @@ function initRetentionSetting() {
     });
 }
 
-// ЗАГРУЗКА И СБРОС ФОНА ЧАТА
+// ЗАГРУЗКА И СБРОС ФОНА ЧАТА (ФИКС ОВЕРЛЕЯ ДЛЯ IOS)
 const customBgInput = document.getElementById('custom-bg-input');
 const resetBgBtn = document.getElementById('reset-bg-btn');
 
 function loadCustomBg() {
     const savedBg = localStorage.getItem('hs_custom_bg');
     if (savedBg) {
-        document.body.style.backgroundImage = `url(${savedBg})`;
-        resetBgBtn.classList.remove('hidden');
+        document.body.style.setProperty('--custom-bg-url', `url(${savedBg})`);
+        document.body.classList.add('has-custom-bg');
+        if (resetBgBtn) resetBgBtn.classList.remove('hidden');
     }
 }
 
@@ -650,8 +649,9 @@ if (customBgInput) {
         reader.onload = (event) => {
             const base64Bg = event.target.result;
             localStorage.setItem('hs_custom_bg', base64Bg);
-            document.body.style.backgroundImage = `url(${base64Bg})`;
-            resetBgBtn.classList.remove('hidden');
+            document.body.style.setProperty('--custom-bg-url', `url(${base64Bg})`);
+            document.body.classList.add('has-custom-bg');
+            if (resetBgBtn) resetBgBtn.classList.remove('hidden');
         };
         reader.readAsDataURL(file);
     });
@@ -660,7 +660,8 @@ if (customBgInput) {
 if (resetBgBtn) {
     resetBgBtn.addEventListener('click', () => {
         localStorage.removeItem('hs_custom_bg');
-        document.body.style.backgroundImage = '';
+        document.body.style.removeProperty('--custom-bg-url');
+        document.body.classList.remove('has-custom-bg');
         resetBgBtn.classList.add('hidden');
     });
 }
