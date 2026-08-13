@@ -3,8 +3,9 @@
   "short_name": "HomeSpace",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#011713",
-  "theme_color": "#011713",
+  "background_color": "#1e1e2e",
+  "theme_color": "#1e1e2e",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
