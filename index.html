@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- PWA & Apple Settings -->
+    <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-title" content="HomeSpace">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
             <h2>HomeSpace</h2>
             <p class="subtitle">Приватный мессенджер</p>
             <form id="login-form">
-                <input type="text" id="username-input" placeholder="Имя пользователя" required autocomplete="off">
+                <input type="text" id="username-input" placeholder="Имя пользователя или Email" required autocomplete="off">
                 <input type="password" id="password-input" placeholder="Пароль" required>
                 <button type="submit" id="btn-login" class="btn glass-btn btn-full">Войти</button>
             </form>
@@ -48,7 +48,7 @@
             </div>
             <div class="scroll-content" id="contacts-list">
                 <div class="contact-item active">
-                    <img src="icon-192.png" class="avatar-sm">
+                    <img src="icon-192.png" class="avatar-sm" alt="Avatar">
                     <div>
                         <strong>Общий чат</strong>
                         <p class="subtitle" style="margin:0;">Онлайн</p>
@@ -214,7 +214,8 @@
 
     </div>
 
-    <script src="app.js?v=21"></script>
+    <!-- Подключаем app.js С АТРИБУТОМ type="module" -->
+    <script type="module" src="app.js?v=22"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
