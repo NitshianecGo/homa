@@ -1,10 +1,14 @@
-const CACHE_NAME = 'privatespace-v18';
+const CACHE_NAME = 'homespace-v19';
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=18',
-  './app.js?v=18',
-  './manifest.json'
+  './style.css?v=19',
+  './app.js?v=19',
+  './manifest.json',
+  './favicon.png',
+  './apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
