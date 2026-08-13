@@ -30,8 +30,7 @@ let messagesRefUnsub = null;
 let typingRefUnsub = null;
 let pinnedRefUnsub = null;
 
-// ВСТРОЕННАЯ АВТОМАШИНА SVG-АВАТАРОК (БЕЗ ВНЕШНИХ СЕРВЕРОВ)
-const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2389b4fa'/><text x='50%' y='55%' font-size='40' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>👤</text></svg>";
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/><text x='50%' y='55%' font-size='40' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>👤</text></svg>";
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -67,15 +66,48 @@ function triggerHaptic() {
     }
 }
 
-if ("Notification" in window && Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
 function showNotification(title, body) {
     if ("Notification" in window && Notification.permission === "granted" && document.hidden) {
         new Notification(title, { body: body, icon: "apple-touch-icon.png" });
     }
 }
+
+// ПРОВЕРКА И ЗАПРОС РАЗРЕШЕНИЙ (УВЕДОМЛЕНИЯ, МИКРОФОН, КАМЕРА)
+document.getElementById('toggle-notif-btn').addEventListener('click', async () => {
+    triggerHaptic();
+    if (!("Notification" in window)) {
+        alert("Уведомления не поддерживаются браузером.");
+        return;
+    }
+    const perm = await Notification.requestPermission();
+    if (perm === "granted") {
+        alert("Уведомления успешно включены!");
+    } else {
+        alert("Доступ к уведомлениям отклонен.");
+    }
+});
+
+document.getElementById('check-mic-btn').addEventListener('click', async () => {
+    triggerHaptic();
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        alert("Микрофон работает и доступен!");
+        stream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+        alert("Ошибка доступа к микрофону: " + err.message);
+    }
+});
+
+document.getElementById('check-cam-btn').addEventListener('click', async () => {
+    triggerHaptic();
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        alert("Камера работает и доступна!");
+        stream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+        alert("Ошибка доступа к камере: " + err.message);
+    }
+});
 
 function fixIOSHeight() {
     let vh = window.innerHeight * 0.01;
@@ -102,10 +134,16 @@ onAuthStateChanged(auth, (user) => {
 document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
     triggerHaptic();
-    const email = document.getElementById('email').value;
+    
+    let username = document.getElementById('username').value.trim().toLowerCase();
     const pass = document.getElementById('password').value;
+
+    let email = username.includes('@') ? username : `${username}@app.local`;
+
     signInWithEmailAndPassword(auth, email, pass)
-        .catch(err => document.getElementById('auth-error').innerText = "Ошибка входа: " + err.message);
+        .catch(err => {
+            document.getElementById('auth-error').innerText = "Ошибка входа: проверьте логин или пароль";
+        });
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
@@ -125,14 +163,20 @@ function setupPresence(uid) {
     });
 }
 
+function getCleanUsername(emailOrUser) {
+    if (!emailOrUser) return 'Пользователь';
+    return emailOrUser.split('@')[0];
+}
+
 function initAppData() {
     loadContacts();
     switchChat('global', 'Общий чат');
     loadPosts();
     checkAutoRetention();
     
-    document.getElementById('user-email-text').innerText = currentUser.email;
-    document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
+    const cleanName = getCleanUsername(currentUser.email);
+    document.getElementById('user-email-text').innerText = `@${cleanName}`;
+    document.getElementById('user-display-name').innerText = cleanName;
 
     onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
         const userData = snapshot.val();
@@ -167,18 +211,19 @@ function loadContacts() {
             div.className = 'contact-item';
             
             const privateChatId = currentUser.uid < uid ? `private_${currentUser.uid}_${uid}` : `private_${uid}_${currentUser.uid}`;
+            const userName = u.name || getCleanUsername(u.email);
 
             div.innerHTML = `
                 <img src="${u.avatar || DEFAULT_AVATAR}" class="avatar-sm">
                 <div>
-                    <div><strong>${u.name || u.email.split('@')[0]}</strong></div>
+                    <div><strong>${userName}</strong></div>
                     <span id="status-${uid}" class="text-muted" style="font-size:0.75rem;">⚪ Оффлайн</span>
                 </div>
             `;
             
             div.onclick = () => {
                 triggerHaptic();
-                switchChat(privateChatId, `💬 Чат с ${u.name || u.email.split('@')[0]}`);
+                switchChat(privateChatId, `💬 Чат с ${userName}`);
                 openMobileTab('panel-chat');
             };
             container.appendChild(div);
@@ -189,7 +234,7 @@ function loadContacts() {
                 if (el && st) {
                     if (st.state === 'online') {
                         el.innerText = '🟢 В сети';
-                        el.style.color = '#a6e3a1';
+                        el.style.color = '#34d399';
                     } else {
                         const lastTime = st.lastChanged ? new Date(st.lastChanged).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                         el.innerText = `⚪ Был(а) в сети ${lastTime ? 'в ' + lastTime : ''}`;
@@ -279,7 +324,7 @@ function listenTyping(chatId) {
         const indicator = document.getElementById('typing-indicator');
         if (indicator) {
             indicator.innerText = isTyping ? '✏️ печатает...' : '';
-            indicator.style.color = 'var(--accent)';
+            indicator.style.color = 'var(--accent-hover)';
             indicator.style.fontSize = '0.8rem';
         }
     });
@@ -293,7 +338,7 @@ function sendTextMessage() {
 
     const msgPayload = {
         sender: currentUser.uid,
-        senderName: currentUser.email.split('@')[0],
+        senderName: getCleanUsername(currentUser.email),
         type: 'text',
         content: text,
         timestamp: serverTimestamp(),
@@ -391,7 +436,7 @@ function loadMessages(targetId) {
 
             let checkMark = '';
             if (isOutgoing) {
-                checkMark = msg.read ? '<span style="color:#89b4fa; font-weight:bold;">✓✓</span>' : '<span style="color:#89b4fa; font-weight:bold;">✓</span>';
+                checkMark = msg.read ? '<span style="color:#ffffff; font-weight:bold;">✓✓</span>' : '<span style="color:#ffffff; opacity:0.8;">✓</span>';
             }
 
             const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
@@ -476,7 +521,7 @@ recordBtn.addEventListener('click', async () => {
                 reader.onloadend = () => {
                     push(ref(db, `messages/${currentChatTarget}`), {
                         sender: currentUser.uid,
-                        senderName: currentUser.email.split('@')[0],
+                        senderName: getCleanUsername(currentUser.email),
                         type: 'audio',
                         content: reader.result,
                         timestamp: serverTimestamp(),
@@ -557,7 +602,7 @@ document.getElementById('chat-file-input').addEventListener('change', async (e) 
 
         push(ref(db, `messages/${currentChatTarget}`), {
             sender: currentUser.uid,
-            senderName: currentUser.email.split('@')[0],
+            senderName: getCleanUsername(currentUser.email),
             type: isVideo ? 'video' : 'image',
             content: mediaData,
             timestamp: serverTimestamp(),
@@ -575,7 +620,7 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
     try {
         const base64Avatar = await fileToBase64(file, 150);
         await set(ref(db, `users/${currentUser.uid}`), {
-            name: currentUser.email.split('@')[0],
+            name: getCleanUsername(currentUser.email),
             email: currentUser.email,
             avatar: base64Avatar
         });
@@ -643,7 +688,7 @@ function loadPosts() {
 
             item.innerHTML = `
                 <div class="post-header-row">
-                    <strong>${post.authorEmail.split('@')[0]}</strong>
+                    <strong>${getCleanUsername(post.authorEmail)}</strong>
                     ${deleteBtn}
                 </div>
                 <p style="margin-top: 6px;">${post.text}</p>
@@ -670,6 +715,17 @@ window.deletePost = function(postKey) {
     }
 };
 
+// ПЕРЕКЛЮЧЕНИЕ ТЕМ (LIQUID EMERALD И DARK CLASSIC)
+document.querySelectorAll('.theme-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+        triggerHaptic();
+        document.querySelectorAll('.theme-opt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const theme = btn.getAttribute('data-theme-val');
+        document.documentElement.setAttribute('data-theme', theme);
+    });
+});
+
 document.querySelectorAll('.bg-opt-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         triggerHaptic();
@@ -682,12 +738,6 @@ document.querySelectorAll('.bg-opt-btn').forEach(btn => {
             document.body.setAttribute('data-chat-bg', bg);
         }
     });
-});
-
-document.getElementById('theme-toggle').addEventListener('click', () => {
-    triggerHaptic();
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
 });
 
 let fontSize = 100;
