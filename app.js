@@ -3,12 +3,12 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 import { getDatabase, ref, set, push, onValue, off, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
-  authDomain: "homa-27efb.firebaseapp.com",
-  databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
-  projectId: "homa-27efb",
-  messagingSenderId: "365610803694",
-  appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
+    apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
+    authDomain: "homa-27efb.firebaseapp.com",
+    databaseURL: "https://homa-27efb-default-rtdb.firebaseio.com",
+    projectId: "homa-27efb",
+    messagingSenderId: "365610803694",
+    appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -43,26 +43,29 @@ fixIOSHeight();
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
-        document.getElementById('auth-screen').classList.remove('active');
-        document.getElementById('app-screen').classList.add('active');
+        document.getElementById('auth-screen')?.classList.remove('active');
+        document.getElementById('app-screen')?.classList.add('active');
         setupPresence(user.uid);
         initAppData();
     } else {
         currentUser = null;
-        document.getElementById('app-screen').classList.remove('active');
-        document.getElementById('auth-screen').classList.add('active');
+        document.getElementById('app-screen')?.classList.remove('active');
+        document.getElementById('auth-screen')?.classList.add('active');
     }
 });
 
-document.getElementById('login-form').addEventListener('submit', (e) => {
+document.getElementById('login-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
     signInWithEmailAndPassword(auth, email, pass)
-        .catch(err => document.getElementById('auth-error').innerText = "Ошибка входа: " + err.message);
+        .catch(err => {
+            const errEl = document.getElementById('auth-error');
+            if(errEl) errEl.innerText = "Ошибка входа: " + err.message;
+        });
 });
 
-document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+document.getElementById('logout-btn')?.addEventListener('click', () => signOut(auth));
 
 // ОНЛАЙН СТАТУС
 function setupPresence(uid) {
@@ -83,16 +86,18 @@ function initAppData() {
     loadPosts();
     loadCustomBg();
     initRetentionSetting();
+    initThemeLogic(); // Переключение тем 🌙/☀️
     
-    document.getElementById('user-email-text').innerText = currentUser.email;
-    document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
+    const emailText = document.getElementById('user-email-text');
+    const nameText = document.getElementById('user-display-name');
+    if (emailText) emailText.innerText = currentUser.email;
+    if (nameText) nameText.innerText = currentUser.email.split('@')[0];
 
     onValue(ref(db, `users/${currentUser.uid}`), (snapshot) => {
         const userData = snapshot.val();
-        if (userData && userData.avatar) {
-            document.getElementById('user-avatar').src = userData.avatar;
-        } else {
-            document.getElementById('user-avatar').src = DEFAULT_AVATAR;
+        const avatarEl = document.getElementById('user-avatar');
+        if (avatarEl) {
+            avatarEl.src = (userData && userData.avatar) ? userData.avatar : DEFAULT_AVATAR;
         }
     });
 }
@@ -101,6 +106,7 @@ function initAppData() {
 function loadContacts() {
     onValue(ref(db, 'users'), (snapshot) => {
         const container = document.getElementById('contacts-list');
+        if (!container) return;
         container.innerHTML = '';
         const users = snapshot.val() || {};
         
@@ -159,7 +165,8 @@ function highlightContact(itemId) {
 // 2. ЧАТ И ОЧИСТКА ДИАЛОГА
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
-    document.getElementById('chat-title').innerText = title;
+    const titleEl = document.getElementById('chat-title');
+    if (titleEl) titleEl.innerText = title;
     cancelReply();
     loadMessages(targetId);
     listenTyping(targetId);
@@ -167,7 +174,7 @@ function switchChat(targetId, title) {
 }
 
 // КНОПКА ОЧИСТКИ ДИАЛОГА ИЗ БД
-document.getElementById('clear-chat-btn').addEventListener('click', () => {
+document.getElementById('clear-chat-btn')?.addEventListener('click', () => {
     if (confirm("Вы уверены, что хотите полностью очистить этот диалог? Сообщения удалятся из базы данных навсегда.")) {
         remove(ref(db, `messages/${currentChatTarget}`))
             .then(() => alert("Диалог успешно очищен."))
@@ -175,12 +182,12 @@ document.getElementById('clear-chat-btn').addEventListener('click', () => {
     }
 });
 
-document.getElementById('send-msg-btn').addEventListener('click', sendTextMessage);
-document.getElementById('chat-text-input').addEventListener('keypress', (e) => {
+document.getElementById('send-msg-btn')?.addEventListener('click', sendTextMessage);
+document.getElementById('chat-text-input')?.addEventListener('keypress', (e) => {
     if(e.key === 'Enter') sendTextMessage();
 });
 
-document.getElementById('chat-text-input').addEventListener('input', () => {
+document.getElementById('chat-text-input')?.addEventListener('input', () => {
     if (!currentUser) return;
     set(ref(db, `typing/${currentChatTarget}/${currentUser.uid}`), true);
 
@@ -191,9 +198,7 @@ document.getElementById('chat-text-input').addEventListener('input', () => {
 });
 
 function listenTyping(chatId) {
-    if (typingRefUnsub) {
-        off(typingRefUnsub);
-    }
+    if (typingRefUnsub) off(typingRefUnsub);
     
     typingRefUnsub = ref(db, `typing/${chatId}`);
     onValue(typingRefUnsub, (snapshot) => {
@@ -225,21 +230,22 @@ function listenPinnedMessage(chatId) {
         const pinnedBar = document.getElementById('pinned-bar');
         const pinnedText = document.getElementById('pinned-text-preview');
 
-        if (pinned) {
+        if (pinned && pinnedBar && pinnedText) {
             pinnedText.innerText = `${pinned.senderName}: ${pinned.content}`;
             pinnedBar.classList.remove('hidden');
-        } else {
+        } else if (pinnedBar) {
             pinnedBar.classList.add('hidden');
         }
     });
 }
 
-document.getElementById('unpin-btn').addEventListener('click', () => {
+document.getElementById('unpin-btn')?.addEventListener('click', () => {
     remove(ref(db, `pinned/${currentChatTarget}`));
 });
 
 function sendTextMessage() {
     const input = document.getElementById('chat-text-input');
+    if (!input) return;
     const text = input.value.trim();
     if(!text) return;
 
@@ -268,18 +274,18 @@ function sendTextMessage() {
 
 function cancelReply() {
     replyTargetMessage = null;
-    document.getElementById('reply-preview').style.display = 'none';
+    const preview = document.getElementById('reply-preview');
+    if (preview) preview.style.display = 'none';
 }
-document.getElementById('cancel-reply-btn').addEventListener('click', cancelReply);
+document.getElementById('cancel-reply-btn')?.addEventListener('click', cancelReply);
 
 function loadMessages(targetId) {
-    if (messagesRefUnsub) {
-        off(messagesRefUnsub);
-    }
+    if (messagesRefUnsub) off(messagesRefUnsub);
 
     messagesRefUnsub = ref(db, `messages/${targetId}`);
     onValue(messagesRefUnsub, (snapshot) => {
         const container = document.getElementById('chat-messages');
+        if (!container) return;
         container.innerHTML = '';
         const data = snapshot.val() || {};
         
@@ -304,9 +310,12 @@ function loadMessages(targetId) {
                     });
                 } else {
                     replyTargetMessage = msg;
-                    document.getElementById('reply-user-name').innerText = msg.senderName || 'Пользователь';
-                    document.getElementById('reply-text-preview').innerText = msg.type === 'text' ? msg.content : `[${msg.type}]`;
-                    document.getElementById('reply-preview').style.display = 'flex';
+                    const rUser = document.getElementById('reply-user-name');
+                    const rText = document.getElementById('reply-text-preview');
+                    const rPrev = document.getElementById('reply-preview');
+                    if (rUser) rUser.innerText = msg.senderName || 'Пользователь';
+                    if (rText) rText.innerText = msg.type === 'text' ? msg.content : `[${msg.type}]`;
+                    if (rPrev) rPrev.style.display = 'flex';
                 }
             };
 
@@ -385,64 +394,66 @@ function getSupportedMimeType() {
     return '';
 }
 
-recordBtn.addEventListener('click', async () => {
-    if (!isRecording) {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: { echoCancellation: true, noiseSuppression: true } 
-            });
-            
-            const mimeType = getSupportedMimeType();
-            mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-            audioChunks = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data && e.data.size > 0) audioChunks.push(e.data);
-            };
-
-            mediaRecorder.onstop = () => {
-                const finalMime = mediaRecorder.mimeType || 'audio/mp4';
-                const audioBlob = new Blob(audioChunks, { type: finalMime });
+if (recordBtn) {
+    recordBtn.addEventListener('click', async () => {
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { echoCancellation: true, noiseSuppression: true } 
+                });
                 
-                const reader = new FileReader();
-                reader.readAsDataURL(audioBlob);
-                reader.onloadend = () => {
-                    const audioDataUrl = reader.result;
-                    
-                    push(ref(db, `messages/${currentChatTarget}`), {
-                        sender: currentUser.uid,
-                        senderName: currentUser.email.split('@')[0],
-                        type: 'audio',
-                        content: audioDataUrl,
-                        timestamp: serverTimestamp(),
-                        read: false
-                    });
+                const mimeType = getSupportedMimeType();
+                mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) audioChunks.push(e.data);
                 };
 
-                stream.getTracks().forEach(track => track.stop());
-            };
+                mediaRecorder.onstop = () => {
+                    const finalMime = mediaRecorder.mimeType || 'audio/mp4';
+                    const audioBlob = new Blob(audioChunks, { type: finalMime });
+                    
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => {
+                        const audioDataUrl = reader.result;
+                        
+                        push(ref(db, `messages/${currentChatTarget}`), {
+                            sender: currentUser.uid,
+                            senderName: currentUser.email.split('@')[0],
+                            type: 'audio',
+                            content: audioDataUrl,
+                            timestamp: serverTimestamp(),
+                            read: false
+                        });
+                    };
 
-            mediaRecorder.start();
-            isRecording = true;
-            recordBtn.innerText = '🛑';
-            recordBtn.style.color = 'var(--danger)';
-        } catch (err) {
-            alert('Разрешите доступ к микрофону в настройках Safari.');
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordBtn.innerText = '🛑';
+                recordBtn.style.color = 'var(--danger)';
+            } catch (err) {
+                alert('Разрешите доступ к микрофону в настройках браузера.');
+            }
+        } else {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            isRecording = false;
+            recordBtn.innerText = '🎙️';
+            recordBtn.style.color = 'var(--text-primary)';
         }
-    } else {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-        }
-        isRecording = false;
-        recordBtn.innerText = '🎙️';
-        recordBtn.style.color = 'var(--text-primary)';
-    }
-});
+    });
+}
 
 // КЛИКАБЕЛЬНОСТЬ ФАЙЛОВ
-document.getElementById('chat-file-btn').addEventListener('click', () => document.getElementById('chat-file-input').click());
-document.getElementById('avatar-edit-btn').addEventListener('click', () => document.getElementById('avatar-file-input').click());
-document.getElementById('post-file-btn').addEventListener('click', () => document.getElementById('post-file-input').click());
+document.getElementById('chat-file-btn')?.addEventListener('click', () => document.getElementById('chat-file-input')?.click());
+document.getElementById('avatar-edit-btn')?.addEventListener('click', () => document.getElementById('avatar-file-input')?.click());
+document.getElementById('post-file-btn')?.addEventListener('click', () => document.getElementById('post-file-input')?.click());
 
 // ЧТЕНИЕ И СЖАТИЕ МЕДИА
 async function fileToBase64(file, maxWidth = 800) {
@@ -477,7 +488,7 @@ async function fileToBase64(file, maxWidth = 800) {
     });
 }
 
-document.getElementById('chat-file-input').addEventListener('change', async (e) => {
+document.getElementById('chat-file-input')?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if(!file) return;
     try {
@@ -498,7 +509,7 @@ document.getElementById('chat-file-input').addEventListener('change', async (e) 
 });
 
 // СМЕНА АВАТАРКИ
-document.getElementById('avatar-file-input').addEventListener('change', async (e) => {
+document.getElementById('avatar-file-input')?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file || !currentUser) return;
     try {
@@ -508,7 +519,8 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
             email: currentUser.email,
             avatar: base64Avatar
         });
-        document.getElementById('user-avatar').src = base64Avatar;
+        const avatarEl = document.getElementById('user-avatar');
+        if (avatarEl) avatarEl.src = base64Avatar;
         alert('Аватар обновлен!');
     } catch (err) {
         alert('Ошибка смены аватарки: ' + err.message);
@@ -516,13 +528,15 @@ document.getElementById('avatar-file-input').addEventListener('change', async (e
 });
 
 // ПУБЛИКАЦИЯ И УДАЛЕНИЕ ПОСТОВ
-document.getElementById('post-file-input').addEventListener('change', (e) => {
+document.getElementById('post-file-input')?.addEventListener('change', (e) => {
     selectedPostFile = e.target.files[0];
-    document.getElementById('post-file-name').innerText = selectedPostFile ? selectedPostFile.name : '';
+    const nameEl = document.getElementById('post-file-name');
+    if (nameEl) nameEl.innerText = selectedPostFile ? selectedPostFile.name : '';
 });
 
-document.getElementById('submit-post-btn').addEventListener('click', async () => {
-    const text = document.getElementById('post-text-input').value.trim();
+document.getElementById('submit-post-btn')?.addEventListener('click', async () => {
+    const inputEl = document.getElementById('post-text-input');
+    const text = inputEl ? inputEl.value.trim() : '';
     if(!text && !selectedPostFile) return;
 
     let mediaUrl = '';
@@ -542,14 +556,16 @@ document.getElementById('submit-post-btn').addEventListener('click', async () =>
         timestamp: serverTimestamp()
     });
 
-    document.getElementById('post-text-input').value = '';
+    if (inputEl) inputEl.value = '';
     selectedPostFile = null;
-    document.getElementById('post-file-name').innerText = '';
+    const nameEl = document.getElementById('post-file-name');
+    if (nameEl) nameEl.innerText = '';
 });
 
 function loadPosts() {
     onValue(ref(db, 'posts'), (snapshot) => {
         const container = document.getElementById('wall-posts');
+        if (!container) return;
         container.innerHTML = '';
         const data = snapshot.val() || {};
         
@@ -597,20 +613,43 @@ window.deletePost = function(postKey) {
     }
 };
 
-// НАСТРОЙКИ
-document.getElementById('theme-toggle').addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-});
+// 4. НАСТРОЙКИ, ТЕМА И ШРИФТЫ
+function initThemeLogic() {
+    const themeToggleBtn = document.getElementById('theme-toggle') || document.getElementById('theme-toggle-btn');
+    
+    function updateThemeUI(theme) {
+        if (theme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            if (themeToggleBtn) themeToggleBtn.innerHTML = '☀️ Светлая тема';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if (themeToggleBtn) themeToggleBtn.innerHTML = '🌙 Тёмная тема';
+        }
+    }
+
+    const savedTheme = localStorage.getItem('hs_theme') || 'dark';
+    updateThemeUI(savedTheme);
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            localStorage.setItem('hs_theme', newTheme);
+            updateThemeUI(newTheme);
+        });
+    }
+}
 
 let fontSize = 100;
-document.getElementById('font-inc').addEventListener('click', () => changeFontSize(10));
-document.getElementById('font-dec').addEventListener('click', () => changeFontSize(-10));
+document.getElementById('font-inc')?.addEventListener('click', () => changeFontSize(10));
+document.getElementById('font-dec')?.addEventListener('click', () => changeFontSize(-10));
 
 function changeFontSize(delta) {
     fontSize = Math.min(Math.max(fontSize + delta, 80), 150);
     document.documentElement.style.setProperty('--font-size-base', `${fontSize}%`);
-    document.getElementById('font-size-val').innerText = `${fontSize}%`;
+    const fontVal = document.getElementById('font-size-val');
+    if (fontVal) fontVal.innerText = `${fontSize}%`;
 }
 
 // ХРАНЕНИЕ СООБЩЕНИЙ (1-7-14-30-всегда)
@@ -666,14 +705,13 @@ if (resetBgBtn) {
     });
 }
 
-
-// МОБИЛЬНАЯ НАВИГАЦИЯ
+// МОБИЛЬНАЯ НАВИГАЦИЯ (1 ВЫДЕЛЕННАЯ ВКЛАДКА)
 function openMobileTab(targetId) {
     document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-target') === targetId);
     });
-    document.querySelectorAll('.panel').forEach(p => {
-        p.classList.toggle('active', p.id === targetId);
+    document.querySelectorAll('.panel, .tab-view').forEach(p => {
+        if (p.id) p.classList.toggle('active', p.id === targetId);
     });
 }
 
