@@ -3,8 +3,8 @@
   "short_name": "HomeSpace",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#2b2338",
-  "theme_color": "#2b2338",
+  "background_color": "#011713",
+  "theme_color": "#011713",
   "icons": [
     {
       "src": "icon-192.png",
