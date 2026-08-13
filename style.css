@@ -1,13 +1,15 @@
 :root {
     --bg-gradient: radial-gradient(circle at 20% 20%, #2b2a4a 0%, #151525 100%);
-    /* ПРОЗРАЧНОЕ ЖИДКОЕ СТЕКЛО ВМЕСТО БЕЛОЙ ЗАЛИВКИ */
-    --glass-bg: rgba(255, 255, 255, 0.18);
-    --glass-bg-hover: rgba(255, 255, 255, 0.28);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-glow: rgba(137, 180, 250, 0.45);
     
-    --text-primary: #111827;
-    --text-muted: #374151;
+    /* ЧЕТКИЕ ЦВЕТА И СТЕКЛО */
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-bg-hover: rgba(255, 255, 255, 0.22);
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-glow: rgba(137, 180, 250, 0.5);
+    
+    /* ЧЁТКИЙ ТЕМНЫЙ ТЕКСТ ДЛЯ ЧИТАЕМОСТИ НА СТЕКЛЕ */
+    --text-primary: #0f172a;
+    --text-muted: #334155;
     --accent: #1e66f5;
     --accent-hover: #2a72ff;
     --danger: #d20f39;
@@ -17,15 +19,12 @@
 
 [data-theme="light"] {
     --bg-gradient: radial-gradient(circle at 20% 20%, #e2e8f0 0%, #cbd5e1 100%);
-    --glass-bg: rgba(255, 255, 255, 0.35);
-    --glass-bg-hover: rgba(255, 255, 255, 0.55);
-    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-bg-hover: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.6);
     --glass-glow: rgba(30, 102, 245, 0.35);
-    --text-primary: #0f172a;
-    --text-muted: #334155;
-    --accent: #1e66f5;
-    --accent-hover: #2a72ff;
-    --danger: #d20f39;
+    --text-primary: #020617;
+    --text-muted: #1e293b;
 }
 
 * {
@@ -57,7 +56,6 @@ body {
     top: 0;
 }
 
-/* ОВЕРЛЕЙ ДЛЯ ПОЛЬЗОВАТЕЛЬСКОГО ФОНА С ВЫСОКИМ ПРИОРИТЕТОМ */
 body.has-custom-bg {
     background-image: var(--custom-bg-url) !important;
     background-size: cover !important;
@@ -67,23 +65,26 @@ body.has-custom-bg {
 
 .hidden { display: none !important; }
 
-/* КАРТОЧКИ - ЖИДКОЕ СТЕКЛО С ЛЕГКОЙ ПРОЗРАЧНОСТЬЮ */
+/* 💎 БАЗОВОЕ СТЕКЛО БЕЗ БЕЛЫХ ПЯТЕН НА IOS */
 .glass-panel, .profile-card, .settings-group, .wall-create-box, .post-item {
     background: var(--glass-bg) !important;
-    backdrop-filter: blur(25px) saturate(190%) -webkit-backdrop-filter: blur(25px) saturate(190%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
     border: 1px solid var(--glass-border) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
     border-radius: 20px;
+    color: var(--text-primary) !important;
 }
 
 .glass-btn {
     background: rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
     border: 1px solid var(--glass-border) !important;
     color: var(--text-primary) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.25s ease;
+    font-weight: 600;
 }
 
 .glass-btn:active {
@@ -93,8 +94,8 @@ body.has-custom-bg {
 
 .glass-btn-danger, .btn-danger {
     background: rgba(210, 15, 57, 0.22) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(210, 15, 57, 0.5) !important;
     color: #dc2626 !important;
     font-weight: 700;
@@ -141,13 +142,13 @@ input[type="email"], input[type="password"], input[type="text"], textarea, selec
     padding: 12px 16px;
     border-radius: 14px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
     color: var(--text-primary) !important;
     font-size: 1rem;
     outline: none;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    font-weight: 500;
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+    font-weight: 600;
 }
 
 textarea {
@@ -194,7 +195,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .scroll-content {
@@ -216,16 +217,15 @@ textarea {
     margin-bottom: 6px;
     background: rgba(255, 255, 255, 0.15) !important;
     border: 1px solid transparent;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     color: var(--text-primary) !important;
 }
 
+/* ФИКС ЧЕТКОГО ВЫДЕЛЕНИЯ В ВЫБРАННОМ ЧАТЕ/ВКЛАДКЕ */
 .contact-item.active, .contact-item:hover {
     background: rgba(255, 255, 255, 0.35) !important;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--glass-glow) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* ДИАЛОГ */
@@ -237,7 +237,7 @@ textarea {
     align-items: center;
     padding: 8px 14px;
     border-bottom: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
@@ -258,9 +258,7 @@ textarea {
     font-size: 0.95rem;
     position: relative;
     word-break: break-word;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     color: var(--text-primary) !important;
 }
 
@@ -278,7 +276,7 @@ textarea {
 
 .msg-meta {
     font-size: 0.7rem;
-    opacity: 0.8;
+    opacity: 0.85;
     text-align: right;
     margin-top: 4px;
 }
@@ -381,7 +379,6 @@ textarea {
     align-items: flex-start;
 }
 
-/* ОТНОСИТЕЛЬНЫЕ ЕДИНИЦЫ ДЛЯ МАСШТАБИРОВАНИЯ ВСЕХ ЭЛЕМЕНТОВ НОМИНАЛЬНО */
 .retention-desc {
     font-size: 0.9rem;
     line-height: 1.45;
@@ -389,7 +386,7 @@ textarea {
     font-weight: 500;
 }
 
-/* НИЖНЯЯ НАВИГАЦИЯ ДЛЯ МОБИЛЬНЫХ */
+/* 📱 НИЖНЯЯ НАВИГАЦИЯ (LIQUID GLASS БЕЗ РАЗМЫТИЯ ВСЕГО ЭКРАНА) */
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
@@ -408,18 +405,17 @@ textarea {
         left: 5%;
         width: 90vw;
         height: 64px;
-        background: rgba(255, 255, 255, 0.22) !important;
-        backdrop-filter: blur(25px) saturate(200%);
-        -webkit-backdrop-filter: blur(25px) saturate(200%);
+        background: rgba(255, 255, 255, 0.2) !important;
+        -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+        backdrop-filter: blur(25px) saturate(200%) !important;
         border: 1px solid var(--glass-border) !important;
         border-radius: 32px;
         justify-content: space-around;
         align-items: center;
         z-index: 100;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
     
-    /* СТЕКЛЯННЫЙ И ПОЛУПРОЗРАЧНЫЙ ВИД ДЛЯ АКТИВНОЙ ВКЛАДКИ (БЕЗ БЕЛОЙ ЗАЛИВКИ) */
     .nav-btn {
         background: transparent !important;
         border: 1px solid transparent;
@@ -432,17 +428,16 @@ textarea {
         cursor: pointer;
         padding: 6px 12px;
         border-radius: 20px;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         font-weight: 600;
     }
     
+    /* ИСПРАВЛЕНА АКТИВНАЯ КНОПКА: СТЕКЛЯННАЯ ПОДСВЕТКА ВМЕСТО БЕЛОЙ ЗАЛИВКИ */
     .nav-btn.active {
         color: var(--text-primary) !important;
-        background: rgba(255, 255, 255, 0.38) !important;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.35) !important;
         border: 1px solid var(--glass-glow) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
         transform: translateY(-2px) scale(1.04);
     }
 
