@@ -1,135 +1,196 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Homa App</title>
+    
+    <!-- PWA & Apple Mobile Settings -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HomeSpace">
+    <meta name="theme-color" content="#1e1e2e">
+
+    <title>HomeSpace</title>
+
+    <!-- Иконки и Манифест -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <!-- 🔐 Экран авторизации -->
-        <div id="auth-screen" class="screen active">
-            <div class="auth-card glass-panel">
-                <h2>Вход в Homa</h2>
-                <p class="subtitle">Введите ваше имя для начала общения</p>
-                <div id="login-form">
-                    <input type="text" id="usernameInput" placeholder="Ваше имя...">
-                    <button id="loginBtn" class="btn btn-full">Войти</button>
-                </div>
-            </div>
-        </div>
 
-        <!-- 📱 Основной интерфейс приложения -->
-        <div id="app-screen" class="screen">
-            
-            <!-- Вкладка 1: Контакты / Чаты -->
-            <div id="panel-contacts" class="panel active">
-                <div class="panel-header">
-                    <h3>Чаты и контакты</h3>
-                </div>
-                <div class="scroll-content">
-                    <div class="search-box" style="margin-bottom: 12px;">
-                        <input type="text" id="searchInput" placeholder="Поиск контактов...">
-                    </div>
-                    <div id="contactsList" class="messages-container"></div>
-                </div>
-            </div>
-
-            <!-- Вкладка 2: Активный диалог (Чат) -->
-            <div id="panel-chat" class="panel">
-                <div class="panel-header">
-                    <h3 id="chatTitle">Выберите чат</h3>
-                    <button id="backToListBtn" class="icon-btn" style="display: none;">⬅️</button>
-                </div>
-                
-                <div id="pinnedBar" class="pinned-bar hidden">
-                    <div class="pinned-info">
-                        <span class="pinned-label">Закрепленное сообщение</span>
-                        <span id="pinnedText" class="pinned-text"></span>
-                    </div>
-                </div>
-
-                <div class="scroll-content messages-container" id="messagesList">
-                    <!-- Сообщения будут добавляться динамически -->
-                </div>
-
-                <div id="replyPreviewBar" class="reply-preview-bar hidden">
-                    <span id="replyPreviewText">Ответ на сообщение...</span>
-                    <button id="cancelReplyBtn" class="icon-btn">❌</button>
-                </div>
-
-                <div class="chat-input-area">
-                    <input type="text" id="messageInput" placeholder="Введите сообщение...">
-                    <button id="sendMsgBtn" class="btn">Отправить</button>
-                </div>
-            </div>
-
-            <!-- Вкладка 3: Стена -->
-            <div id="panel-wall" class="panel">
-                <div class="panel-header">
-                    <h3>Стена</h3>
-                </div>
-                <div class="scroll-content">
-                    <div class="wall-create-box glass-panel">
-                        <textarea id="wallPostInput" placeholder="Что у вас нового?"></textarea>
-                        <div class="wall-actions">
-                            <button id="sendPostBtn" class="btn btn-sm">Опубликовать</button>
-                        </div>
-                    </div>
-                    <div id="wallPostsList" class="messages-container"></div>
-                </div>
-            </div>
-
-            <!-- Вкладка 4: Профиль / Настройки -->
-            <div id="panel-settings" class="panel">
-                <div class="panel-header">
-                    <h3>Настройки</h3>
-                </div>
-                <div class="scroll-content">
-                    <div class="profile-card glass-panel">
-                        <div class="avatar-wrapper">
-                            <img id="profileAvatar" class="avatar-lg" src="" alt="Avatar">
-                        </div>
-                        <h3 id="profileName">Имя</h3>
-                    </div>
-                    
-                    <div class="settings-group glass-panel">
-                        <h4>Аккаунт</h4>
-                        <div class="setting-item">
-                            <span>Выйти из аккаунта</span>
-                            <button id="logoutBtn" class="btn btn-sm glass-btn-danger">Выйти</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 📱 Единая стеклянная навигация (из вашего запроса) -->
-            <nav class="glass-nav">
-                <button class="nav-btn active" data-target="panel-contacts">
-                    <span class="nav-icon">💬</span>
-                    <span>Чаты</span>
-                </button>
-                <button class="nav-btn" data-target="panel-chat">
-                    <span class="nav-icon">✉️</span>
-                    <span>Диалог</span>
-                </button>
-                <button class="nav-btn" data-target="panel-wall">
-                    <span class="nav-icon">📰</span>
-                    <span>Стена</span>
-                </button>
-                <button class="nav-btn" data-target="panel-settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span>Профиль</span>
-                </button>
-            </nav>
-
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-card glass-panel">
+            <h2>HomeSpace</h2>
+            <p class="subtitle">Закрытая социальная сеть</p>
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email" required autocomplete="username">
+                <input type="password" id="password" placeholder="Пароль" required autocomplete="current-password">
+                <button type="submit" class="btn btn-primary glass-btn">Войти</button>
+            </form>
+            <div id="auth-error" class="error-msg"></div>
         </div>
     </div>
 
-    <!-- Firebase SDK (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="app.js"></script>
+    <!-- ОСНОВНОЙ ЭКРАН ПРИЛОЖЕНИЯ -->
+    <div id="app-screen" class="screen">
+        
+        <!-- ЛЕВАЯ ПАНЕЛЬ: ЧАТЫ-КОНТАКТЫ -->
+        <aside id="panel-contacts" class="panel glass-panel active">
+            <header class="panel-header">
+                <h3>💬 Чаты-контакты</h3>
+            </header>
+            <div id="contacts-list" class="scroll-content"></div>
+        </aside>
+
+        <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ: ЧАТ -->
+        <main id="panel-chat" class="panel glass-panel">
+            <header class="panel-header chat-header">
+                <div>
+                    <h3 id="chat-title">Общий чат</h3>
+                    <span id="typing-indicator" class="typing-text"></span>
+                </div>
+                <button id="clear-chat-btn" class="btn btn-danger btn-sm glass-btn-danger" title="Очистить диалог">🗑️ Очистить</button>
+            </header>
+
+            <!-- ЗАКРЕПЛЕННОЕ СООБЩЕНИЕ -->
+            <div id="pinned-bar" class="pinned-bar glass-panel hidden">
+                <div class="pinned-info">
+                    <span class="pinned-label">📌 Закреплено</span>
+                    <span id="pinned-text-preview" class="pinned-text">Сообщение...</span>
+                </div>
+                <button id="unpin-btn" class="icon-btn" title="Открепить">✖</button>
+            </div>
+
+            <div id="chat-messages" class="scroll-content messages-container"></div>
+
+            <!-- Предпросмотр цитаты -->
+            <div id="reply-preview" class="reply-preview-bar glass-panel" style="display: none;">
+                <div class="reply-info">
+                    <span class="reply-user" id="reply-user-name">Имя</span>
+                    <span class="reply-text" id="reply-text-preview">Текст сообщения</span>
+                </div>
+                <button id="cancel-reply-btn" class="icon-btn">✖</button>
+            </div>
+
+            <!-- Панель ввода сообщения -->
+            <div class="chat-input-area glass-panel">
+                <button id="chat-file-btn" class="icon-btn">📎</button>
+                <input type="file" id="chat-file-input" accept="image/*,video/*" hidden>
+
+                <input type="text" id="chat-text-input" placeholder="Сообщение..." autocomplete="off">
+
+                <button id="record-audio-btn" class="icon-btn">🎙️</button>
+                <button id="send-msg-btn" class="btn btn-primary btn-icon glass-btn">➤</button>
+            </div>
+        </main>
+
+        <!-- ПРАВАЯ ПАНЕЛЬ: СТЕНА (ЛЕНТА) -->
+        <section id="panel-wall" class="panel glass-panel">
+            <header class="panel-header">
+                <h3>📰 Стена публикаций</h3>
+            </header>
+            <div class="wall-create-box glass-panel">
+                <textarea id="post-text-input" placeholder="Что нового?"></textarea>
+                <div class="wall-actions">
+                    <button id="post-file-btn" class="btn btn-outline btn-sm glass-btn">📷 Медиа</button>
+                    <input type="file" id="post-file-input" accept="image/*,video/*" hidden>
+                    <span id="post-file-name" class="file-name-indicator"></span>
+                    <button id="submit-post-btn" class="btn btn-primary btn-sm glass-btn">Опубликовать</button>
+                </div>
+            </div>
+            <div id="wall-posts" class="scroll-content"></div>
+        </section>
+
+        <!-- ПАНЕЛЬ: НАСТРОЙКИ И ПРОФИЛЬ -->
+        <section id="panel-settings" class="panel glass-panel">
+            <header class="panel-header">
+                <h3>⚙️ Профиль и Настройки</h3>
+            </header>
+            <div class="scroll-content settings-content">
+                <div class="profile-card glass-panel">
+                    <div class="avatar-wrapper">
+                        <img id="user-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2389b4fa'/><text x='50%' y='55%' font-size='45' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>👤</text></svg>" class="avatar-lg" alt="User Avatar">
+                        <button id="avatar-edit-btn" class="btn-avatar-edit">✏️</button>
+                        <input type="file" id="avatar-file-input" accept="image/*" hidden>
+                    </div>
+                    <h3 id="user-display-name">Пользователь</h3>
+                    <p id="user-email-text" class="text-muted"></p>
+                </div>
+
+                <div class="settings-group glass-panel">
+                    <h4>Оформление</h4>
+                    <div class="setting-item">
+                        <span>Тёмная тема</span>
+                        <button id="theme-toggle" class="btn btn-outline btn-sm glass-btn">Сменить тему</button>
+                    </div>
+                    <div class="setting-item">
+                        <span>Размер шрифта</span>
+                        <div class="font-controls">
+                            <button id="font-dec" class="btn btn-outline btn-sm glass-btn">-</button>
+                            <span id="font-size-val">100%</span>
+                            <button id="font-inc" class="btn btn-outline btn-sm glass-btn">+</button>
+                        </div>
+                    </div>
+                    <div class="setting-item flex-col" style="margin-top: 14px;">
+                        <span>Фон чата</span>
+                        <div class="custom-bg-box" style="margin-top: 8px; width: 100%;">
+                            <label for="custom-bg-input" class="btn btn-outline btn-sm glass-btn btn-full" style="display: block; text-align: center; cursor: pointer;">
+                                🖼️ Загрузить свое фото
+                            </label>
+                            <input type="file" id="custom-bg-input" accept="image/*" hidden>
+                            <button id="reset-bg-btn" class="btn btn-danger btn-sm glass-btn-danger btn-full hidden" style="margin-top: 6px;">Сбросить фон</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group glass-panel">
+                    <h4>Хранение сообщений</h4>
+                    <div class="setting-item flex-col" style="margin-top: 8px;">
+                        <span>Автоочистка истории:</span>
+                        <select id="retention-select" class="glass-select" style="margin-top: 6px; width: 100%;">
+                            <option value="1d">Удалять через 1 день</option>
+                            <option value="7d">Удалять через 7 дней</option>
+                            <option value="14d">Удалять через 14 дней</option>
+                            <option value="30d">Удалять через 30 дней</option>
+                            <option value="never" selected>Хранить всегда</option>
+                        </select>
+                    </div>
+                    <p class="retention-desc" style="margin-top: 10px;">Все данные сохраняются локально в память устройства. Выберите период, через который чаты будут очищаться автоматически.</p>
+                </div>
+
+                <div class="settings-group glass-panel">
+                    <button id="logout-btn" class="btn btn-danger btn-full glass-btn-danger">Выйти из аккаунта</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- НИЖНЯЯ НАВИГАЦИЯ LIQUID GLASS (ДЛЯ МОБИЛЬНЫХ) -->
+        <nav class="bottom-nav glass-nav">
+            <button class="nav-btn active" data-target="panel-contacts">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Чаты</span>
+            </button>
+            <button class="nav-btn" data-target="panel-chat">
+                <span class="nav-icon">✉️</span>
+                <span class="nav-label">Диалог</span>
+            </button>
+            <button class="nav-btn" data-target="panel-wall">
+                <span class="nav-icon">📰</span>
+                <span class="nav-label">Стена</span>
+            </button>
+            <button class="nav-btn" data-target="panel-settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Настройки</span>
+            </button>
+        </nav>
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
