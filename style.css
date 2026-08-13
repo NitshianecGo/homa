@@ -3,10 +3,10 @@
     
     /* СТЕКЛО БЕЗ БЕЛЫХ РАЗРЫВОВ */
     --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.18);
     --glass-glow: rgba(16, 185, 129, 0.35);
     
-    /* ЦВЕТА СООБЩЕНИЙ (WHATSAPP + LIQUID GLASS) */
+    /* ЦВЕТА СООБЩЕНИЙ */
     --msg-incoming-bg: rgba(30, 35, 45, 0.75);
     --msg-outgoing-bg: linear-gradient(135deg, rgba(16, 112, 84, 0.85) 0%, rgba(6, 78, 59, 0.9) 100%);
     
@@ -60,7 +60,7 @@ body.has-custom-bg {
 
 .hidden { display: none !important; }
 
-/* 💎 ЕДИНЫЙ ПРОЗРАЧНЫЙ СТЕКЛЯННЫЙ СТИЛЬ ДЛЯ ВСЕХ ПАНЕЛЕЙ */
+/* 💎 ЕДИНЫЙ ПРОЗРАЧНЫЙ СТЕКЛЯННЫЙ СТИЛЬ ДЛЯ КАРТОЧЕК */
 .glass-panel, .profile-card, .settings-group, .wall-create-box, .post-item {
     background: var(--glass-bg) !important;
     -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
@@ -71,28 +71,32 @@ body.has-custom-bg {
     color: var(--text-primary) !important;
 }
 
-.glass-btn {
-    background: rgba(255, 255, 255, 0.12) !important;
+/* 🔘 КНОПКИ В НАСТРОЙКАХ (ЧЁТКИЙ ТЕКСТ) */
+.glass-btn, .btn-outline {
+    background: rgba(255, 255, 255, 0.15) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     backdrop-filter: blur(12px) !important;
-    border: 1px solid var(--glass-border) !important;
-    color: var(--text-primary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
     transition: all 0.25s ease;
     font-weight: 600;
 }
 
-.glass-btn:active {
+.glass-btn:active, .btn-outline:active {
     transform: scale(0.96);
+    background: rgba(255, 255, 255, 0.25) !important;
     box-shadow: 0 0 15px var(--glass-glow);
 }
 
+/* 🛑 КНОПКА «ВЫЙТИ» И «СБРОСИТЬ» (ЯРКИЙ ТЕКСТ) */
 .glass-btn-danger, .btn-danger {
-    background: rgba(244, 63, 94, 0.2) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(244, 63, 94, 0.4) !important;
-    color: #fecdd3 !important;
-    font-weight: 700;
+    background: rgba(220, 38, 38, 0.35) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(239, 68, 68, 0.6) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .screen {
@@ -134,13 +138,18 @@ input[type="email"], input[type="password"], input[type="text"], textarea, selec
     padding: 12px 16px;
     border-radius: 14px;
     border: 1px solid var(--glass-border);
-    background: rgba(0, 0, 0, 0.25) !important;
+    background: rgba(0, 0, 0, 0.4) !important;
     color: #ffffff !important;
     font-size: 1rem;
     outline: none;
     -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
     font-weight: 500;
+}
+
+select.glass-select option {
+    background: #1e1b2e !important;
+    color: #ffffff !important;
 }
 
 textarea {
@@ -168,7 +177,7 @@ textarea {
     color: #ffffff !important;
 }
 
-/* 📱 ОСНОВНОЙ ИНТЕРФЕЙС И БЕСШОВНЫЙ ЧАТ */
+/* 📱 ОСНОВНОЙ ИНТЕРФЕЙС */
 #app-screen {
     display: flex;
     position: relative;
@@ -178,7 +187,7 @@ textarea {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: transparent !important; /* Убираем резкий разрыв фона */
+    background: transparent !important;
     border: none !important;
     box-shadow: none !important;
 }
@@ -225,7 +234,7 @@ textarea {
     backdrop-filter: blur(15px);
 }
 
-/* ✉️ ДИАЛОГ (WHATSAPP MIX STYLES) */
+/* ✉️ ДИАЛОГ */
 #panel-chat { flex: 1; }
 
 .pinned-bar {
@@ -248,7 +257,6 @@ textarea {
     gap: 8px;
 }
 
-/* 💬 ОБЛАЧКА СООБЩЕНИЙ */
 .msg-bubble {
     max-width: 80%;
     padding: 10px 14px;
@@ -309,7 +317,6 @@ textarea {
     color: #ffffff;
 }
 
-/* ✍️ ПОЛЕ ВВОДА СООБЩЕНИЯ (УБРАНА БЕЛАЯ ПОЛОСА) */
 .chat-input-area {
     display: flex;
     align-items: center;
@@ -393,7 +400,7 @@ textarea {
     font-weight: 400;
 }
 
-/* 📱 МОБИЛЬНАЯ ПЛАВАЮЩАЯ НАВИГАЦИЯ LIQUID GLASS */
+/* 📱 МОБИЛЬНАЯ ПЛАВАЮЩАЯ НАВИГАЦИЯ */
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
