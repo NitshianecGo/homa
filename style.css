@@ -1,11 +1,10 @@
 :root {
-    /* ТЕМА ПО УМОЛЧАНИЮ: LIQUID EMERALD GLASS */
     --bg-gradient: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 60%, #011713 100%);
-    --glass-bg: rgba(6, 78, 59, 0.25);
-    --glass-bg-hover: rgba(16, 185, 129, 0.2);
-    --glass-border: rgba(52, 211, 153, 0.25);
+    --glass-bg: rgba(6, 78, 59, 0.45);
+    --glass-bg-hover: rgba(16, 185, 129, 0.25);
+    --glass-border: rgba(52, 211, 153, 0.35);
     --glass-glow: rgba(16, 185, 129, 0.4);
-    --text-primary: #f2f5f9;
+    --text-primary: #ffffff;
     --text-muted: #a7f3d0;
     --accent: #10b981;
     --accent-hover: #34d399;
@@ -16,11 +15,11 @@
 
 [data-theme="dark"] {
     --bg-gradient: radial-gradient(circle at 20% 20%, #2b2a4a 0%, #151525 100%);
-    --glass-bg: rgba(255, 255, 255, 0.07);
-    --glass-bg-hover: rgba(255, 255, 255, 0.12);
-    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-bg: rgba(30, 30, 50, 0.65);
+    --glass-bg-hover: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.2);
     --glass-glow: rgba(137, 180, 250, 0.35);
-    --text-primary: #f2f5f9;
+    --text-primary: #ffffff;
     --text-muted: #a6adc8;
     --accent: #89b4fa;
     --accent-hover: #b4befe;
@@ -44,9 +43,9 @@ html {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg-gradient);
+    background: var(--bg-gradient) !important;
     background-attachment: fixed;
-    color: var(--text-primary);
+    color: #ffffff !important;
     height: calc(var(--vh, 1vh) * 100);
     width: 100vw;
     overflow: hidden;
@@ -56,20 +55,22 @@ body {
     transition: background 0.5s ease;
 }
 
+/* БАЗОВЫЕ СТЕКЛЯННЫЕ ПАНЕЛИ (Зафиксирован цвет для Safari) */
 .glass-panel {
-    background: var(--glass-bg);
+    background-color: rgba(6, 78, 59, 0.35) !important;
     backdrop-filter: blur(25px) saturate(190%);
     -webkit-backdrop-filter: blur(25px) saturate(190%);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 .glass-btn {
-    background: var(--glass-bg-hover) !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border) !important;
-    color: var(--text-primary) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -79,8 +80,9 @@ body {
 }
 
 .glass-btn-danger {
-    background: rgba(244, 63, 94, 0.25) !important;
+    background-color: rgba(244, 63, 94, 0.25) !important;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(244, 63, 94, 0.4) !important;
     color: #fecdd3 !important;
 }
@@ -127,33 +129,39 @@ body {
     gap: 1rem;
 }
 
-input[type="email"], input[type="password"], input[type="text"], textarea, .glass-select {
+input[type="email"], input[type="password"], input[type="text"], textarea {
     width: 100%;
     padding: 12px 16px;
     border-radius: 14px;
     border: 1px solid var(--glass-border);
-    background: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.35) !important;
     color: #ffffff !important;
     font-size: 1rem;
     outline: none;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-.setting-label {
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    font-weight: 500;
+.setting-label, .setting-item span, h3, h4, span {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
 .glass-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
     cursor: pointer;
     margin-top: 6px;
-    color: #ffffff;
-    background: rgba(0, 0, 0, 0.4);
+    color: #ffffff !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 .glass-select option {
-    background: #022c22;
-    color: #ffffff;
+    background-color: #022c22 !important;
+    color: #ffffff !important;
 }
 
 textarea {
@@ -178,7 +186,7 @@ textarea {
     font-size: 1.3rem;
     cursor: pointer;
     padding: 6px;
-    color: var(--text-primary);
+    color: #ffffff !important;
     transition: transform 0.2s;
 }
 .icon-btn:active { transform: scale(0.9); }
@@ -193,10 +201,9 @@ textarea {
     flex-direction: column;
     height: 100%;
     border-radius: 0;
-    background: var(--glass-bg);
+    background-color: rgba(0, 0, 0, 0.15);
 }
 
-/* ИСПРАВЛЕНИЕ ДЛЯ IPHONE SAFE AREA (ОСТРОВ FACE ID И ЧЕЛКА) */
 .panel-header {
     padding-top: calc(14px + env(safe-area-inset-top));
     padding-bottom: 14px;
@@ -206,7 +213,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(0, 0, 0, 0.15);
+    background-color: rgba(0, 0, 0, 0.3) !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 10;
@@ -235,7 +242,7 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 8px 14px;
-    background: rgba(16, 185, 129, 0.2);
+    background-color: rgba(16, 185, 129, 0.2) !important;
     border-bottom: 1px solid var(--glass-border);
     font-size: 0.85rem;
 }
@@ -250,13 +257,13 @@ textarea {
 
 #panel-contacts { width: 280px; }
 
-/* СТИЛИ ЕДИНОГО ИЗУМРУДНО-СТЕКЛЯННОГО ДИЗАЙНА ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
+/* ПРИНУДИТЕЛЬНЫЕ ТЕМНЫЕ ПОДЛОЖКИ ДЛЯ ПЛАШЕК (Убирает белые пятна на iPhone) */
 .contact-item, .post-item, .wall-create-box, .profile-card, .settings-group {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
+    background-color: rgba(0, 0, 0, 0.35) !important;
+    border: 1px solid var(--glass-border) !important;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    color: var(--text-primary);
+    color: #ffffff !important;
 }
 
 .contact-item {
@@ -270,8 +277,8 @@ textarea {
     transition: all 0.3s ease;
 }
 .contact-item:hover, .contact-item.active {
-    background: var(--glass-bg-hover);
-    border-color: var(--accent);
+    background-color: rgba(16, 185, 129, 0.25) !important;
+    border-color: var(--accent) !important;
     box-shadow: 0 4px 20px var(--glass-glow);
 }
 
@@ -290,32 +297,34 @@ textarea {
     position: relative;
     word-break: break-word;
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
 .msg-bubble.incoming {
     align-self: flex-start;
-    background: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.4) !important;
     border: 1px solid var(--glass-border);
-    color: var(--text-primary);
+    color: #ffffff !important;
 }
 
 .msg-bubble.outgoing {
     align-self: flex-end;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.7) 0%, rgba(5, 150, 105, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 .msg-meta {
     font-size: 0.7rem;
-    opacity: 0.8;
+    opacity: 0.85;
     text-align: right;
     margin-top: 4px;
+    color: #ffffff !important;
 }
 
 .quote-block {
-    background: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.3) !important;
     border-left: 3px solid var(--accent-hover);
     padding: 4px 8px;
     border-radius: 6px;
@@ -372,7 +381,7 @@ textarea {
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--glass-border);
     border-radius: 0;
-    background: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.4) !important;
 }
 
 .reply-preview-bar {
@@ -484,7 +493,7 @@ textarea {
 }
 .theme-opt.active {
     border-color: var(--accent) !important;
-    background: var(--glass-glow) !important;
+    background-color: rgba(16, 185, 129, 0.3) !important;
 }
 
 .bg-selector {
@@ -499,12 +508,12 @@ textarea {
     font-size: 0.75rem;
     border-radius: 10px;
     border: 1px solid var(--glass-border);
-    background: rgba(255,255,255,0.05);
-    color: var(--text-primary);
+    background-color: rgba(255,255,255,0.05);
+    color: #ffffff;
     cursor: pointer;
 }
 .bg-opt-btn.active {
-    background: var(--accent);
+    background-color: var(--accent) !important;
     color: #fff;
 }
 
@@ -517,6 +526,7 @@ textarea {
     height: 100vh;
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -558,7 +568,7 @@ textarea {
         left: 5%;
         width: 90vw;
         height: 64px;
-        background: rgba(6, 78, 59, 0.4);
+        background-color: rgba(2, 44, 34, 0.65) !important;
         backdrop-filter: blur(25px) saturate(200%);
         -webkit-backdrop-filter: blur(25px) saturate(200%);
         border: 1px solid var(--glass-border);
@@ -566,7 +576,7 @@ textarea {
         justify-content: space-around;
         align-items: center;
         z-index: 100;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     }
     
     .nav-btn {
@@ -586,11 +596,12 @@ textarea {
     }
     
     .nav-btn.active {
-        color: #ffffff;
-        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(15px);
-        border-color: var(--accent);
-        box-shadow: 0 4px 20px var(--glass-glow), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        -webkit-backdrop-filter: blur(15px);
+        border-color: var(--accent) !important;
+        box-shadow: 0 4px 20px var(--glass-glow);
         transform: translateY(-2px) scale(1.05);
     }
 
