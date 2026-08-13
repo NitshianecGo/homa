@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -7,210 +7,65 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ЭКРАН АВТОРИЗАЦИИ -->
-    <div id="auth-screen" class="screen active">
-        <div class="auth-card glass-panel">
-            <div class="logo">💬 Homa App</div>
-            <h2>Вход в систему</h2>
-            <form id="login-form">
-                <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="example@mail.com" required>
+    <div id="app">
+        <!-- Экран авторизации / чатов / контактов -->
+        <div id="auth-screen" class="screen active">
+            <div class="auth-container">
+                <h2>Вход в Homa</h2>
+                <input type="text" id="usernameInput" placeholder="Введите ваше имя...">
+                <button id="loginBtn" class="primary-btn">Войти</button>
+            </div>
+        </div>
+
+        <div id="main-screen" class="screen">
+            <div class="header">
+                <h1 id="pageTitle">Чаты</h1>
+            </div>
+            
+            <div class="content-container">
+                <!-- Вкладка Чаты -->
+                <div id="chats-tab" class="tab-content active">
+                    <div id="chatsList" class="list-container"></div>
                 </div>
-                <div class="input-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+
+                <!-- Вкладка Контакты -->
+                <div id="contacts-tab" class="tab-content">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Поиск контактов...">
+                    </div>
+                    <div id="contactsList" class="list-container"></div>
                 </div>
-                <button type="submit" class="btn btn-primary">Войти</button>
-            </form>
-            <div id="auth-error" class="error-msg"></div>
+
+                <!-- Вкладка Профиль -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="profile-card">
+                        <h3 id="profileName">Имя пользователя</h3>
+                        <button id="logoutBtn" class="danger-btn">Выйти</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📱 ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА НАВИГАЦИИ (iOS GLASS) -->
+            <nav class="glass-nav">
+                <button class="nav-btn active" data-tab="chats">
+                    <span class="nav-icon">💬</span>
+                    <span>Чаты</span>
+                </button>
+                <button class="nav-btn" data-tab="contacts">
+                    <span class="nav-icon">👥</span>
+                    <span>Контакты</span>
+                </button>
+                <button class="nav-btn" data-tab="profile">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Профиль</span>
+                </button>
+            </nav>
         </div>
     </div>
 
-    <!-- ОСНОВНОЙ ЭКРАН ПРИЛОЖЕНИЯ -->
-    <div id="app-screen" class="screen">
-        <div class="app-container">
-            <!-- ПАНЕЛЬ 1: КОНТАКТЫ И ЧАТЫ -->
-            <section id="panel-contacts" class="panel active">
-                <div class="panel-header">
-                    <h3>💬 Мессенджер</h3>
-                </div>
-                <div class="search-box">
-                    <input type="text" id="contact-search-input" placeholder="🔍 Поиск контактов...">
-                </div>
-                <div id="contacts-list" class="contacts-list"></div>
-            </section>
-
-            <!-- ПАНЕЛЬ 2: АКТИВНЫЙ ЧАТ -->
-            <section id="panel-chat" class="panel">
-                <div class="chat-header glass-panel">
-                    <button class="btn-icon mobile-only" onclick="window.openMobileTab('panel-contacts')">⬅️</button>
-                    <div class="chat-header-info">
-                        <h3 id="chat-title">Общий чат</h3>
-                        <div id="typing-indicator" class="typing-text"></div>
-                    </div>
-                    <div class="chat-header-actions">
-                        <input type="text" id="chat-search-input" placeholder="🔍 В чате..." class="chat-search-field">
-                        <button id="clear-chat-btn" class="btn-icon danger" title="Очистить весь диалог">🗑️</button>
-                    </div>
-                </div>
-
-                <!-- ЗАКРЕПЛЕННОЕ СООБЩЕНИЕ -->
-                <div id="pinned-bar" class="pinned-bar hidden glass-panel">
-                    <div class="pinned-icon">📌</div>
-                    <div class="pinned-content">
-                        <small>Закрепленное сообщение</small>
-                        <div id="pinned-text-preview" class="pinned-text">...</div>
-                    </div>
-                    <button id="unpin-btn" class="btn-icon-sm">✖</button>
-                </div>
-
-                <!-- ОБЛАСТЬ СООБЩЕНИЙ -->
-                <div id="chat-messages" class="chat-messages"></div>
-
-                <!-- ПРЕВЬЮ ОТВЕТА / РЕДАКТИРОВАНИЯ -->
-                <div id="reply-preview" class="reply-preview glass-panel" style="display: none;">
-                    <div id="reply-indicator-bar" class="reply-bar-accent"></div>
-                    <div class="reply-content-box">
-                        <strong id="reply-user-name" class="reply-user">Пользователь</strong>
-                        <div id="reply-text-preview" class="reply-text">Текст сообщения</div>
-                    </div>
-                    <button id="cancel-reply-btn" class="btn-icon-sm">✖</button>
-                </div>
-
-                <!-- ПАНЕЛЬ ВВОДА СООБЩЕНИЯ -->
-                <div class="chat-input-panel glass-panel">
-                    <input type="file" id="chat-file-input" hidden accept="image/*,video/*">
-                    <button id="chat-file-btn" class="btn-icon" title="Прикрепить файл">📎</button>
-                    
-                    <div class="input-wrapper">
-                        <textarea id="chat-text-input" placeholder="Напишите сообщение..." rows="1"></textarea>
-                    </div>
-
-                    <div id="recording-timer" class="recording-timer hidden">🔴 00:00</div>
-                    <button id="record-audio-btn" class="btn-icon" title="Записать голос">🎙️</button>
-                    <button id="send-msg-btn" class="btn-icon primary" title="Отправить">🚀</button>
-                </div>
-            </section>
-
-            <!-- ПАНЕЛЬ 3: СТЕНА ПОСТОВ -->
-            <section id="panel-wall" class="panel">
-                <div class="panel-header">
-                    <h3>📰 Лента постов</h3>
-                </div>
-                
-                <!-- СОЗДАНИЕ ПОСТА -->
-                <div class="create-post-card glass-panel">
-                    <textarea id="post-text-input" placeholder="Что у вас нового?"></textarea>
-                    
-                    <div class="post-actions-row">
-                        <select id="post-category-select" class="select-input">
-                            <option value="общее">#общее</option>
-                            <option value="новости">#новости</option>
-                            <option value="игры">#игры</option>
-                            <option value="вопросы">#вопросы</option>
-                        </select>
-                        <input type="file" id="post-file-input" hidden accept="image/*,video/*">
-                        <button id="post-file-btn" class="btn-sm btn-outline">📎 Медиа</button>
-                        <span id="post-file-name" class="file-name-tag"></span>
-                        <button id="submit-post-btn" class="btn btn-primary">Опубликовать</button>
-                    </div>
-                </div>
-
-                <!-- ФИЛЬТР КАТЕГОРИЙ -->
-                <div class="category-filter-bar">
-                    <button class="cat-chip active" data-cat="all">Все</button>
-                    <button class="cat-chip" data-cat="общее">#общее</button>
-                    <button class="cat-chip" data-cat="новости">#новости</button>
-                    <button class="cat-chip" data-cat="игры">#игры</button>
-                    <button class="cat-chip" data-cat="вопросы">#вопросы</button>
-                </div>
-
-                <!-- ЛЕНТА ПОСТОВ -->
-                <div id="wall-posts" class="wall-posts"></div>
-            </section>
-
-            <!-- ПАНЕЛЬ 4: ПРОФИЛЬ И НАСТРОЙКИ -->
-            <section id="panel-profile" class="panel">
-                <div class="panel-header">
-                    <h3>⚙️ Настройки и Профиль</h3>
-                </div>
-
-                <div class="profile-card glass-panel">
-                    <div class="avatar-container">
-                        <img id="user-avatar" src="" alt="Аватар" class="avatar-lg">
-                        <input type="file" id="avatar-file-input" hidden accept="image/*">
-                        <button id="avatar-edit-btn" class="btn-avatar-edit">📷</button>
-                    </div>
-                    <h2 id="user-display-name">Пользователь</h2>
-                    <p id="user-email-text" class="text-muted"></p>
-                </div>
-
-                <div class="settings-list glass-panel">
-                    <div class="setting-item">
-                        <span>Тема оформления</span>
-                        <button id="theme-toggle" class="btn-sm btn-outline">🌙 Тёмная тема</button>
-                    </div>
-                    <div class="setting-item">
-                        <span>Размер шрифта</span>
-                        <div class="font-controls">
-                            <button id="font-dec" class="btn-sm">-</button>
-                            <span id="font-size-val">100%</span>
-                            <button id="font-inc" class="btn-sm">+</button>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <span>Хранение сообщений</span>
-                        <select id="retention-select" class="select-input">
-                            <option value="never">Всегда хранить</option>
-                            <option value="1">1 день</option>
-                            <option value="7">7 дней</option>
-                            <option value="14">14 дней</option>
-                            <option value="30">30 дней</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <span>Свой фон чата</span>
-                        <div>
-                            <input type="file" id="custom-bg-input" accept="image/*" hidden>
-                            <button class="btn-sm btn-outline" onclick="document.getElementById('custom-bg-input').click()">Загрузить</button>
-                            <button id="reset-bg-btn" class="btn-sm btn-danger hidden">Сбросить</button>
-                        </div>
-                    </div>
-                    <div class="setting-item border-top">
-                        <button id="logout-btn" class="btn btn-danger full-width">Выйти из аккаунта</button>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- НИЖНЯЯ НАВИГАЦИЯ -->
-        <nav class="bottom-nav glass-panel">
-            <button class="nav-btn active" data-target="panel-contacts">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Чаты</span>
-            </button>
-            <button class="nav-btn" data-target="panel-wall">
-                <span class="nav-icon">📰</span>
-                <span class="nav-label">Стена</span>
-            </button>
-            <button class="nav-btn" data-target="panel-profile">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label">Профиль</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- МОДАЛЬНОЕ ОКНО ЭМОДЗИ РЕАКЦИЙ -->
-    <div id="reaction-picker" class="reaction-picker hidden">
-        <button onclick="window.addReaction('👍')">👍</button>
-        <button onclick="window.addReaction('❤️')">❤️</button>
-        <button onclick="window.addReaction('😂')">😂</button>
-        <button onclick="window.addReaction('😮')">😮</button>
-        <button onclick="window.addReaction('😢')">😢</button>
-        <button onclick="window.addReaction('🔥')">🔥</button>
-    </div>
-
-    <script type="module" src="script.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
