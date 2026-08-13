@@ -1,5 +1,5 @@
 /* ==========================================
-   1. ГЛОБАЛЬНЫЙ СБРОС И СТРУКТУРА
+   1. ГЛОБАЛЬНЫЙ СБРОС И ОСНОВНЫЕ ПЕРЕМЕННЫЕ
    ========================================== */
 * {
     box-sizing: border-box;
@@ -15,10 +15,23 @@ input, button, select, textarea, label {
     font-family: inherit;
 }
 
+/* Переменные по умолчанию (Тёмная тема) */
 :root {
     --bg-gradient: radial-gradient(circle at 50% 30%, #1a102f 0%, #0d0818 60%, #05030a 100%);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-card-bg: rgba(255, 255, 255, 0.08);
+    --text-color: #ffffff;
     --accent: #10b981;
-    --vh: 1vh;
+}
+
+/* Переменные для Светлой темы */
+[data-theme="light"] {
+    --bg-gradient: radial-gradient(circle at 50% 30%, #3e4c5e 0%, #2b3545 60%, #1a222d 100%);
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-card-bg: rgba(255, 255, 255, 0.12);
+    --text-color: #ffffff;
 }
 
 html, body {
@@ -33,20 +46,20 @@ body {
     background: var(--bg-gradient) !important;
     background-size: cover !important;
     background-position: center !important;
-    color: #ffffff !important;
+    color: var(--text-color) !important;
     position: fixed;
 }
 
 /* ==========================================
-   2. КАРТОЧКИ И ОТСТУПЫ (ОЗДОРАВЛИВАЕМ ИНТЕРФЕЙС)
+   2. КОНТЕЙНЕРЫ, КАРТОЧКИ И ОТСТУПЫ
    ========================================== */
 .scroll-content {
     flex: 1;
     overflow-y: auto;
-    padding: 16px !important; /* Увеличили отступ от краев */
+    padding: 16px !important;
     display: flex;
     flex-direction: column;
-    gap: 16px !important;    /* РАЗЛЕПЛЯЕМ КАРТОЧКИ ДРУГ ОТ ДРУГА */
+    gap: 16px !important; /* Разлепляет карточки друг от друга */
 }
 
 .glass-panel, 
@@ -55,17 +68,19 @@ body {
 .wall-create-box, 
 .post-item,
 .auth-card {
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: var(--glass-card-bg) !important;
     -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
     backdrop-filter: blur(25px) saturate(190%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid var(--glass-border) !important;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
     border-radius: 20px !important;
-    padding: 16px !important; /* Внутренние отступы */
-    color: #ffffff !important;
+    padding: 16px !important;
+    color: var(--text-color) !important;
 }
 
-/* 👤 ПРОФИЛЬ И АВАТАРКА-КРУГЛЕШ */
+/* ==========================================
+   3. ПРОФИЛЬ И СТРОГО КРУГЛЫЕ АВАТАРЫ
+   ========================================== */
 .profile-card {
     display: flex;
     flex-direction: column;
@@ -82,15 +97,14 @@ body {
 }
 
 /* Аватарка в профиле */
-.avatar-lg {
+.avatar-lg, .profile-card img {
     width: 80px !important;
     height: 80px !important;
-    border-radius: 50% !important; /* СТРОГО КРУГЛАЯ */
+    border-radius: 50% !important; /* Круглеш */
     object-fit: cover !important;
     border: 2px solid rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Иконка карандаша редактирования */
 .btn-avatar-edit {
     position: absolute;
     bottom: 0;
@@ -104,32 +118,37 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 0.8rem;
+    cursor: pointer;
 }
 
-/* 💬 СПИСОК ЧАТОВ И КОНТАКТОВ (РАЗЛЕПЛЯЕМ И АККУРАТНЫЕ АВАТАРЫ) */
-.contact-item {
+/* ==========================================
+   4. СПИСОК ЧАТОВ И КОНТАКТОВ
+   ========================================== */
+.contact-item, .chat-item {
     display: flex !important;
     align-items: center !important;
     gap: 14px !important; /* Отступ между аватаркой и текстом */
     padding: 12px 14px !important;
-    margin-bottom: 10px !important; /* Разделяем чаты */
+    margin-bottom: 10px !important;
     border-radius: 16px !important;
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     transition: all 0.25s ease;
 }
 
-/* Аватарка в списке контактов/чатов */
-.avatar-sm, .contact-item img {
-    width: 48px !important;  /* Компактный размер */
+/* Аватарка в чатах и контактах */
+.avatar-sm, .contact-item img, .chat-item img {
+    width: 48px !important;
     height: 48px !important;
     min-width: 48px !important;
-    border-radius: 50% !important; /* КРУГЛЕШ */
+    border-radius: 50% !important; /* Круглеш */
     object-fit: cover !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-/* ⚙️ СТРОКИ НАСТРОЕК */
+/* ==========================================
+   5. ЭЛЕМЕНТЫ НАСТРОЕК И КНОПКИ
+   ========================================== */
 .setting-item {
     display: flex;
     justify-content: space-between;
@@ -138,7 +157,6 @@ body {
     gap: 12px;
 }
 
-/* Кнопки настроек и форма */
 button, .btn, .glass-btn {
     background: rgba(255, 255, 255, 0.15) !important;
     -webkit-backdrop-filter: blur(15px) !important;
@@ -164,7 +182,7 @@ button:active {
 }
 
 /* ==========================================
-   3. ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА С ПЛАВНОЙ АНИМАЦИЕЙ
+   6. НИЖНЕЕ МЕНЮ (1 АКТИВНАЯ ВКЛАДКА И АНИМАЦИЯ)
    ========================================== */
 .bottom-nav { 
     display: flex; 
@@ -180,11 +198,10 @@ button:active {
     max-width: 400px;
     height: 64px;
     
-    /* Сплошная прозрачная колба */
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: var(--glass-bg) !important;
     -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
     backdrop-filter: blur(30px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border: 1px solid var(--glass-border) !important;
     border-radius: 35px !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
                 inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
@@ -195,7 +212,7 @@ button:active {
     z-index: 9999;
 }
 
-/* Неактивные кнопки — полностью прозрачные без плашек */
+/* Все кнопки по умолчанию прозрачные без плашек */
 .nav-btn {
     flex: 1;
     background: transparent !important;
@@ -211,7 +228,7 @@ button:active {
     padding: 8px 0;
     border-radius: 24px !important;
     
-    /* Плавная анимация переключения элементов */
+    /* Плавная анимация переключения */
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
@@ -219,7 +236,6 @@ button:active {
 .nav-btn.active {
     color: #ffffff !important;
     font-weight: 700 !important;
-    /* Появляется мягкая стеклянная плашка под активной иконкой */
     background: rgba(255, 255, 255, 0.22) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     backdrop-filter: blur(12px) !important;
