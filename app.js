@@ -1,4 +1,4 @@
-// Конфигурация Firebase (замените на ваши данные)
+// Конфигурация Firebase (замените на ваши актуальные данные, если требуется)
 const firebaseConfig = {
     databaseURL: "https://homa-app-default-rtdb.firebaseio.com/"
 };
@@ -7,18 +7,19 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let currentUser = localStorage.getItem('homa_user') || null;
+let currentChatUser = null;
 window.allContacts = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     initAuth();
     initNavigation();
-    initContacts();
+    initAppLogic();
 });
 
-// 🔐 Авторизация
+// 🔐 Логика авторизации
 function initAuth() {
     const authScreen = document.getElementById('auth-screen');
-    const mainScreen = document.getElementById('main-screen');
+    const appScreen = document.getElementById('app-screen');
     const usernameInput = document.getElementById('usernameInput');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
@@ -26,69 +27,66 @@ function initAuth() {
 
     if (currentUser) {
         authScreen.classList.remove('active');
-        mainScreen.classList.add('active');
-        profileName.textContent = currentUser;
+        appScreen.classList.add('active');
+        if (profileName) profileName.textContent = currentUser;
         startApp();
     }
 
-    loginBtn.addEventListener('click', () => {
-        const val = usernameInput.value.trim();
-        if (!val) return;
-        currentUser = val;
-        localStorage.setItem('homa_user', currentUser);
-        authScreen.classList.remove('active');
-        mainScreen.classList.add('active');
-        profileName.textContent = currentUser;
-        startApp();
-    });
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const val = usernameInput.value.trim();
+            if (!val) return;
+            currentUser = val;
+            localStorage.setItem('homa_user', currentUser);
+            authScreen.classList.remove('active');
+            appScreen.classList.add('active');
+            if (profileName) profileName.textContent = currentUser;
+            startApp();
+        });
+    }
 
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('homa_user');
-        location.reload();
-    });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('homa_user');
+            location.reload();
+        });
+    }
 }
 
-// 🧭 Навигация по табам
+// 🧭 Управление нижней навигацией (переключение панелей)
 function initNavigation() {
     const navButtons = document.querySelectorAll('.nav-btn');
-    const tabs = document.querySelectorAll('.tab-content');
-    const pageTitle = document.getElementById('pageTitle');
-
-    const titles = {
-        chats: 'Чаты',
-        contacts: 'Контакты',
-        profile: 'Профиль'
-    };
+    const panels = document.querySelectorAll('.panel');
 
     navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
+            const targetId = btn.getAttribute('data-target');
 
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            tabs.forEach(tab => tab.classList.remove('active'));
-            document.getElementById(`${targetTab}-tab`).classList.add('active');
-
-            if (pageTitle) {
-                pageTitle.textContent = titles[targetTab] || 'Homa';
-            }
+            panels.forEach(panel => {
+                panel.classList.remove('active');
+                if (panel.id === targetId) {
+                    panel.classList.add('active');
+                }
+            });
         });
     });
 }
 
-// 🚀 Запуск логики приложения после входа
+// 🚀 Запуск основной функциональности после входа
 function startApp() {
-    // Регистрация пользователя в базе
+    // Статус пользователя в Firebase
     const userRef = db.ref('users/' + currentUser);
-    userRef.set({ name: currentUser, online: true });
+    userRef.update({ name: currentUser, online: true });
     userRef.onDisconnect().update({ online: false });
 
     loadContacts();
 }
 
-// 👥 Загрузка и рендеринг контактов (с защитой от undefined)
-function initContacts() {
+// 👥 Загрузка контактов с полной защитой от undefined (.toLowerCase ошибка устранена навсегда)
+function initAppLogic() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', renderContactsList);
@@ -107,25 +105,47 @@ function renderContactsList() {
     const searchInput = document.getElementById('searchInput');
     if (!contactsList) return;
 
-    const filter = searchInput ? (searchInput.value || '').toLowerCase() : '';
+    // Безопасное получение значения фильтра (защита от undefined)
+    const filter = searchInput && searchInput.value ? searchInput.value.toLowerCase() : '';
     contactsList.innerHTML = '';
 
     for (const [id, contact] of Object.entries(window.allContacts)) {
-        if (contact.name === currentUser) continue; // Пропускаем себя
+        if (!contact || contact.name === currentUser) continue;
 
-        const name = (contact.name || '').toLowerCase();
-        if (filter && !name.includes(filter)) {
+        // Жесткая страховка от падений через (contact.name || '')
+        const contactName = (contact.name || '').toLowerCase();
+        if (filter && !contactName.includes(filter)) {
             continue;
         }
 
         const item = document.createElement('div');
-        item.className = 'contact-item';
+        item.className = 'contact-item glass-panel';
         item.innerHTML = `
-            <span>${contact.name || 'Без имени'}</span>
-            <span style="font-size: 0.8rem; color: ${contact.online ? '#22c55e' : '#64748b'}">
-                ${contact.online ? '• в сети' : '• не в сети'}
-            </span>
+            <div style="flex: 1;">
+                <h4 style="margin: 0; font-size: 1rem;">${contact.name || 'Без имени'}</h4>
+                <span style="font-size: 0.75rem; color: ${contact.online ? 'var(--accent)' : 'var(--text-muted)'}">
+                    ${contact.online ? '• в сети' : '• не в сети'}
+                </span>
+            </div>
         `;
+        
+        // Клик по контакту переключает на панель чата с этим пользователем
+        item.addEventListener('click', () => {
+            currentChatUser = contact.name;
+            const chatTitle = document.getElementById('chatTitle');
+            if (chatTitle) chatTitle.textContent = `Чат с: ${currentChatUser}`;
+            
+            // Переключаем экран на панель чата программно
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            const chatPanel = document.getElementById('panel-chat');
+            if (chatPanel) chatPanel.classList.add('active');
+            
+            const chatNavBtn = document.querySelector('.nav-btn[data-target="panel-chat"]');
+            if (chatNavBtn) chatNavBtn.classList.add('active');
+        });
+
         contactsList.appendChild(item);
     }
 }
