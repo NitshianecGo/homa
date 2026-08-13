@@ -3,219 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#011713">
-    
-    <!-- Стандартные и обновленные мета-теги для PWA на iOS/Android -->
-    <meta name="mobile-web-app-capable" content="yes">
+    <title>HomeSpace</title>
+
+    <!-- PWA & Apple Web App Settings -->
+    <meta name="apple-mobile-web-app-title" content="HomeSpace">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PrivateSpace">
+    <meta name="theme-color" content="#2b2338">
 
-    <title>Private Space</title>
-    
+    <!-- Icons -->
     <link rel="manifest" href="manifest.json">
-    <!-- Встроенная локальная иконка вместо missing favicon.ico -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/><text x='50%' y='55%' font-size='50' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>💬</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/><text x='50%' y='55%' font-size='50' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>💬</text></svg>">
-    
-    <link rel="stylesheet" href="style.css?v=18">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #2b2338;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        .app-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 32px 24px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .logo { width: 120px; height: 120px; border-radius: 24px; margin-bottom: 20px; }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        p { font-size: 15px; color: rgba(255, 255, 255, 0.7); }
+    </style>
 </head>
 <body>
-
-    <!-- Экран Авторизации -->
-    <div id="auth-screen" class="screen active">
-        <div class="auth-card glass-panel">
-            <h2>Private Space</h2>
-            <p class="subtitle">Приватный мессенджер</p>
-            <form id="login-form">
-                <input type="text" id="username-input" placeholder="Имя пользователя" required autocomplete="off">
-                <input type="password" id="password-input" placeholder="Пароль" required>
-                <button type="submit" class="btn glass-btn btn-full">Войти</button>
-            </form>
-        </div>
+    <div class="app-card">
+        <img src="icon-192.png" alt="HomeSpace Logo" class="logo">
+        <h1>HomeSpace</h1>
+        <p>Добро пожаловать в HomeSpace!</p>
     </div>
 
-    <!-- Главный Экран Приложения -->
-    <div id="app-screen" class="screen">
-        
-        <!-- Панель 1: Контакты / Чаты -->
-        <div id="panel-contacts" class="panel glass-panel">
-            <div class="panel-header">
-                <h3>Чаты</h3>
-                <button id="btn-add-contact" class="icon-btn" title="Добавить контакт">➕</button>
-            </div>
-            <div class="scroll-content" id="contacts-list"></div>
-        </div>
-
-        <!-- Панель 2: Диалог / Чат -->
-        <div id="panel-chat" class="panel glass-panel">
-            <div class="panel-header">
-                <div class="header-info">
-                    <h3 id="chat-title">Общий чат</h3>
-                    <span id="chat-status" class="subtitle">онлайн</span>
-                </div>
-                <div class="chat-header-actions">
-                    <button id="btn-pin-chat" class="btn glass-btn btn-sm">📌 Закрепить</button>
-                    <button id="btn-clear-chat" class="icon-btn" title="Очистить чат">🗑️</button>
-                </div>
-            </div>
-
-            <div id="pinned-message-bar" class="pinned-bar hidden">
-                <div class="pinned-content">
-                    <span class="pinned-icon">📌</span>
-                    <span id="pinned-text">Закрепленное сообщение</span>
-                </div>
-                <button id="btn-unpin" class="icon-btn">❌</button>
-            </div>
-
-            <div class="scroll-content messages-container" id="messages-container"></div>
-
-            <div id="reply-preview-bar" class="reply-preview-bar hidden">
-                <span id="reply-preview-text">Ответ на...</span>
-                <button id="btn-cancel-reply" class="icon-btn">❌</button>
-            </div>
-
-            <div class="chat-input-area glass-panel">
-                <label for="chat-file-input" class="icon-btn">📎</label>
-                <input type="file" id="chat-file-input" accept="image/*,video/*" style="display:none;">
-                <textarea id="chat-message-input" placeholder="Сообщение..." rows="1"></textarea>
-                <div class="record-btn-wrapper">
-                    <span id="record-timer" class="record-timer hidden">00:00</span>
-                    <button id="btn-record-voice" class="icon-btn" title="Голосовое сообщение">🎙️</button>
-                </div>
-                <button id="btn-send-message" class="icon-btn">➤</button>
-            </div>
-        </div>
-
-        <!-- Панель 3: Стена публикаций -->
-        <div id="panel-wall" class="panel glass-panel">
-            <div class="panel-header">
-                <h3>Стена</h3>
-            </div>
-            <div class="scroll-content">
-                <div class="wall-create-box glass-panel">
-                    <textarea id="wall-post-input" placeholder="Что нового?"></textarea>
-                    <div class="wall-actions">
-                        <label for="wall-file-input" class="icon-btn">📷</label>
-                        <input type="file" id="wall-file-input" accept="image/*,video/*" style="display:none;">
-                        <button id="btn-publish-post" class="btn glass-btn btn-sm">Опубликовать</button>
-                    </div>
-                </div>
-                <div id="wall-posts-container"></div>
-            </div>
-        </div>
-
-        <!-- Панель 4: Профиль и Настройки -->
-        <div id="panel-settings" class="panel glass-panel">
-            <div class="panel-header">
-                <h3>Профиль и Настройки</h3>
-            </div>
-            <div class="scroll-content">
-                <div class="profile-card glass-panel">
-                    <div class="avatar-wrapper">
-                        <!-- ВСТРОЕННАЯ SVG АВАТАРКА ВМЕСТО VIA.PLACEHOLDER -->
-                        <img id="user-avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2310b981'/><text x='50%' y='55%' font-size='45' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>👤</text></svg>" alt="Avatar" class="avatar-lg">
-                        <label for="avatar-file-input" class="btn-avatar-edit">✏️</label>
-                        <input type="file" id="avatar-file-input" accept="image/*" style="display:none;">
-                    </div>
-                    <h4 id="user-display-name">Пользователь</h4>
-                    <p id="user-display-handle" class="subtitle">@username</p>
-                </div>
-
-                <div class="settings-group glass-panel">
-                    <h4>Оформление</h4>
-                    <div class="setting-item flex-col">
-                        <span>Тема приложения:</span>
-                        <div class="theme-selector">
-                            <button class="btn glass-btn theme-opt active" data-theme-val="emerald">🟢 Liquid Emerald</button>
-                            <button class="btn glass-btn theme-opt" data-theme-val="dark">🌙 Dark Classic</button>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <span>Размер шрифта</span>
-                        <select id="font-size-select" class="glass-select" style="width: auto;">
-                            <option value="90">90%</option>
-                            <option value="100" selected>100%</option>
-                            <option value="115">115%</option>
-                            <option value="130">130%</option>
-                            <option value="145">145%</option>
-                        </select>
-                    </div>
-                    <div class="setting-item flex-col">
-                        <span>Фон чата:</span>
-                        <div class="bg-selector">
-                            <button class="bg-opt-btn active" data-bg="emerald">Стандарт</button>
-                            <button class="bg-opt-btn" data-bg="nebula">Туманность</button>
-                            <button class="bg-opt-btn" data-bg="sunset">Закат</button>
-                        </div>
-                        <div class="custom-bg-upload-box">
-                            <label for="custom-bg-file" class="btn glass-btn btn-sm btn-full" style="margin-top: 8px; text-align: center; display: block; cursor: pointer;">
-                                🖼️ Загрузить свое фото
-                            </label>
-                            <input type="file" id="custom-bg-file" accept="image/*" style="display:none;">
-                            <button id="btn-reset-custom-bg" class="btn glass-btn-danger btn-sm btn-full hidden" style="margin-top: 4px;">Сбросить фото фона</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-group glass-panel">
-                    <h4>Хранение информации</h4>
-                    <div class="retention-info-text">
-                        <p class="retention-desc">Все данные (сообщения, фото, настройки) сохраняются исключительно в память вашего устройства (Local Storage). Сервер не хранит историю ваших переписок.</p>
-                    </div>
-                    <div class="setting-item flex-col">
-                        <span class="setting-label">Автоочистка истории:</span>
-                        <select id="retention-policy-select" class="glass-select">
-                            <option value="never">Хранить всегда</option>
-                            <option value="1d">Удалять через 1 день</option>
-                            <option value="7d">Удалять через 7 дней</option>
-                            <option value="30d">Удалять через 30 дней</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="settings-group glass-panel">
-                    <h4>Доступ и разрешения</h4>
-                    <div class="setting-item">
-                        <span>Уведомления</span>
-                        <button id="btn-perm-notif" class="btn glass-btn btn-sm">Запросить</button>
-                    </div>
-                    <div class="setting-item">
-                        <span>Микрофон</span>
-                        <button id="btn-perm-mic" class="btn glass-btn btn-sm">Проверить</button>
-                    </div>
-                </div>
-
-                <button id="btn-logout" class="btn glass-btn-danger btn-full" style="margin-top: 15px;">Выйти из аккаунта</button>
-            </div>
-        </div>
-
-        <nav class="glass-nav">
-            <button class="nav-btn active" data-target="panel-contacts">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Чаты</span>
-            </button>
-            <button class="nav-btn" data-target="panel-chat">
-                <span class="nav-icon">✉️</span>
-                <span class="nav-label">Диалог</span>
-            </button>
-            <button class="nav-btn" data-target="panel-wall">
-                <span class="nav-icon">📰</span>
-                <span class="nav-label">Стена</span>
-            </button>
-            <button class="nav-btn" data-target="panel-settings">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label">Профиль</span>
-            </button>
-        </nav>
-
-    </div>
-
-    <div id="lightbox-modal" class="lightbox-modal hidden">
-        <span id="lightbox-close" class="lightbox-close">&times;</span>
-        <img id="lightbox-img" class="lightbox-content" src="" alt="Enlarged image">
-    </div>
-
-    <script type="module" src="app.js?v=18"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>
