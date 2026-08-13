@@ -26,6 +26,7 @@ let replyTargetMessage = null;
 
 let messagesRefUnsub = null;
 let typingRefUnsub = null;
+let pinnedRefUnsub = null;
 
 const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2389b4fa'/><text x='50%' y='55%' font-size='45' text-anchor='middle' fill='%23ffffff' dominant-baseline='middle'>👤</text></svg>";
 
@@ -81,6 +82,7 @@ function initAppData() {
     switchChat('global', 'Общий чат');
     loadPosts();
     loadCustomBg();
+    initRetentionSetting();
     
     document.getElementById('user-email-text').innerText = currentUser.email;
     document.getElementById('user-display-name').innerText = currentUser.email.split('@')[0];
@@ -103,9 +105,11 @@ function loadContacts() {
         const users = snapshot.val() || {};
         
         const globalChatDiv = document.createElement('div');
-        globalChatDiv.className = 'contact-item';
+        globalChatDiv.className = `contact-item ${currentChatTarget === 'global' ? 'active' : ''}`;
+        globalChatDiv.id = 'contact-item-global';
         globalChatDiv.innerHTML = `<strong>📢 Общий Чат</strong>`;
         globalChatDiv.onclick = () => {
+            highlightContact('contact-item-global');
             switchChat('global', 'Общий чат');
             openMobileTab('panel-chat');
         };
@@ -115,9 +119,10 @@ function loadContacts() {
             if (uid === currentUser.uid) return;
             const u = users[uid];
             const div = document.createElement('div');
-            div.className = 'contact-item';
             
             const privateChatId = currentUser.uid < uid ? `private_${currentUser.uid}_${uid}` : `private_${uid}_${currentUser.uid}`;
+            div.className = `contact-item ${currentChatTarget === privateChatId ? 'active' : ''}`;
+            div.id = `contact-item-${uid}`;
 
             div.innerHTML = `
                 <img src="${u.avatar || DEFAULT_AVATAR}" class="avatar-sm">
@@ -128,6 +133,7 @@ function loadContacts() {
             `;
             
             div.onclick = () => {
+                highlightContact(`contact-item-${uid}`);
                 switchChat(privateChatId, `💬 Чат с ${u.name || u.email.split('@')[0]}`);
                 openMobileTab('panel-chat');
             };
@@ -144,6 +150,12 @@ function loadContacts() {
     });
 }
 
+function highlightContact(itemId) {
+    document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
+    const target = document.getElementById(itemId);
+    if (target) target.classList.add('active');
+}
+
 // 2. ЧАТ И ОЧИСТКА ДИАЛОГА
 function switchChat(targetId, title) {
     currentChatTarget = targetId;
@@ -151,6 +163,7 @@ function switchChat(targetId, title) {
     cancelReply();
     loadMessages(targetId);
     listenTyping(targetId);
+    listenPinnedMessage(targetId);
 }
 
 // КНОПКА ОЧИСТКИ ДИАЛОГА ИЗ БД
@@ -201,6 +214,29 @@ function listenTyping(chatId) {
         }
     });
 }
+
+// ЗАКРЕПЛЕНИЕ СООБЩЕНИЯВ ЧАТЕ
+function listenPinnedMessage(chatId) {
+    if (pinnedRefUnsub) off(pinnedRefUnsub);
+
+    pinnedRefUnsub = ref(db, `pinned/${chatId}`);
+    onValue(pinnedRefUnsub, (snapshot) => {
+        const pinned = snapshot.val();
+        const pinnedBar = document.getElementById('pinned-bar');
+        const pinnedText = document.getElementById('pinned-text-preview');
+
+        if (pinned) {
+            pinnedText.innerText = `${pinned.senderName}: ${pinned.content}`;
+            pinnedBar.classList.remove('hidden');
+        } else {
+            pinnedBar.classList.add('hidden');
+        }
+    });
+}
+
+document.getElementById('unpin-btn').addEventListener('click', () => {
+    remove(ref(db, `pinned/${currentChatTarget}`));
+});
 
 function sendTextMessage() {
     const input = document.getElementById('chat-text-input');
@@ -258,11 +294,21 @@ function loadMessages(targetId) {
             const bubble = document.createElement('div');
             bubble.className = `msg-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
             
-            bubble.onclick = () => {
-                replyTargetMessage = msg;
-                document.getElementById('reply-user-name').innerText = msg.senderName || 'Пользователь';
-                document.getElementById('reply-text-preview').innerText = msg.type === 'text' ? msg.content : `[${msg.type}]`;
-                document.getElementById('reply-preview').style.display = 'flex';
+            // Клик по сообщению для цитирования или закрепления
+            bubble.onclick = (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'AUDIO') return;
+                
+                if (confirm("Закрепить это сообщение вверху чата?")) {
+                    set(ref(db, `pinned/${targetId}`), {
+                        senderName: msg.senderName,
+                        content: msg.type === 'text' ? msg.content : `[${msg.type}]`
+                    });
+                } else {
+                    replyTargetMessage = msg;
+                    document.getElementById('reply-user-name').innerText = msg.senderName || 'Пользователь';
+                    document.getElementById('reply-text-preview').innerText = msg.type === 'text' ? msg.content : `[${msg.type}]`;
+                    document.getElementById('reply-preview').style.display = 'flex';
+                }
             };
 
             let quoteHTML = '';
@@ -281,16 +327,19 @@ function loadMessages(targetId) {
             } else if (msg.type === 'video') {
                 body = `<video src="${msg.content}" controls class="chat-media-video"></video>`;
             } else if (msg.type === 'audio') {
+                const audioId = `audio-${msgKey}`;
+                const speedBtnId = `speed-${msgKey}`;
                 body = `
                     <div class="audio-voice-message">
-                        <audio src="${msg.content}" controls playsinline preload="metadata" class="custom-audio-elem"></audio>
+                        <audio id="${audioId}" src="${msg.content}" controls playsinline preload="metadata" class="custom-audio-elem"></audio>
+                        <button id="${speedBtnId}" class="speed-btn" onclick="window.changeAudioSpeed('${audioId}', '${speedBtnId}')">1x</button>
                     </div>
                 `;
             }
 
             let checkMark = '';
             if (isOutgoing) {
-                checkMark = msg.read ? '<span style="color:#89b4fa; font-weight:bold;">✓✓</span>' : '<span style="color:#89b4fa; font-weight:bold;">✓</span>';
+                checkMark = msg.read ? '<span style="color:#1e66f5; font-weight:bold;">✓✓</span>' : '<span style="color:#1e66f5; font-weight:bold;">✓</span>';
             }
 
             const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
@@ -300,6 +349,24 @@ function loadMessages(targetId) {
         container.scrollTop = container.scrollHeight;
     });
 }
+
+// ПЕРЕКЛЮЧЕНИЕ СКОРОСТИ ВОСПРОИЗВЕДЕНИЯ ГУДИО (1x -> 1.5x -> 2x)
+window.changeAudioSpeed = function(audioId, btnId) {
+    const audio = document.getElementById(audioId);
+    const btn = document.getElementById(btnId);
+    if (!audio || !btn) return;
+
+    if (audio.playbackRate === 1.0) {
+        audio.playbackRate = 1.5;
+        btn.innerText = '1.5x';
+    } else if (audio.playbackRate === 1.5) {
+        audio.playbackRate = 2.0;
+        btn.innerText = '2x';
+    } else {
+        audio.playbackRate = 1.0;
+        btn.innerText = '1x';
+    }
+};
 
 // 3. ПОШАГОВАЯ СИСТЕМА ЗАПИСИ
 const recordBtn = document.getElementById('record-audio-btn');
@@ -546,6 +613,20 @@ function changeFontSize(delta) {
     fontSize = Math.min(Math.max(fontSize + delta, 80), 150);
     document.documentElement.style.setProperty('--font-size-base', `${fontSize}%`);
     document.getElementById('font-size-val').innerText = `${fontSize}%`;
+}
+
+// ХРАНЕНИЕ СООБЩЕНИЙ (1-7-14-30-всегда)
+function initRetentionSetting() {
+    const select = document.getElementById('retention-select');
+    if (!select) return;
+
+    const savedVal = localStorage.getItem('hs_retention_period') || 'never';
+    select.value = savedVal;
+
+    select.addEventListener('change', (e) => {
+        const val = e.target.value;
+        localStorage.setItem('hs_retention_period', val);
+    });
 }
 
 // ЗАГРУЗКА И СБРОС ФОНА ЧАТА
