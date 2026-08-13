@@ -1,9 +1,9 @@
-const CACHE_NAME = 'homespace-v19';
+const CACHE_NAME = 'homespace-v21';
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=19',
-  './app.js?v=19',
+  './style.css?v=21',
+  './app.js?v=21',
   './manifest.json',
   './favicon.png',
   './apple-touch-icon.png',
