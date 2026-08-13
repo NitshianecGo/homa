@@ -1,4 +1,4 @@
-// Импорт модулей Firebase SDK v10
+// Импорт Firebase SDK v10
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
     getAuth, 
@@ -12,9 +12,7 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// -------------------------------------------------------------
-// 1. ТВОЯ РЕАЛЬНАЯ КОНФИГУРАЦИЯ FIREBASE (ПРОЕКТ homa-27efb)
-// -------------------------------------------------------------
+// Конфигурация проекта homa-27efb
 const firebaseConfig = {
     apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
     authDomain: "homa-27efb.firebaseapp.com",
@@ -24,14 +22,11 @@ const firebaseConfig = {
     appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
 };
 
-// Инициализация
+// Инициализация Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// -------------------------------------------------------------
-// 2. ИНИЦИАЛИЗАЦИЯ ИНТЕРФЕЙСА ПРИ ЗАГРУЗКЕ
-// -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     
     // Адаптация высоты экрана под iOS Safe Area
@@ -49,9 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password-input');
     const loginBtn = document.getElementById('btn-login');
 
-    // -------------------------------------------------------------
-    // 3. АВТОРИЗАЦИЯ ЧЕРЕЗ FIREBASE AUTH
-    // -------------------------------------------------------------
+    // Авторизация Firebase Auth
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -64,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Авто-преобразование username -> username@homespace.app если ввели без @
             const email = userInput.includes('@') ? userInput : `${userInput.toLowerCase()}@homespace.app`;
 
             try {
@@ -73,11 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     loginBtn.textContent = 'Проверка...';
                 }
 
-                // Вход в Firebase
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                await loadUserProfile(user);
+                await loadUserProfile(userCredential.user);
 
             } catch (error) {
                 console.error("Firebase Auth error:", error.code, error.message);
@@ -98,9 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // -------------------------------------------------------------
-    // 4. ОТСЛЕЖИВАНИЕ СЕССИИ (FIREBASE STATE)
-    // -------------------------------------------------------------
+    // Отслеживание сессии Firebase
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             await loadUserProfile(user);
@@ -125,30 +112,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.username) name = data.username;
             }
         } catch (e) {
-            console.log("Firestore skipped:", e);
+            console.log("Firestore load skipped:", e);
         }
 
         if (displayName) displayName.textContent = name;
         if (displayHandle) displayHandle.textContent = '@' + name.toLowerCase().replace(/\s+/g, '');
     }
 
-    // -------------------------------------------------------------
-    // 5. ВЫХОД ИЗ АККАУНТА
-    // -------------------------------------------------------------
+    // Выход из аккаунта
     const logoutBtn = document.getElementById('btn-logout');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
             } catch (err) {
-                console.error("SignOut Error:", err);
+                console.error("SignOut error:", err);
             }
         });
     }
 
-    // -------------------------------------------------------------
-    // 6. ПАНЕЛИ, ТЕМЫ И КАСТОМНЫЙ ФОН
-    // -------------------------------------------------------------
+    // Переключение табов навигации
     const navButtons = document.querySelectorAll('.nav-btn');
     const panels = document.querySelectorAll('.panel');
 
@@ -167,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Загрузка своего фона
+    // Загрузка и сброс кастомного фона
     const customBgInput = document.getElementById('custom-bg-file');
     const resetBgBtn = document.getElementById('btn-reset-custom-bg');
     const savedCustomBg = localStorage.getItem('custom_chat_bg');
@@ -201,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Настройка шрифта
+    // Размер шрифта
     const fontSizeSelect = document.getElementById('font-size-select');
     const savedSize = localStorage.getItem('app_font_size') || '100';
 
