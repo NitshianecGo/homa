@@ -1,156 +1,12 @@
-// Импорт Firebase SDK v10
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getAuth, 
-    signInWithEmailAndPassword, 
-    onAuthStateChanged, 
-    signOut 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-    getFirestore, 
-    doc, 
-    getDoc 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// Конфигурация проекта homa-27efb
-const firebaseConfig = {
-    apiKey: "AIzaSyBRi7lwyM1XELz02Gy_llBXt3c0V7kpLCI",
-    authDomain: "homa-27efb.firebaseapp.com",
-    projectId: "homa-27efb",
-    storageBucket: "homa-27efb.firebasestorage.app",
-    messagingSenderId: "365610803694",
-    appId: "1:365610803694:web:76a5554f8ab0c51c0f2eff"
-};
-
-// Инициализация Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
+// Переменные и инициализация
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Адаптация высоты экрана под iOS Safe Area
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-    window.addEventListener('resize', () => {
-        let vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-    });
+    initCustomBackground();
+    initFontSize();
+    initNavigation();
+});
 
-    const loginForm = document.getElementById('login-form');
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app-screen');
-    const usernameInput = document.getElementById('username-input');
-    const passwordInput = document.getElementById('password-input');
-    const loginBtn = document.getElementById('btn-login');
-
-    // Авторизация Firebase Auth
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const userInput = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (!userInput || !password) {
-                alert("Заполните логин/email и пароль!");
-                return;
-            }
-
-            const email = userInput.includes('@') ? userInput : `${userInput.toLowerCase()}@homespace.app`;
-
-            try {
-                if (loginBtn) {
-                    loginBtn.disabled = true;
-                    loginBtn.textContent = 'Проверка...';
-                }
-
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                await loadUserProfile(userCredential.user);
-
-            } catch (error) {
-                console.error("Firebase Auth error:", error.code, error.message);
-                
-                let errorMsg = "Неверный логин или пароль!";
-                if (error.code === 'auth/user-not-found') errorMsg = "Пользователь не найден!";
-                if (error.code === 'auth/wrong-password') errorMsg = "Неверный пароль!";
-                if (error.code === 'auth/invalid-credential') errorMsg = "Неверные учетные данные!";
-                
-                alert(errorMsg);
-                if (passwordInput) passwordInput.value = '';
-            } finally {
-                if (loginBtn) {
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Войти';
-                }
-            }
-        });
-    }
-
-    // Отслеживание сессии Firebase
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            await loadUserProfile(user);
-            if (authScreen) authScreen.classList.remove('active');
-            if (appScreen) appScreen.classList.add('active');
-        } else {
-            if (appScreen) appScreen.classList.remove('active');
-            if (authScreen) authScreen.classList.add('active');
-        }
-    });
-
-    async function loadUserProfile(user) {
-        const displayName = document.getElementById('user-display-name');
-        const displayHandle = document.getElementById('user-display-handle');
-        
-        let name = user.displayName || user.email.split('@')[0];
-        
-        try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                const data = userDoc.data();
-                if (data.username) name = data.username;
-            }
-        } catch (e) {
-            console.log("Firestore load skipped:", e);
-        }
-
-        if (displayName) displayName.textContent = name;
-        if (displayHandle) displayHandle.textContent = '@' + name.toLowerCase().replace(/\s+/g, '');
-    }
-
-    // Выход из аккаунта
-    const logoutBtn = document.getElementById('btn-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-            } catch (err) {
-                console.error("SignOut error:", err);
-            }
-        });
-    }
-
-    // Переключение табов навигации
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const panels = document.querySelectorAll('.panel');
-
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-target');
-            
-            navButtons.forEach(b => b.classList.remove('active'));
-            panels.forEach(p => p.classList.remove('active'));
-
-            btn.classList.add('active');
-            const targetPanel = document.getElementById(targetId);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-        });
-    });
-
-    // Загрузка и сброс кастомного фона
+// Функционал загрузки пользовательского фото на фон
+function initCustomBackground() {
     const customBgInput = document.getElementById('custom-bg-file');
     const resetBgBtn = document.getElementById('btn-reset-custom-bg');
     const savedCustomBg = localStorage.getItem('custom_chat_bg');
@@ -183,8 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
             resetBgBtn.classList.add('hidden');
         });
     }
+}
 
-    // Размер шрифта
+// Изменение размера шрифта (динамическое изменение всех тегов, включая информацию о хранении)
+function initFontSize() {
     const fontSizeSelect = document.getElementById('font-size-select');
     const savedSize = localStorage.getItem('app_font_size') || '100';
 
@@ -198,4 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('app_font_size', val);
         });
     }
-});
+}
+
+// Переключение табов в мобильном меню
+function initNavigation() {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const panels = document.querySelectorAll('.panel');
+
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            
+            navButtons.forEach(b => b.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+}
