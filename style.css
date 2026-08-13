@@ -1,12 +1,13 @@
 :root {
     --bg-gradient: radial-gradient(circle at 20% 20%, #2b2a4a 0%, #151525 100%);
-    --glass-bg: rgba(255, 255, 255, 0.15);
-    --glass-bg-hover: rgba(255, 255, 255, 0.25);
-    --glass-border: rgba(255, 255, 255, 0.25);
-    --glass-glow: rgba(137, 180, 250, 0.4);
-    /* ТЕКСТ ПО УМОЛЧАНИЮ ТЕМНЫЙ / ЧЕРНЫЙ */
+    /* ПРОЗРАЧНОЕ ЖИДКОЕ СТЕКЛО ВМЕСТО БЕЛОЙ ЗАЛИВКИ */
+    --glass-bg: rgba(255, 255, 255, 0.18);
+    --glass-bg-hover: rgba(255, 255, 255, 0.28);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-glow: rgba(137, 180, 250, 0.45);
+    
     --text-primary: #111827;
-    --text-muted: #4b5563;
+    --text-muted: #374151;
     --accent: #1e66f5;
     --accent-hover: #2a72ff;
     --danger: #d20f39;
@@ -16,12 +17,12 @@
 
 [data-theme="light"] {
     --bg-gradient: radial-gradient(circle at 20% 20%, #e2e8f0 0%, #cbd5e1 100%);
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-bg-hover: rgba(255, 255, 255, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.7);
-    --glass-glow: rgba(30, 102, 245, 0.3);
+    --glass-bg: rgba(255, 255, 255, 0.35);
+    --glass-bg-hover: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-glow: rgba(30, 102, 245, 0.35);
     --text-primary: #0f172a;
-    --text-muted: #475569;
+    --text-muted: #334155;
     --accent: #1e66f5;
     --accent-hover: #2a72ff;
     --danger: #d20f39;
@@ -56,23 +57,32 @@ body {
     top: 0;
 }
 
+/* ОВЕРЛЕЙ ДЛЯ ПОЛЬЗОВАТЕЛЬСКОГО ФОНА С ВЫСОКИМ ПРИОРИТЕТОМ */
+body.has-custom-bg {
+    background-image: var(--custom-bg-url) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
 .hidden { display: none !important; }
 
-/* LIQUID GLASS СТИЛИ */
-.glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+/* КАРТОЧКИ - ЖИДКОЕ СТЕКЛО С ЛЕГКОЙ ПРОЗРАЧНОСТЬЮ */
+.glass-panel, .profile-card, .settings-group, .wall-create-box, .post-item {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(25px) saturate(190%) -webkit-backdrop-filter: blur(25px) saturate(190%);
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
 }
 
 .glass-btn {
-    background: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border) !important;
     color: var(--text-primary) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.25s ease;
 }
 
@@ -81,10 +91,10 @@ body {
     box-shadow: 0 0 15px var(--glass-glow);
 }
 
-/* ОПАСНЫЕ КНОПКИ (КРАСНЫЙ ТЕКСТ) */
 .glass-btn-danger, .btn-danger {
-    background: rgba(210, 15, 57, 0.2) !important;
+    background: rgba(210, 15, 57, 0.22) !important;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(210, 15, 57, 0.5) !important;
     color: #dc2626 !important;
     font-weight: 700;
@@ -131,11 +141,12 @@ input[type="email"], input[type="password"], input[type="text"], textarea, selec
     padding: 12px 16px;
     border-radius: 14px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
     color: var(--text-primary) !important;
     font-size: 1rem;
     outline: none;
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     font-weight: 500;
 }
 
@@ -183,7 +194,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12) !important;
 }
 
 .scroll-content {
@@ -195,7 +206,6 @@ textarea {
 /* ЧАТЫ И КОНТАКТЫ */
 #panel-contacts { width: 280px; }
 
-/* ВЫДЕЛЕННЫЙ ДИАЛОГ ИЛИ КОНТАКТ (ПРОЗРАЧНЫЙ СТЕКЛЯННЫЙ ВИД) */
 .contact-item {
     display: flex;
     align-items: center;
@@ -204,17 +214,18 @@ textarea {
     border-radius: 16px;
     cursor: pointer;
     margin-bottom: 6px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.15) !important;
     border: 1px solid transparent;
     transition: all 0.3s ease;
     color: var(--text-primary) !important;
 }
 
 .contact-item.active, .contact-item:hover {
-    background: rgba(137, 180, 250, 0.25) !important;
+    background: rgba(255, 255, 255, 0.35) !important;
     backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border: 1px solid var(--glass-glow) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* ДИАЛОГ */
@@ -226,8 +237,9 @@ textarea {
     align-items: center;
     padding: 8px 14px;
     border-bottom: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.25) !important;
     font-size: 0.85rem;
+    border-radius: 0 !important;
 }
 .pinned-info { display: flex; flex-direction: column; }
 .pinned-label { font-weight: bold; font-size: 0.75rem; color: var(--accent); }
@@ -247,19 +259,20 @@ textarea {
     position: relative;
     word-break: break-word;
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     color: var(--text-primary) !important;
 }
 
 .msg-bubble.incoming {
     align-self: flex-start;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.35) !important;
     border: 1px solid var(--glass-border);
 }
 
 .msg-bubble.outgoing {
     align-self: flex-end;
-    background: rgba(137, 180, 250, 0.45);
+    background: rgba(137, 180, 250, 0.45) !important;
     border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
@@ -279,7 +292,6 @@ textarea {
     font-size: 0.8rem;
 }
 
-/* ЭЛЕМЕНТЫ АУДИОСООБЩЕНИЙ С КНОПКОЙ СКОРОСТИ */
 .audio-voice-message {
     display: flex;
     align-items: center;
@@ -304,6 +316,7 @@ textarea {
     padding: 12px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--glass-border);
+    border-radius: 0 !important;
 }
 
 .reply-preview-bar {
@@ -313,6 +326,7 @@ textarea {
     padding: 8px 14px;
     border-top: 1px solid var(--glass-border);
     font-size: 0.85rem;
+    border-radius: 0 !important;
 }
 
 .chat-media-img, .post-media-img, .chat-media-video, .post-media-video {
@@ -321,46 +335,16 @@ textarea {
     margin-top: 6px;
 }
 
-/* СТЕНА */
+/* СТЕНА И ПРОФИЛЬ */
 #panel-wall { width: 340px; }
-.wall-create-box {
-    padding: 12px;
-    border-radius: 18px;
-    margin-bottom: 12px;
-}
-.wall-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 8px;
-}
-.post-item {
-    padding: 14px;
-    border-radius: 18px;
-    margin-bottom: 12px;
-}
-.post-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.btn-delete-post {
-    background: none;
-    border: none;
-    color: var(--danger);
-    font-size: 0.8rem;
-    cursor: pointer;
-    font-weight: 700;
-}
-
-/* ПРОФИЛЬ И НАСТРОЙКИ */
 #panel-settings { width: 300px; }
+
 .profile-card {
     text-align: center;
     padding: 20px;
-    border-radius: 20px;
     margin-bottom: 16px;
 }
+
 .avatar-wrapper {
     position: relative;
     display: inline-block;
@@ -368,6 +352,7 @@ textarea {
 }
 .avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
 .avatar-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+
 .btn-avatar-edit {
     position: absolute;
     bottom: 0;
@@ -378,24 +363,27 @@ textarea {
     padding: 6px;
     cursor: pointer;
 }
+
 .settings-group {
     padding: 14px;
-    border-radius: 18px;
     margin-bottom: 12px;
 }
+
 .setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 10px;
 }
+
 .flex-col {
     flex-direction: column;
     align-items: flex-start;
 }
 
+/* ОТНОСИТЕЛЬНЫЕ ЕДИНИЦЫ ДЛЯ МАСШТАБИРОВАНИЯ ВСЕХ ЭЛЕМЕНТОВ НОМИНАЛЬНО */
 .retention-desc {
-    font-size: 0.95rem !important;
+    font-size: 0.9rem;
     line-height: 1.45;
     color: var(--text-primary) !important;
     font-weight: 500;
@@ -409,7 +397,7 @@ textarea {
         display: none;
         width: 100% !important;
         border-right: none;
-        padding-bottom: 80px;
+        padding-bottom: 85px;
     }
     .panel.active { display: flex; }
     
@@ -420,20 +408,20 @@ textarea {
         left: 5%;
         width: 90vw;
         height: 64px;
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.22) !important;
         backdrop-filter: blur(25px) saturate(200%);
         -webkit-backdrop-filter: blur(25px) saturate(200%);
-        border: 1px solid var(--glass-border);
+        border: 1px solid var(--glass-border) !important;
         border-radius: 32px;
         justify-content: space-around;
         align-items: center;
         z-index: 100;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     }
     
-    /* ПРОЗРАЧНО-СТЕКЛЯННЫЙ ВИД ДЛЯ АКТИВНОЙ ВКЛАДКИ НАВИГАЦИИ */
+    /* СТЕКЛЯННЫЙ И ПОЛУПРОЗРАЧНЫЙ ВИД ДЛЯ АКТИВНОЙ ВКЛАДКИ (БЕЗ БЕЛОЙ ЗАЛИВКИ) */
     .nav-btn {
-        background: transparent;
+        background: transparent !important;
         border: 1px solid transparent;
         color: var(--text-muted);
         display: flex;
@@ -450,11 +438,12 @@ textarea {
     
     .nav-btn.active {
         color: var(--text-primary) !important;
-        background: rgba(255, 255, 255, 0.4) !important;
+        background: rgba(255, 255, 255, 0.38) !important;
         backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
         border: 1px solid var(--glass-glow) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px) scale(1.04);
     }
 
     .nav-icon { font-size: 1.2rem; }
