@@ -627,14 +627,14 @@ function initRetentionSetting() {
     });
 }
 
-// ЗАГРУЗКА И СБРОС ФОНА ЧАТА (ФИКС ОВЕРЛЕЯ ДЛЯ IOS)
+// ЗАГРУЗКА И СБРОС ФОНА ЧАТА ДЛЯ ВСЕХ ПАНЕЛЕЙ И ЭКРАНОВ
 const customBgInput = document.getElementById('custom-bg-input');
 const resetBgBtn = document.getElementById('reset-bg-btn');
 
 function loadCustomBg() {
     const savedBg = localStorage.getItem('hs_custom_bg');
     if (savedBg) {
-        document.body.style.setProperty('--custom-bg-url', `url(${savedBg})`);
+        document.body.style.setProperty('--custom-bg-url', `url("${savedBg}")`);
         document.body.classList.add('has-custom-bg');
         if (resetBgBtn) resetBgBtn.classList.remove('hidden');
     }
@@ -649,7 +649,7 @@ if (customBgInput) {
         reader.onload = (event) => {
             const base64Bg = event.target.result;
             localStorage.setItem('hs_custom_bg', base64Bg);
-            document.body.style.setProperty('--custom-bg-url', `url(${base64Bg})`);
+            document.body.style.setProperty('--custom-bg-url', `url("${base64Bg}")`);
             document.body.classList.add('has-custom-bg');
             if (resetBgBtn) resetBgBtn.classList.remove('hidden');
         };
@@ -665,6 +665,7 @@ if (resetBgBtn) {
         resetBgBtn.classList.add('hidden');
     });
 }
+
 
 // МОБИЛЬНАЯ НАВИГАЦИЯ
 function openMobileTab(targetId) {
