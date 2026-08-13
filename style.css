@@ -1,256 +1,555 @@
-/* ==========================================
-   1. ГЛОБАЛЬНЫЙ СБРОС И ОСНОВНЫЕ ПЕРЕМЕННЫЕ
-   ========================================== */
+/* ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И ТЕМЫ */
+:root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-card: rgba(30, 41, 59, 0.75);
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --bubble-incoming: rgba(30, 41, 59, 0.9);
+    --bubble-outgoing: #2563eb;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --font-size-base: 100%;
+}
+
+[data-theme="light"] {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --bubble-incoming: #ffffff;
+    --bubble-outgoing: #2563eb;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-tap-highlight-color: transparent;
-}
-
-input, button, select, textarea, label {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    border-radius: 0;
-    font-family: inherit;
-}
-
-/* Переменные по умолчанию (Тёмная тема) */
-:root {
-    --bg-gradient: radial-gradient(circle at 50% 30%, #1a102f 0%, #0d0818 60%, #05030a 100%);
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-card-bg: rgba(255, 255, 255, 0.08);
-    --text-color: #ffffff;
-    --accent: #10b981;
-}
-
-/* Переменные для Светлой темы */
-[data-theme="light"] {
-    --bg-gradient: radial-gradient(circle at 50% 30%, #3e4c5e 0%, #2b3545 60%, #1a222d 100%);
-    --glass-bg: rgba(255, 255, 255, 0.15);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-card-bg: rgba(255, 255, 255, 0.12);
-    --text-color: #ffffff;
 }
 
 html, body {
     width: 100%;
     height: 100%;
+    height: calc(var(--vh, 1vh) * 100);
     overflow: hidden;
-    background-color: #05030a !important;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif !important;
-    background: var(--bg-gradient) !important;
-    background-size: cover !important;
-    background-position: center !important;
-    color: var(--text-color) !important;
-    position: fixed;
+/* СВОЙ ФОН ЧАТА */
+body.has-custom-bg {
+    background-image: var(--custom-bg-url);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-/* ==========================================
-   2. КОНТЕЙНЕРЫ, КАРТОЧКИ И ОТСТУПЫ
-   ========================================== */
-.scroll-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px !important;
+/* ЭКРАНЫ */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+.screen.active {
+    display: flex;
+}
+
+/* АВТОРИЗАЦИЯ */
+#auth-screen {
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: var(--bg-primary);
+}
+.auth-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 30px;
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
-    gap: 16px !important; /* Разлепляет карточки друг от друга */
+    gap: 16px;
+    text-align: center;
+}
+.logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.input-group input {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    outline: none;
 }
 
-.glass-panel, 
-.profile-card, 
-.settings-group, 
-.wall-create-box, 
-.post-item,
-.auth-card {
-    background: var(--glass-card-bg) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
-    backdrop-filter: blur(25px) saturate(190%) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-    border-radius: 20px !important;
-    padding: 16px !important;
-    color: var(--text-color) !important;
+/* ОСНОВНОЙ ИНТЕРФЕЙС */
+.app-container {
+    display: flex;
+    width: 100%;
+    height: calc(100% - 65px);
+    position: relative;
 }
 
-/* ==========================================
-   3. ПРОФИЛЬ И СТРОГО КРУГЛЫЕ АВАТАРЫ
-   ========================================== */
+.panel {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+}
+
+.panel.active {
+    display: flex;
+}
+
+/* ДЕСКТОПНЫЙ РЕЖИМ (МНОГОКОЛОНОЧНЫЙ) */
+@media (min-width: 768px) {
+    .app-container {
+        height: 100%;
+    }
+    .panel {
+        display: flex !important;
+    }
+    #panel-contacts {
+        width: 320px;
+        border-right: 1px solid var(--border-color);
+    }
+    #panel-chat {
+        flex: 1;
+    }
+    #panel-wall, #panel-profile {
+        width: 380px;
+        border-left: 1px solid var(--border-color);
+    }
+    .bottom-nav {
+        display: none !important;
+    }
+    .mobile-only {
+        display: none !important;
+    }
+}
+
+/* КАРТОЧКИ И СТЕКЛО */
+.glass-panel {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+}
+
+/* ЗАГОЛОВКИ ПАНЕЛЕЙ */
+.panel-header {
+    padding: 16px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* КОНТАКТЫ И СПИСОК */
+.search-box {
+    padding: 12px;
+}
+.search-box input, .chat-search-field, .select-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    outline: none;
+}
+.contacts-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+    position: relative;
+}
+.contact-item:hover, .contact-item.active {
+    background: rgba(59, 130, 246, 0.15);
+}
+.unread-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* АВАТАРКИ */
+.avatar-lg {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent);
+}
+.avatar-sm {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ЧАТ */
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    gap: 10px;
+}
+.chat-header-info {
+    flex: 1;
+}
+.chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* СООБЩЕНИЯ */
+.msg-bubble {
+    max-width: 78%;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    position: relative;
+    word-break: break-word;
+}
+.msg-bubble.incoming {
+    align-self: flex-start;
+    background: var(--bubble-incoming);
+    border-bottom-left-radius: 2px;
+}
+.msg-bubble.outgoing {
+    align-self: flex-end;
+    background: var(--bubble-outgoing);
+    color: #ffffff;
+    border-bottom-right-radius: 2px;
+}
+.msg-meta {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 4px;
+}
+.chat-media-img, .chat-media-video {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: var(--radius-sm);
+    margin-top: 6px;
+    display: block;
+}
+
+/* ЦИТАТА / ОТВЕТ */
+.quote-block {
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid var(--accent);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
+.reply-preview {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 12px;
+    border-top: 1px solid var(--border-color);
+}
+.reply-bar-accent {
+    width: 4px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+.reply-content-box {
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ЗАКРЕПЛЕННОЕ СООБЩЕНИЕ */
+.pinned-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+.pinned-content {
+    flex: 1;
+}
+
+/* РЕАКЦИИ */
+.reactions-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+.reaction-chip {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+}
+.reaction-picker {
+    position: absolute;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 6px 12px;
+    display: flex;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+}
+.reaction-picker button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.reaction-picker button:hover {
+    transform: scale(1.3);
+}
+
+/* ПАНЕЛЬ ВВОДА */
+.chat-input-panel {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 8px;
+    border-top: 1px solid var(--border-color);
+}
+.input-wrapper {
+    flex: 1;
+}
+.input-wrapper textarea {
+    width: 100%;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    border-radius: 20px;
+    outline: none;
+    resize: none;
+    max-height: 100px;
+}
+.recording-timer {
+    color: var(--danger);
+    font-weight: bold;
+    font-size: 0.9rem;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* СТЕНА ПОСТОВ */
+.create-post-card {
+    padding: 16px;
+    margin: 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.create-post-card textarea {
+    width: 100%;
+    min-height: 70px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    outline: none;
+}
+.post-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.category-filter-bar {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 12px 16px;
+    overflow-x: auto;
+}
+.cat-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cat-chip.active {
+    background: var(--accent);
+    color: #fff;
+}
+.wall-posts {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.post-item {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.post-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.comments-section {
+    margin-top: 10px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+}
+.comment-item {
+    font-size: 0.85rem;
+    padding: 4px 0;
+}
+
+/* ПРОФИЛЬ */
 .profile-card {
+    margin: 16px;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    gap: 12px !important;
+    gap: 10px;
 }
-
-.avatar-wrapper {
+.avatar-container {
     position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto;
 }
-
-/* Аватарка в профиле */
-.avatar-lg, .profile-card img {
-    width: 80px !important;
-    height: 80px !important;
-    border-radius: 50% !important; /* Круглеш */
-    object-fit: cover !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-}
-
 .btn-avatar-edit {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 28px;
-    height: 28px;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.25) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
+    background: var(--accent);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     cursor: pointer;
 }
-
-/* ==========================================
-   4. СПИСОК ЧАТОВ И КОНТАКТОВ
-   ========================================== */
-.contact-item, .chat-item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 14px !important; /* Отступ между аватаркой и текстом */
-    padding: 12px 14px !important;
-    margin-bottom: 10px !important;
-    border-radius: 16px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    transition: all 0.25s ease;
+.settings-list {
+    margin: 0 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
 }
-
-/* Аватарка в чатах и контактах */
-.avatar-sm, .contact-item img, .chat-item img {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    border-radius: 50% !important; /* Круглеш */
-    object-fit: cover !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* ==========================================
-   5. ЭЛЕМЕНТЫ НАСТРОЕК И КНОПКИ
-   ========================================== */
 .setting-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
-    gap: 12px;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-button, .btn, .glass-btn {
-    background: rgba(255, 255, 255, 0.15) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    color: #ffffff !important;
-    border-radius: 14px !important;
-    padding: 8px 14px;
-    font-weight: 600 !important;
-    font-size: 0.9rem;
+/* КНОПКИ */
+.btn {
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
+.btn-primary { background: var(--accent); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-sm { padding: 6px 12px; font-size: 0.85rem; border-radius: var(--radius-sm); }
+.btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); }
+.btn-icon { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 6px; }
+.btn-icon-sm { background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted); }
 
-button:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.25) !important;
-}
-
-.btn-danger, #reset-bg-btn, #logout-btn {
-    background: rgba(220, 38, 38, 0.35) !important;
-    border: 1px solid rgba(248, 113, 113, 0.5) !important;
-}
-
-/* ==========================================
-   6. НИЖНЕЕ МЕНЮ (1 АКТИВНАЯ ВКЛАДКА И АНИМАЦИЯ)
-   ========================================== */
-.bottom-nav { 
-    display: flex; 
-}
-
-.glass-nav {
-    display: flex;
+/* НИЖНЯЯ НАВИГАЦИЯ */
+.bottom-nav {
     position: fixed;
-    bottom: calc(16px + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90vw;
-    max-width: 400px;
-    height: 64px;
-    
-    background: var(--glass-bg) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
-    backdrop-filter: blur(30px) saturate(200%) !important;
-    border: 1px solid var(--glass-border) !important;
-    border-radius: 35px !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
-                
-    justify-content: space-between;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    display: flex;
+    justify-content: space-around;
     align-items: center;
-    padding: 0 8px;
-    z-index: 9999;
+    border-top: 1px solid var(--border-color);
+    z-index: 100;
 }
-
-/* Все кнопки по умолчанию прозрачные без плашек */
 .nav-btn {
-    flex: 1;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: rgba(255, 255, 255, 0.6) !important;
+    background: none;
+    border: none;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    font-size: 0.72rem;
-    font-weight: 500;
-    padding: 8px 0;
-    border-radius: 24px !important;
-    
-    /* Плавная анимация переключения */
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    gap: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
 }
+.nav-btn.active { color: var(--accent); }
+.nav-icon { font-size: 1.3rem; }
+.nav-label { font-size: 0.75rem; }
 
-/* ЕДИНСТВЕННАЯ ВЫДЕЛЕННАЯ ВКЛАДКА */
-.nav-btn.active {
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    background: rgba(255, 255, 255, 0.22) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
-    transform: translateY(-1px);
-}
-
-.nav-icon {
-    font-size: 1.25rem;
-    margin-bottom: 2px;
-    transition: transform 0.3s ease;
-}
-
-.nav-btn.active .nav-icon {
-    transform: scale(1.1);
-}
+.hidden { display: none !important; }
