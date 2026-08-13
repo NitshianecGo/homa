@@ -8,62 +8,126 @@
 </head>
 <body>
     <div id="app">
-        <!-- Экран авторизации / чатов / контактов -->
+        <!-- 🔐 Экран авторизации -->
         <div id="auth-screen" class="screen active">
-            <div class="auth-container">
+            <div class="auth-card glass-panel">
                 <h2>Вход в Homa</h2>
-                <input type="text" id="usernameInput" placeholder="Введите ваше имя...">
-                <button id="loginBtn" class="primary-btn">Войти</button>
+                <p class="subtitle">Введите ваше имя для начала общения</p>
+                <div id="login-form">
+                    <input type="text" id="usernameInput" placeholder="Ваше имя...">
+                    <button id="loginBtn" class="btn btn-full">Войти</button>
+                </div>
             </div>
         </div>
 
-        <div id="main-screen" class="screen">
-            <div class="header">
-                <h1 id="pageTitle">Чаты</h1>
-            </div>
+        <!-- 📱 Основной интерфейс приложения -->
+        <div id="app-screen" class="screen">
             
-            <div class="content-container">
-                <!-- Вкладка Чаты -->
-                <div id="chats-tab" class="tab-content active">
-                    <div id="chatsList" class="list-container"></div>
+            <!-- Вкладка 1: Контакты / Чаты -->
+            <div id="panel-contacts" class="panel active">
+                <div class="panel-header">
+                    <h3>Чаты и контакты</h3>
                 </div>
-
-                <!-- Вкладка Контакты -->
-                <div id="contacts-tab" class="tab-content">
-                    <div class="search-box">
+                <div class="scroll-content">
+                    <div class="search-box" style="margin-bottom: 12px;">
                         <input type="text" id="searchInput" placeholder="Поиск контактов...">
                     </div>
-                    <div id="contactsList" class="list-container"></div>
+                    <div id="contactsList" class="messages-container"></div>
+                </div>
+            </div>
+
+            <!-- Вкладка 2: Активный диалог (Чат) -->
+            <div id="panel-chat" class="panel">
+                <div class="panel-header">
+                    <h3 id="chatTitle">Выберите чат</h3>
+                    <button id="backToListBtn" class="icon-btn" style="display: none;">⬅️</button>
+                </div>
+                
+                <div id="pinnedBar" class="pinned-bar hidden">
+                    <div class="pinned-info">
+                        <span class="pinned-label">Закрепленное сообщение</span>
+                        <span id="pinnedText" class="pinned-text"></span>
+                    </div>
                 </div>
 
-                <!-- Вкладка Профиль -->
-                <div id="profile-tab" class="tab-content">
-                    <div class="profile-card">
-                        <h3 id="profileName">Имя пользователя</h3>
-                        <button id="logoutBtn" class="danger-btn">Выйти</button>
+                <div class="scroll-content messages-container" id="messagesList">
+                    <!-- Сообщения будут добавляться динамически -->
+                </div>
+
+                <div id="replyPreviewBar" class="reply-preview-bar hidden">
+                    <span id="replyPreviewText">Ответ на сообщение...</span>
+                    <button id="cancelReplyBtn" class="icon-btn">❌</button>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="messageInput" placeholder="Введите сообщение...">
+                    <button id="sendMsgBtn" class="btn">Отправить</button>
+                </div>
+            </div>
+
+            <!-- Вкладка 3: Стена -->
+            <div id="panel-wall" class="panel">
+                <div class="panel-header">
+                    <h3>Стена</h3>
+                </div>
+                <div class="scroll-content">
+                    <div class="wall-create-box glass-panel">
+                        <textarea id="wallPostInput" placeholder="Что у вас нового?"></textarea>
+                        <div class="wall-actions">
+                            <button id="sendPostBtn" class="btn btn-sm">Опубликовать</button>
+                        </div>
+                    </div>
+                    <div id="wallPostsList" class="messages-container"></div>
+                </div>
+            </div>
+
+            <!-- Вкладка 4: Профиль / Настройки -->
+            <div id="panel-settings" class="panel">
+                <div class="panel-header">
+                    <h3>Настройки</h3>
+                </div>
+                <div class="scroll-content">
+                    <div class="profile-card glass-panel">
+                        <div class="avatar-wrapper">
+                            <img id="profileAvatar" class="avatar-lg" src="" alt="Avatar">
+                        </div>
+                        <h3 id="profileName">Имя</h3>
+                    </div>
+                    
+                    <div class="settings-group glass-panel">
+                        <h4>Аккаунт</h4>
+                        <div class="setting-item">
+                            <span>Выйти из аккаунта</span>
+                            <button id="logoutBtn" class="btn btn-sm glass-btn-danger">Выйти</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 📱 ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА НАВИГАЦИИ (iOS GLASS) -->
+            <!-- 📱 Единая стеклянная навигация (из вашего запроса) -->
             <nav class="glass-nav">
-                <button class="nav-btn active" data-tab="chats">
+                <button class="nav-btn active" data-target="panel-contacts">
                     <span class="nav-icon">💬</span>
                     <span>Чаты</span>
                 </button>
-                <button class="nav-btn" data-tab="contacts">
-                    <span class="nav-icon">👥</span>
-                    <span>Контакты</span>
+                <button class="nav-btn" data-target="panel-chat">
+                    <span class="nav-icon">✉️</span>
+                    <span>Диалог</span>
                 </button>
-                <button class="nav-btn" data-tab="profile">
+                <button class="nav-btn" data-target="panel-wall">
+                    <span class="nav-icon">📰</span>
+                    <span>Стена</span>
+                </button>
+                <button class="nav-btn" data-target="panel-settings">
                     <span class="nav-icon">⚙️</span>
                     <span>Профиль</span>
                 </button>
             </nav>
+
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="app.js"></script>
