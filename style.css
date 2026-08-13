@@ -6,11 +6,10 @@
     --glass-border: rgba(255, 255, 255, 0.18);
     --glass-glow: rgba(255, 255, 255, 0.35);
     
-    /* ЦВЕТА СООБЩЕНИЙ */
+    /* СООБЩЕНИЯ */
     --msg-incoming-bg: rgba(30, 35, 45, 0.75);
     --msg-outgoing-bg: linear-gradient(135deg, rgba(16, 112, 84, 0.85) 0%, rgba(6, 78, 59, 0.9) 100%);
     
-    /* ЧЁТКИЙ БЕЛЫЙ ТЕКСТ ПО УМОЛЧАНИЮ ВО ВСЁМ ПРИЛОЖЕНИИ И НАСТРОЙКАХ */
     --text-primary: #ffffff;
     --text-muted: #cbd5e1;
     --accent: #10b981;
@@ -34,6 +33,7 @@ html {
     font-size: var(--font-size-base);
     background-color: #05030a !important;
     height: 100%;
+    width: 100%;
 }
 
 body {
@@ -43,7 +43,7 @@ body {
     background-position: center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
-    color: var(--text-primary) !important;
+    color: #ffffff !important;
     height: calc(var(--vh, 1vh) * 100);
     width: 100vw;
     overflow: hidden;
@@ -52,31 +52,34 @@ body {
     top: 0;
 }
 
+/* 🖼️ БЕСШОВНЫЙ СВОЙ ФОН НА ВЕСЬ ЭКРАН И ДЛЯ ВСЕХ ПАНЕЛЕЙ */
 body.has-custom-bg {
     background-image: var(--custom-bg-url) !important;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
 }
 
 .hidden { display: none !important; }
 
-/* 💎 СТЕКЛЯННЫЕ КАРТОЧКИ С ЧЁТКИМ ТЕКСТОМ */
+/* 💎 СТЕКЛЯННЫЕ КАРТОЧКИ С ПРОЗРАЧНОСТЬЮ */
 .glass-panel, .profile-card, .settings-group, .wall-create-box, .post-item {
-    background: var(--glass-bg) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
     backdrop-filter: blur(25px) saturate(190%) !important;
-    border: 1px solid var(--glass-border) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
     border-radius: 20px;
     color: #ffffff !important;
 }
 
-/* ⚙️ ТЕКСТ В НАСТРОЙКАХ ЧЁТКИЙ БЕЛЫЙ ПО УМОЛЧАНИЮ */
+/* ⚙️ ЧЕТКИЙ БЕЛЫЙ ТЕКСТ В НАСТРОЙКАХ */
 #panel-settings h3, 
 #panel-settings h4, 
 #panel-settings span, 
 #panel-settings p, 
+#panel-settings label,
 .retention-desc,
 .setting-item span {
     color: #ffffff !important;
@@ -84,28 +87,33 @@ body.has-custom-bg {
     font-weight: 500;
 }
 
-/* 🔘 КНОПКИ В НАСТРОЙКАХ */
-.glass-btn, .btn-outline {
+/* 🔘 ФИКС КНОПОК НА IOS (УБРАНА БЕЛАЯ ЗАЛИВКА, СДЕЛАНО СТЕКЛО С БЕЛЫМ ТЕКСТОМ) */
+button, .glass-btn, .btn-outline, label.btn {
+    -webkit-appearance: none !important;
+    appearance: none !important;
     background: rgba(255, 255, 255, 0.15) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: #ffffff !important;
     transition: all 0.25s ease;
-    font-weight: 600;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-.glass-btn:active, .btn-outline:active {
+button:active, .glass-btn:active, .btn-outline:active {
     transform: scale(0.96);
-    background: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.28) !important;
 }
 
 /* 🛑 КНОПКА «ВЫЙТИ» И «СБРОСИТЬ» */
-.glass-btn-danger, .btn-danger {
-    background: rgba(220, 38, 38, 0.35) !important;
+.glass-btn-danger, .btn-danger, #reset-bg-btn, #logout-btn {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: rgba(220, 38, 38, 0.45) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(239, 68, 68, 0.6) !important;
+    border: 1px solid rgba(248, 113, 113, 0.6) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
 }
@@ -148,8 +156,8 @@ input[type="email"], input[type="password"], input[type="text"], textarea, selec
     width: 100%;
     padding: 12px 16px;
     border-radius: 14px;
-    border: 1px solid var(--glass-border);
-    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.35) !important;
     color: #ffffff !important;
     font-size: 1rem;
     outline: none;
@@ -180,15 +188,16 @@ textarea {
 .btn-full { width: 100%; }
 
 .icon-btn {
-    background: none;
-    border: none;
+    background: none !important;
+    border: none !important;
     font-size: 1.3rem;
     cursor: pointer;
     padding: 6px;
     color: #ffffff !important;
+    box-shadow: none !important;
 }
 
-/* 📱 ОСНОВНОЙ ИНТЕРФЕЙС */
+/* 📱 ОСНОВНОЙ ИНТЕРФЕЙС И БЕСШОВНЫЕ ПАНЕЛИ */
 #app-screen {
     display: flex;
     position: relative;
@@ -203,16 +212,21 @@ textarea {
     box-shadow: none !important;
 }
 
+/* 🔝 ИСПРАВЛЕНИЕ ВЕРХНЕЙ ТЁМНОЙ ПОЛОСЫ: ПРОЗРАЧНАЯ С ШЕЛКОВЫМ БЛУРОМ */
 .panel-header {
     padding: 14px 16px;
     padding-top: calc(14px + env(safe-area-inset-top));
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(0, 0, 0, 0.2) !important;
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
+    background: rgba(0, 0, 0, 0.15) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.panel-header h3 {
+    color: #ffffff !important;
 }
 
 .scroll-content {
@@ -253,8 +267,8 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 8px 14px;
-    border-bottom: 1px solid var(--glass-border);
-    background: rgba(0, 0, 0, 0.3) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2) !important;
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
@@ -284,7 +298,7 @@ textarea {
 .msg-bubble.incoming {
     align-self: flex-start;
     background: var(--msg-incoming-bg) !important;
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-bottom-left-radius: 4px;
 }
 
@@ -318,14 +332,14 @@ textarea {
 }
 
 .speed-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-radius: 10px;
     padding: 2px 8px;
     font-size: 0.75rem;
     font-weight: bold;
     cursor: pointer;
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 .chat-input-area {
@@ -334,10 +348,10 @@ textarea {
     gap: 8px;
     padding: 10px 14px;
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    background: rgba(0, 0, 0, 0.35) !important;
-    -webkit-backdrop-filter: blur(25px);
-    backdrop-filter: blur(25px);
-    border-top: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.25) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    backdrop-filter: blur(25px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 0 !important;
 }
 
@@ -346,8 +360,8 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 8px 14px;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border-top: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
@@ -373,15 +387,15 @@ textarea {
     display: inline-block;
     margin-bottom: 8px;
 }
-.avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); }
+.avatar-lg { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.25); }
 .avatar-sm { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 
 .btn-avatar-edit {
     position: absolute;
     bottom: 0;
     right: 0;
-    background: var(--accent);
-    border: none;
+    background: var(--accent) !important;
+    border: none !important;
     border-radius: 50%;
     padding: 6px;
     cursor: pointer;
@@ -404,7 +418,7 @@ textarea {
     align-items: flex-start;
 }
 
-/* 📱 МОБИЛЬНАЯ ПЛАВАЮЩАЯ НАВИГАЦИЯ И ИКОНКИ КАК НА ВЫДЕЛЕННОЙ Картинке */
+/* 📱 МОБИЛЬНАЯ ПЛАВАЮЩАЯ НАВИГАЦИЯ */
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
@@ -423,7 +437,7 @@ textarea {
         left: 5%;
         width: 90vw;
         height: 64px;
-        background: rgba(15, 12, 28, 0.65) !important;
+        background: rgba(15, 12, 28, 0.6) !important;
         -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
         backdrop-filter: blur(25px) saturate(200%) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -434,11 +448,10 @@ textarea {
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
     
-    /* ▫️ ОДИНАКОВЫЕ КНОПКИ НАВИГАЦИИ (ЕДИНЫЙ СТЕКЛЯННЫЙ СТИЛЬ С ОВАЛОМ) */
     .nav-btn {
-        background: transparent;
-        border: 1px solid transparent;
-        color: #ffffff;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        color: #ffffff !important;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -449,18 +462,18 @@ textarea {
         border-radius: 20px;
         transition: all 0.25s ease;
         font-weight: 500;
-        opacity: 0.85;
+        opacity: 0.8;
+        box-shadow: none !important;
     }
     
-    /* ✨ АКТИВНАЯ / ВЫДЕЛЕННАЯ КНОПКА (КАК НА ВАШЕМ СКРИНШОТЕ) */
     .nav-btn.active, .nav-btn:active {
         color: #ffffff !important;
         opacity: 1 !important;
         background: rgba(255, 255, 255, 0.22) !important;
         border: 1px solid rgba(255, 255, 255, 0.4) !important;
-        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
-        -webkit-backdrop-filter: blur(12px);
-        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        backdrop-filter: blur(12px) !important;
         transform: translateY(-1px) scale(1.02);
     }
 
