@@ -1,9 +1,9 @@
-const CACHE_NAME = 'privatespace-v15';
+const CACHE_NAME = 'privatespace-v16';
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=15',
-  './app.js?v=15',
+  './style.css?v=16',
+  './app.js?v=16',
   './manifest.json',
   './apple-touch-icon.png'
 ];
@@ -25,7 +25,7 @@ self.addEventListener('activate', (e) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            return caches.delete(key);
+            return caches.delete(key); // Удаляем старый кэш со светлой темой
           }
         })
       );
