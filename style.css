@@ -26,7 +26,6 @@
     --danger: #d20f39;
 }
 
-/* ТЕМАТИЧЕСКИЕ СТЕКЛЯННЫЕ ФОНЫ ЧАТА */
 body[data-chat-bg="nebula"] { --bg-gradient: radial-gradient(circle at 50% 30%, #4a154b 0%, #110826 100%); }
 body[data-chat-bg="sunset"] { --bg-gradient: radial-gradient(circle at 80% 20%, #632c3b 0%, #1a0f24 100%); }
 body[data-chat-bg="emerald"] { --bg-gradient: radial-gradient(circle at 30% 70%, #123e36 0%, #081a17 100%); }
@@ -89,15 +88,22 @@ body {
     display: none;
     height: calc(var(--vh, 1vh) * 100);
     width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
 }
 
 .screen.active {
     display: flex;
+    z-index: 2;
 }
 
 #auth-screen {
     justify-content: center;
     align-items: center;
+    background: var(--bg-gradient);
+    z-index: 10;
 }
 
 .auth-card {
@@ -196,7 +202,6 @@ textarea {
     padding: 12px;
 }
 
-/* ЗАКРЕПЛЕННЫЙ БАР */
 .pinned-bar {
     display: flex;
     justify-content: space-between;
@@ -215,7 +220,6 @@ textarea {
     text-overflow: ellipsis;
 }
 
-/* КОНТАКТЫ */
 #panel-contacts { width: 280px; }
 .contact-item {
     display: flex;
@@ -282,7 +286,6 @@ textarea {
     font-size: 0.8rem;
 }
 
-/* СТИЛИЗАЦИЯ ГИСТОГРАММЫ И УСКОРЕНИЯ ГОЛОСОВЫХ */
 .audio-voice-message {
     display: flex;
     align-items: center;
@@ -452,9 +455,6 @@ textarea {
     color: #fff;
 }
 
-/* LIGHTBOX МЕ
-```css
-ДИА МОДАЛКА */
 .lightbox-modal {
     position: fixed;
     z-index: 9999;
@@ -485,7 +485,9 @@ textarea {
     cursor: pointer;
 }
 
-.bottom-nav { display: none; }
+.bottom-nav { 
+    display: none !important; 
+}
 
 @media (max-width: 900px) {
     .panel {
@@ -496,8 +498,8 @@ textarea {
     }
     .panel.active { display: flex; }
     
-    .glass-nav {
-        display: flex;
+    #app-screen.active .glass-nav {
+        display: flex !important;
         position: fixed;
         bottom: 12px;
         left: 5%;
