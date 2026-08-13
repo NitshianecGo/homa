@@ -58,6 +58,15 @@
                 <button id="clear-chat-btn" class="btn btn-danger btn-sm glass-btn-danger" title="Очистить диалог">🗑️ Очистить</button>
             </header>
 
+            <!-- ЗАКРЕПЛЕННОЕ СООБЩЕНИЕ -->
+            <div id="pinned-bar" class="pinned-bar glass-panel hidden">
+                <div class="pinned-info">
+                    <span class="pinned-label">📌 Закреплено</span>
+                    <span id="pinned-text-preview" class="pinned-text">Сообщение...</span>
+                </div>
+                <button id="unpin-btn" class="icon-btn" title="Открепить">✖</button>
+            </div>
+
             <div id="chat-messages" class="scroll-content messages-container"></div>
 
             <!-- Предпросмотр цитаты -->
@@ -140,9 +149,20 @@
                     </div>
                 </div>
 
+                <!-- ХРАНЕНИЕ ЧАТА В НАСТРОЙКАХ (1-7-14-30-всегда) -->
                 <div class="settings-group glass-panel">
-                    <h4>Хранение информации</h4>
-                    <p class="retention-desc">Все данные (сообщения, фото, настройки) сохраняются исключительно в память вашего устройства (Local Storage). Сервер не хранит историю ваших переписок.</p>
+                    <h4>Хранение сообщений</h4>
+                    <div class="setting-item flex-col" style="margin-top: 8px;">
+                        <span>Автоочистка истории:</span>
+                        <select id="retention-select" class="glass-select" style="margin-top: 6px; width: 100%;">
+                            <option value="1d">Удалять через 1 день</option>
+                            <option value="7d">Удалять через 7 дней</option>
+                            <option value="14d">Удалять через 14 дней</option>
+                            <option value="30d">Удалять через 30 дней</option>
+                            <option value="never" selected>Хранить всегда</option>
+                        </select>
+                    </div>
+                    <p class="retention-desc" style="margin-top: 10px;">Все данные сохраняются локально в память устройства. Выберите период, через который чаты будут очищаться автоматически.</p>
                 </div>
 
                 <div class="settings-group glass-panel">
@@ -155,7 +175,7 @@
         <nav class="bottom-nav glass-nav">
             <button class="nav-btn active" data-target="panel-contacts">
                 <span class="nav-icon">💬</span>
-                <span class="nav-label">Чаты-контакты</span>
+                <span class="nav-label">Чаты</span>
             </button>
             <button class="nav-btn" data-target="panel-chat">
                 <span class="nav-icon">✉️</span>
