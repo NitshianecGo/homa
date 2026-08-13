@@ -1,30 +1,25 @@
 :root {
-    --bg-gradient: radial-gradient(circle at 20% 20%, #2b2a4a 0%, #151525 100%);
+    --bg-gradient: radial-gradient(circle at 50% 30%, #1a102f 0%, #0d0818 60%, #05030a 100%);
     
-    /* ЧЕТКИЕ ЦВЕТА И СТЕКЛО */
-    --glass-bg: rgba(255, 255, 255, 0.12);
-    --glass-bg-hover: rgba(255, 255, 255, 0.22);
-    --glass-border: rgba(255, 255, 255, 0.25);
-    --glass-glow: rgba(137, 180, 250, 0.5);
+    /* СТЕКЛО БЕЗ БЕЛЫХ РАЗРЫВОВ */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-glow: rgba(16, 185, 129, 0.35);
     
-    /* ЧЁТКИЙ ТЕМНЫЙ ТЕКСТ ДЛЯ ЧИТАЕМОСТИ НА СТЕКЛЕ */
-    --text-primary: #0f172a;
-    --text-muted: #334155;
-    --accent: #1e66f5;
-    --accent-hover: #2a72ff;
-    --danger: #d20f39;
+    /* ЦВЕТА СООБЩЕНИЙ (WHATSAPP + LIQUID GLASS) */
+    --msg-incoming-bg: rgba(30, 35, 45, 0.75);
+    --msg-outgoing-bg: linear-gradient(135deg, rgba(16, 112, 84, 0.85) 0%, rgba(6, 78, 59, 0.9) 100%);
+    
+    --text-primary: #ffffff;
+    --text-muted: #94a3b8;
+    --accent: #10b981;
+    --danger: #f43f5e;
     --font-size-base: 100%;
     --vh: 1vh;
 }
 
 [data-theme="light"] {
-    --bg-gradient: radial-gradient(circle at 20% 20%, #e2e8f0 0%, #cbd5e1 100%);
-    --glass-bg: rgba(255, 255, 255, 0.4);
-    --glass-bg-hover: rgba(255, 255, 255, 0.6);
-    --glass-border: rgba(255, 255, 255, 0.6);
-    --glass-glow: rgba(30, 102, 245, 0.35);
-    --text-primary: #020617;
-    --text-muted: #1e293b;
+    --bg-gradient: radial-gradient(circle at 50% 30%, #2d3748 0%, #1a202c 100%);
 }
 
 * {
@@ -36,7 +31,7 @@
 
 html {
     font-size: var(--font-size-base);
-    background-color: #151525 !important;
+    background-color: #05030a !important;
     height: 100%;
 }
 
@@ -65,24 +60,23 @@ body.has-custom-bg {
 
 .hidden { display: none !important; }
 
-/* 💎 БАЗОВОЕ СТЕКЛО БЕЗ БЕЛЫХ ПЯТЕН НА IOS */
+/* 💎 ЕДИНЫЙ ПРОЗРАЧНЫЙ СТЕКЛЯННЫЙ СТИЛЬ ДЛЯ ВСЕХ ПАНЕЛЕЙ */
 .glass-panel, .profile-card, .settings-group, .wall-create-box, .post-item {
     background: var(--glass-bg) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
+    backdrop-filter: blur(25px) saturate(190%) !important;
     border: 1px solid var(--glass-border) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
     border-radius: 20px;
     color: var(--text-primary) !important;
 }
 
 .glass-btn {
-    background: rgba(255, 255, 255, 0.25) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
     border: 1px solid var(--glass-border) !important;
     color: var(--text-primary) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.25s ease;
     font-weight: 600;
 }
@@ -93,11 +87,11 @@ body.has-custom-bg {
 }
 
 .glass-btn-danger, .btn-danger {
-    background: rgba(210, 15, 57, 0.22) !important;
+    background: rgba(244, 63, 94, 0.2) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(210, 15, 57, 0.5) !important;
-    color: #dc2626 !important;
+    border: 1px solid rgba(244, 63, 94, 0.4) !important;
+    color: #fecdd3 !important;
     font-weight: 700;
 }
 
@@ -107,11 +101,9 @@ body.has-custom-bg {
     width: 100vw;
 }
 
-.screen.active {
-    display: flex;
-}
+.screen.active { display: flex; }
 
-/* АВТОРИЗАЦИЯ */
+/* 🔒 АВТОРИЗАЦИЯ */
 #auth-screen {
     justify-content: center;
     align-items: center;
@@ -142,13 +134,13 @@ input[type="email"], input[type="password"], input[type="text"], textarea, selec
     padding: 12px 16px;
     border-radius: 14px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.3) !important;
-    color: var(--text-primary) !important;
+    background: rgba(0, 0, 0, 0.25) !important;
+    color: #ffffff !important;
     font-size: 1rem;
     outline: none;
     -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 textarea {
@@ -173,10 +165,10 @@ textarea {
     font-size: 1.3rem;
     cursor: pointer;
     padding: 6px;
-    color: var(--text-primary) !important;
+    color: #ffffff !important;
 }
 
-/* СТРУКТУРА ПРИЛОЖЕНИЯ */
+/* 📱 ОСНОВНОЙ ИНТЕРФЕЙС И БЕСШОВНЫЙ ЧАТ */
 #app-screen {
     display: flex;
     position: relative;
@@ -186,6 +178,9 @@ textarea {
     display: flex;
     flex-direction: column;
     height: 100%;
+    background: transparent !important; /* Убираем резкий разрыв фона */
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .panel-header {
@@ -195,7 +190,9 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
 }
 
 .scroll-content {
@@ -204,7 +201,7 @@ textarea {
     padding: 12px;
 }
 
-/* ЧАТЫ И КОНТАКТЫ */
+/* 💬 КОНТАКТЫ */
 #panel-contacts { width: 280px; }
 
 .contact-item {
@@ -215,20 +212,20 @@ textarea {
     border-radius: 16px;
     cursor: pointer;
     margin-bottom: 6px;
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid transparent;
     transition: all 0.25s ease;
-    color: var(--text-primary) !important;
+    color: #ffffff !important;
 }
 
-/* ФИКС ЧЕТКОГО ВЫДЕЛЕНИЯ В ВЫБРАННОМ ЧАТЕ/ВКЛАДКЕ */
 .contact-item.active, .contact-item:hover {
-    background: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(16, 185, 129, 0.2) !important;
     border: 1px solid var(--glass-glow) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
 }
 
-/* ДИАЛОГ */
+/* ✉️ ДИАЛОГ (WHATSAPP MIX STYLES) */
 #panel-chat { flex: 1; }
 
 .pinned-bar {
@@ -237,52 +234,57 @@ textarea {
     align-items: center;
     padding: 8px 14px;
     border-bottom: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
 .pinned-info { display: flex; flex-direction: column; }
 .pinned-label { font-weight: bold; font-size: 0.75rem; color: var(--accent); }
-.pinned-text { color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px; }
+.pinned-text { color: #ffffff; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 250px; }
 
 .messages-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
+/* 💬 ОБЛАЧКА СООБЩЕНИЙ */
 .msg-bubble {
-    max-width: 75%;
+    max-width: 80%;
     padding: 10px 14px;
     border-radius: 18px;
     font-size: 0.95rem;
     position: relative;
     word-break: break-word;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    color: var(--text-primary) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: #ffffff !important;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
 }
 
 .msg-bubble.incoming {
     align-self: flex-start;
-    background: rgba(255, 255, 255, 0.35) !important;
+    background: var(--msg-incoming-bg) !important;
     border: 1px solid var(--glass-border);
+    border-bottom-left-radius: 4px;
 }
 
 .msg-bubble.outgoing {
     align-self: flex-end;
-    background: rgba(137, 180, 250, 0.45) !important;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--msg-outgoing-bg) !important;
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    border-bottom-right-radius: 4px;
 }
 
 .msg-meta {
-    font-size: 0.7rem;
-    opacity: 0.85;
+    font-size: 0.68rem;
+    opacity: 0.75;
     text-align: right;
     margin-top: 4px;
 }
 
 .quote-block {
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.25);
     border-left: 3px solid var(--accent);
     padding: 4px 8px;
     border-radius: 6px;
@@ -297,22 +299,26 @@ textarea {
 }
 
 .speed-btn {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
     border: 1px solid var(--glass-border);
     border-radius: 10px;
     padding: 2px 8px;
     font-size: 0.75rem;
     font-weight: bold;
     cursor: pointer;
-    color: var(--text-primary);
+    color: #ffffff;
 }
 
+/* ✍️ ПОЛЕ ВВОДА СООБЩЕНИЯ (УБРАНА БЕЛАЯ ПОЛОСА) */
 .chat-input-area {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    padding: 10px 14px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: rgba(0, 0, 0, 0.35) !important;
+    -webkit-backdrop-filter: blur(25px);
+    backdrop-filter: blur(25px);
     border-top: 1px solid var(--glass-border);
     border-radius: 0 !important;
 }
@@ -322,6 +328,7 @@ textarea {
     justify-content: space-between;
     align-items: center;
     padding: 8px 14px;
+    background: rgba(0, 0, 0, 0.3) !important;
     border-top: 1px solid var(--glass-border);
     font-size: 0.85rem;
     border-radius: 0 !important;
@@ -333,7 +340,7 @@ textarea {
     margin-top: 6px;
 }
 
-/* СТЕНА И ПРОФИЛЬ */
+/* 📰 СТЕНА И ⚙️ НАСТРОЙКИ */
 #panel-wall { width: 340px; }
 #panel-settings { width: 300px; }
 
@@ -382,11 +389,11 @@ textarea {
 .retention-desc {
     font-size: 0.9rem;
     line-height: 1.45;
-    color: var(--text-primary) !important;
-    font-weight: 500;
+    color: #cbd5e1 !important;
+    font-weight: 400;
 }
 
-/* 📱 НИЖНЯЯ НАВИГАЦИЯ (LIQUID GLASS БЕЗ РАЗМЫТИЯ ВСЕГО ЭКРАНА) */
+/* 📱 МОБИЛЬНАЯ ПЛАВАЮЩАЯ НАВИГАЦИЯ LIQUID GLASS */
 .bottom-nav { display: none; }
 
 @media (max-width: 900px) {
@@ -405,7 +412,7 @@ textarea {
         left: 5%;
         width: 90vw;
         height: 64px;
-        background: rgba(255, 255, 255, 0.2) !important;
+        background: rgba(10, 15, 25, 0.6) !important;
         -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
         backdrop-filter: blur(25px) saturate(200%) !important;
         border: 1px solid var(--glass-border) !important;
@@ -413,7 +420,7 @@ textarea {
         justify-content: space-around;
         align-items: center;
         z-index: 100;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
     
     .nav-btn {
@@ -426,18 +433,17 @@ textarea {
         justify-content: center;
         font-size: 0.65rem;
         cursor: pointer;
-        padding: 6px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
         transition: all 0.25s ease;
-        font-weight: 600;
+        font-weight: 500;
     }
     
-    /* ИСПРАВЛЕНА АКТИВНАЯ КНОПКА: СТЕКЛЯННАЯ ПОДСВЕТКА ВМЕСТО БЕЛОЙ ЗАЛИВКИ */
     .nav-btn.active {
-        color: var(--text-primary) !important;
-        background: rgba(255, 255, 255, 0.35) !important;
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.18) !important;
         border: 1px solid var(--glass-glow) !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
         transform: translateY(-2px) scale(1.04);
     }
 
