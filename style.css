@@ -66,7 +66,7 @@ body.has-custom-bg {
 .hidden { display: none !important; }
 
 /* ==========================================
-   2. КАРТОЧКИ И ОТСТУПЫ (ОЗДОРАВЛИВАЕМ ИНТЕРФЕЙС)
+   2. КАРТОЧКИ И ОТСТУПЫ
    ========================================== */
 .scroll-content {
     flex: 1;
@@ -74,7 +74,7 @@ body.has-custom-bg {
     padding: 16px !important;
     display: flex;
     flex-direction: column;
-    gap: 16px !important; /* РАЗЛЕПЛЯЕМ КАРТОЧКИ ДРУГ ОТ ДРУГА */
+    gap: 16px !important;
 }
 
 .glass-panel, 
@@ -146,7 +146,7 @@ textarea {
     height: 80px;
 }
 
-/* 👤 ПРОФИЛЬ И АВАТАРКА-КРУГЛЕШ */
+/* 👤 ПРОФИЛЬ И АВАТАРКА */
 .profile-card {
     display: flex;
     flex-direction: column;
@@ -162,16 +162,14 @@ textarea {
     margin: 0 auto;
 }
 
-/* Аватарка в профиле */
 .avatar-lg {
     width: 80px !important;
     height: 80px !important;
-    border-radius: 50% !important; /* СТРОГО КРУГЛАЯ */
+    border-radius: 50% !important;
     object-fit: cover !important;
     border: 2px solid rgba(255, 255, 255, 0.3) !important;
 }
 
-/* Иконка карандаша редактирования */
 .btn-avatar-edit {
     position: absolute;
     bottom: 0;
@@ -188,15 +186,15 @@ textarea {
     cursor: pointer;
 }
 
-/* 💬 СПИСОК ЧАТОВ И КОНТАКТОВ (РАЗЛЕПЛЯЕМ И АККУРАТНЫЕ АВАТАРЫ) */
+/* 💬 СПИСОК ЧАТОВ И КОНТАКТОВ */
 #panel-contacts { width: 280px; }
 
 .contact-item {
     display: flex !important;
     align-items: center !important;
-    gap: 14px !important; /* Отступ между аватаркой и текстом */
+    gap: 14px !important;
     padding: 12px 14px !important;
-    margin-bottom: 10px !important; /* Разделяем чаты */
+    margin-bottom: 10px !important;
     border-radius: 16px !important;
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -211,12 +209,11 @@ textarea {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Аватарка в списке контактов/чатов */
 .avatar-sm, .contact-item img {
-    width: 48px !important; /* Компактный размер */
+    width: 48px !important;
     height: 48px !important;
     min-width: 48px !important;
-    border-radius: 50% !important; /* КРУГЛЕШ */
+    border-radius: 50% !important;
     object-fit: cover !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
@@ -235,7 +232,6 @@ textarea {
     align-items: flex-start;
 }
 
-/* Кнопки настроек и формы */
 button, .btn, .glass-btn {
     background: rgba(255, 255, 255, 0.15) !important;
     -webkit-backdrop-filter: blur(15px) !important;
@@ -413,7 +409,7 @@ button:active {
 }
 
 /* ==========================================
-   3. ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА С ПЛАВНОЙ АНИМАЦИЕЙ
+   3. ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА НАВИГАЦИИ
    ========================================== */
 .bottom-nav { 
     display: none; 
@@ -428,8 +424,6 @@ button:active {
     width: 90vw;
     max-width: 400px;
     height: 64px;
-    
-    /* Сплошная прозрачная колба */
     background: rgba(255, 255, 255, 0.08) !important;
     -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
     backdrop-filter: blur(30px) saturate(200%) !important;
@@ -437,14 +431,12 @@ button:active {
     border-radius: 35px !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
                 inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
-                
     justify-content: space-between;
     align-items: center;
     padding: 0 8px;
     z-index: 9999;
 }
 
-/* Неактивные кнопки — полностью прозрачные без плашек */
 .nav-btn {
     flex: 1;
     background: transparent !important;
@@ -460,16 +452,12 @@ button:active {
     padding: 8px 0;
     border-radius: 24px !important;
     cursor: pointer;
-    
-    /* Плавная анимация переключения элементов */
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* ЕДИНСТВЕННАЯ ВЫДЕЛЕННАЯ ВКЛАДКА */
 .nav-btn.active {
     color: #ffffff !important;
     font-weight: 700 !important;
-    /* Появляется мягкая стеклянная плашка под активной иконкой */
     background: rgba(255, 255, 255, 0.22) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     backdrop-filter: blur(12px) !important;
@@ -489,7 +477,6 @@ button:active {
     transform: scale(1.1);
 }
 
-/* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ */
 @media (max-width: 900px) {
     .panel {
         display: none;
