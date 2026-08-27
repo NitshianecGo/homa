@@ -55,7 +55,6 @@ body {
     top: 0;
 }
 
-/* ОВЕРЛЕЙ ДЛЯ ПОЛЬЗОВАТЕЛЬСКОГО ФОНА */
 body.has-custom-bg {
     background-image: var(--custom-bg-url) !important;
     background-size: cover !important;
@@ -66,7 +65,7 @@ body.has-custom-bg {
 .hidden { display: none !important; }
 
 /* ==========================================
-   2. КАРТОЧКИ И ОТСТУПЫ
+   2. СТЕКЛЯННЫЕ ПАНЕЛИ (УЛУЧШЕННЫЙ КОНТРАСТ)
    ========================================== */
 .scroll-content {
     flex: 1;
@@ -77,17 +76,18 @@ body.has-custom-bg {
     gap: 16px !important;
 }
 
+/* Плотное стекло с темной подложкой, чтобы фон не «прожигал» контент */
 .glass-panel, 
 .profile-card, 
 .settings-group, 
 .wall-create-box, 
 .post-item,
 .auth-card {
-    background: rgba(255, 255, 255, 0.08) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
-    backdrop-filter: blur(25px) saturate(190%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    background: rgba(15, 12, 25, 0.65) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
     border-radius: 20px !important;
     padding: 16px !important;
     color: var(--text-primary) !important;
@@ -132,12 +132,10 @@ input[type="email"], input[type="password"], input[type="text"], textarea, selec
     padding: 12px 16px;
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
     color: var(--text-primary) !important;
     font-size: 1rem;
     outline: none;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
     font-weight: 500;
 }
 
@@ -187,7 +185,7 @@ textarea {
 }
 
 /* 💬 СПИСОК ЧАТОВ И КОНТАКТОВ */
-#panel-contacts { width: 280px; }
+#panel-contacts { width: 300px; }
 
 .contact-item {
     display: flex !important;
@@ -196,8 +194,8 @@ textarea {
     padding: 12px 14px !important;
     margin-bottom: 10px !important;
     border-radius: 16px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     transition: all 0.25s ease;
     cursor: pointer;
     color: var(--text-primary) !important;
@@ -206,7 +204,6 @@ textarea {
 .contact-item.active, .contact-item:hover {
     background: rgba(255, 255, 255, 0.15) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-sm, .contact-item img {
@@ -233,17 +230,17 @@ textarea {
 }
 
 button, .btn, .glass-btn {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
     -webkit-backdrop-filter: blur(15px) !important;
     backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: var(--text-primary) !important;
     border-radius: 14px !important;
     padding: 8px 14px;
     font-weight: 600 !important;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.25s ease !important;
 }
 
 button:active {
@@ -269,33 +266,39 @@ button:active {
     color: var(--text-primary) !important;
 }
 
-/* СТРУКТУРА ПРИЛОЖЕНИЯ И ЧАТА */
+/* ==========================================
+   3. РАСКЛАДКА ПАНЕЛЕЙ НА ПК И МОБИЛЬНЫХ
+   ========================================== */
 #app-screen {
     display: flex;
     position: relative;
     width: 100vw;
     height: 100%;
+    gap: 10px; /* Отступы между панелями на ПК, чтобы они не сливались */
+    padding: 10px;
 }
 
 .panel {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: calc(100% - 20px);
+    border-radius: 20px !important;
+    overflow: hidden;
 }
 
 .panel-header {
     padding: 14px 16px;
-    padding-top: calc(14px + env(safe-area-inset-top));
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
 }
 
+#panel-contacts { width: 280px; min-width: 280px; }
 #panel-chat { flex: 1; }
-#panel-wall { width: 340px; }
-#panel-settings { width: 300px; }
+#panel-wall { width: 320px; min-width: 320px; }
+#panel-settings { width: 320px; min-width: 320px; }
 
 .pinned-bar {
     display: flex;
@@ -303,7 +306,7 @@ button:active {
     align-items: center;
     padding: 8px 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
     font-size: 0.85rem;
     border-radius: 0 !important;
 }
@@ -326,7 +329,7 @@ button:active {
     word-break: break-word;
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     color: var(--text-primary) !important;
 }
 
@@ -338,41 +341,8 @@ button:active {
 
 .msg-bubble.outgoing {
     align-self: flex-end;
-    background: rgba(16, 185, 129, 0.25) !important;
-    border: 1px solid rgba(16, 185, 129, 0.4);
-}
-
-.msg-meta {
-    font-size: 0.7rem;
-    opacity: 0.8;
-    text-align: right;
-    margin-top: 4px;
-}
-
-.quote-block {
-    background: rgba(0, 0, 0, 0.2);
-    border-left: 3px solid var(--accent);
-    padding: 4px 8px;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    font-size: 0.8rem;
-}
-
-.audio-voice-message {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.speed-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 0.75rem;
-    font-weight: bold;
-    cursor: pointer;
-    color: var(--text-primary);
+    background: rgba(16, 185, 129, 0.3) !important;
+    border: 1px solid rgba(16, 185, 129, 0.5);
 }
 
 .chat-input-area {
@@ -380,36 +350,13 @@ button:active {
     align-items: center;
     gap: 8px;
     padding: 12px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0 !important;
-}
-
-.reply-preview-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    font-size: 0.85rem;
-    border-radius: 0 !important;
-}
-
-.chat-media-img, .post-media-img, .chat-media-video, .post-media-video {
-    max-width: 100%;
-    border-radius: 12px;
-    margin-top: 6px;
-}
-
-.retention-desc {
-    font-size: 0.9rem;
-    line-height: 1.45;
-    color: var(--text-muted) !important;
-    font-weight: 400;
+    background: rgba(0, 0, 0, 0.2) !important;
 }
 
 /* ==========================================
-   3. ЕДИНАЯ СТЕКЛЯННАЯ КАПСУЛА НАВИГАЦИИ
+   4. СТЕКЛЯННАЯ КАПСУЛА НАВИГАЦИИ (МОБИЛЬНЫЕ)
    ========================================== */
 .bottom-nav { 
     display: none; 
@@ -424,12 +371,12 @@ button:active {
     width: 90vw;
     max-width: 400px;
     height: 64px;
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(15, 12, 25, 0.85) !important;
     -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
     backdrop-filter: blur(30px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-radius: 35px !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 
                 inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
     justify-content: space-between;
     align-items: center;
@@ -452,38 +399,40 @@ button:active {
     padding: 8px 0;
     border-radius: 24px !important;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.3s ease !important;
 }
 
 .nav-btn.active {
     color: #ffffff !important;
     font-weight: 700 !important;
-    background: rgba(255, 255, 255, 0.22) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    backdrop-filter: blur(12px) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
     border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
-    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
 }
 
 .nav-icon {
     font-size: 1.25rem;
     margin-bottom: 2px;
-    transition: transform 0.3s ease;
 }
 
-.nav-btn.active .nav-icon {
-    transform: scale(1.1);
-}
-
-@media (max-width: 900px) {
+/* Мобильный адаптив (экраны меньше 1024px) */
+@media (max-width: 1024px) {
+    #app-screen {
+        padding: 0;
+        gap: 0;
+    }
     .panel {
         display: none;
         width: 100% !important;
-        border-right: none;
+        height: 100% !important;
+        border: none !important;
+        border-radius: 0 !important;
         padding-bottom: 85px;
     }
-    .panel.active { display: flex; }
-    .bottom-nav { display: flex; }
+    .panel.active { 
+        display: flex !important; 
+    }
+    .bottom-nav { 
+        display: flex !important; 
+    }
 }
