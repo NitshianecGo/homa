@@ -1,4 +1,4 @@
-const CACHE_NAME = 'homespace-v23';
+const CACHE_NAME = 'homespace-v24';
 const ASSETS = [
   './',
   './index.html',
